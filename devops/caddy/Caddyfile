@@ -1,0 +1,16 @@
+{
+	admin off
+	auto_https off
+}
+
+http://derja.{$ROOT_DOMAIN} {
+	reverse_proxy frontend:3001
+}
+
+http://api.derja.{$ROOT_DOMAIN} {
+	reverse_proxy backend:3000
+}
+
+http://admin.derja.{$ROOT_DOMAIN} {
+	reverse_proxy frontend:3001
+}

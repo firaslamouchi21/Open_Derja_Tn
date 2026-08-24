@@ -1,0 +1,17 @@
+{
+  "common": {
+    "loading": "Loading",
+    "error": "Something went wrong",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "skip": "Skip",
+    "next": "Next"
+  },
+  "nav": {
+    "translate": "Translate",
+    "explore": "Explore",
+    "compare": "Compare",
+    "lexicon": "Lexicon",
+    "contribute": "Contribute"
+  }
+}

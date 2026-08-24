@@ -1,0 +1,22 @@
+{
+  "name": "@open-derja/core",
+  "private": true,
+  "version": "0.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@open-derja/db": "workspace:*",
+    "@aws-sdk/client-s3": "^3.678.0",
+    "@aws-sdk/s3-request-presigner": "^3.678.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "typescript": "^5.6.3"
+  }
+}

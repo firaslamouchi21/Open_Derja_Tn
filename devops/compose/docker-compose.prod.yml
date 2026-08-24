@@ -1,0 +1,149 @@
+services:
+  postgres:
+    build:
+      context: ../..
+      dockerfile: devops/docker/postgres.Dockerfile
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    mem_limit: 768m
+
+  pgbouncer:
+    build:
+      context: ../..
+      dockerfile: devops/docker/pgbouncer.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      POOL_MODE: transaction
+      DEFAULT_POOL_SIZE: 20
+      MAX_CLIENT_CONN: 200
+      AUTH_TYPE: scram-sha-256
+    mem_limit: 128m
+
+  redis:
+    build:
+      context: ../..
+      dockerfile: devops/docker/redis.Dockerfile
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    mem_limit: 256m
+
+  nlp:
+    build:
+      context: ../../nlp
+      dockerfile: ../devops/docker/nlp.Dockerfile
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 256m
+
+  processing:
+    build:
+      context: ../../processing
+      dockerfile: ../devops/docker/processing.Dockerfile
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 128m
+
+  backend:
+    build:
+      context: ../..
+      dockerfile: devops/docker/backend.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      pgbouncer:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/${POSTGRES_DB}?pgbouncer=true
+      DIRECT_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379
+      AUTH_SECRET: ${AUTH_SECRET}
+      CORS_ORIGIN: https://derja.${ROOT_DOMAIN}
+      PORT: 3000
+      IP_HASH_SALT: ${IP_HASH_SALT}
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER}
+      R2_ACCOUNT_ID: ${R2_ACCOUNT_ID}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      R2_BUCKET: ${R2_BUCKET}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    mem_limit: 768m
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: devops/docker/frontend.Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: https://api.derja.${ROOT_DOMAIN}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+    mem_limit: 512m
+
+  caddy:
+    build:
+      context: ../..
+      dockerfile: devops/docker/caddy.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    environment:
+      ROOT_DOMAIN: ${ROOT_DOMAIN}
+    mem_limit: 128m
+
+  cloudflared:
+    build:
+      context: ../..
+      dockerfile: devops/docker/cloudflared.Dockerfile
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+    depends_on:
+      - caddy
+    mem_limit: 128m
+
+volumes:
+  pgdata:
+
+networks:
+  default:
+    name: opendarja_net

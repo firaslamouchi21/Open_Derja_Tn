@@ -1,0 +1,13 @@
+node_modules
+**/node_modules
+dist
+**/dist
+.next
+**/.next
+target
+**/target
+*.tsbuildinfo
+**/*.tsbuildinfo
+.env
+**/.env
+.git

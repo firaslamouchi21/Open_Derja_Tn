@@ -1,0 +1,12 @@
+[package]
+name = "opendarja-processing"
+version = "0.0.0"
+edition = "2021"
+
+[[bin]]
+name = "opendarja-processing"
+path = "src/main.rs"
+
+[dependencies]
+actix-web = "4"
+serde = { version = "1", features = ["derive"] }

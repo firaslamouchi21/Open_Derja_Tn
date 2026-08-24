@@ -1,0 +1,49 @@
+name: verify-backup-restore
+
+on:
+  schedule:
+    - cron: "0 11 * * 4"
+  workflow_dispatch:
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: restore_test
+          POSTGRES_PASSWORD: restore_test
+          POSTGRES_DB: restore_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U restore_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install postgres client + awscli
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client awscli gnupg
+
+      - name: restore latest backup and sanity-check row counts
+        run: devops/backup/pg-restore.sh
+        env:
+          RESTORE_TARGET_URL: postgres://restore_test:restore_test@localhost:5432/restore_test
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          MIN_EXPECTED_ROWS: 1
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - if: failure()
+        run: devops/monitoring/notify.sh error "Restore test" "verify-backup-restore workflow failed — see the Actions run for details"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}

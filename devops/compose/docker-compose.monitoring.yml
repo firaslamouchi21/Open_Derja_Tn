@@ -1,0 +1,58 @@
+services:
+  cloudbeaver:
+    build:
+      context: ../..
+      dockerfile: devops/docker/cloudbeaver.Dockerfile
+    restart: unless-stopped
+    volumes:
+      - cloudbeaver_data:/opt/cloudbeaver/workspace
+    ports:
+      - "127.0.0.1:8978:8978"
+    networks:
+      - opendarja_net
+
+  dozzle:
+    build:
+      context: ../..
+      dockerfile: devops/docker/dozzle.Dockerfile
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "127.0.0.1:8888:8080"
+    networks:
+      - opendarja_net
+
+  netdata:
+    build:
+      context: ../..
+      dockerfile: devops/docker/netdata.Dockerfile
+    restart: unless-stopped
+    hostname: opendarja-vps
+    pid: host
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdata_config:/etc/netdata
+      - netdata_lib:/var/lib/netdata
+      - netdata_cache:/var/cache/netdata
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "127.0.0.1:19999:19999"
+    networks:
+      - opendarja_net
+
+volumes:
+  cloudbeaver_data:
+  netdata_config:
+  netdata_lib:
+  netdata_cache:
+
+networks:
+  opendarja_net:
+    external: true

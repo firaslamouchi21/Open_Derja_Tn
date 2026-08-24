@@ -1,0 +1,101 @@
+name: master
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: opendarja
+          POSTGRES_PASSWORD: opendarja
+          POSTGRES_DB: opendarja
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U opendarja"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://opendarja:opendarja@localhost:5432/opendarja
+      DIRECT_URL: postgres://opendarja:opendarja@localhost:5432/opendarja
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter @open-derja/db generate
+
+      - name: migration drift check
+        run: |
+          pnpm --filter @open-derja/db migrate:deploy
+          pnpm exec prisma migrate diff \
+            --from-migrations db/migrations \
+            --to-schema-datamodel db/schema.prisma \
+            --shadow-database-url "$DIRECT_URL" \
+            --exit-code
+        working-directory: db
+
+      - run: pnpm -r --if-present typecheck
+
+      - run: pnpm test:unit
+
+      - run: pnpm test:shell
+
+      - run: pnpm -r --if-present test
+
+      - run: pnpm -r --if-present build
+
+      - if: failure()
+        run: devops/monitoring/notify.sh error "CI" "master workflow failed on ${{ github.ref_name }} (${{ github.sha }})"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - uses: github/codeql-action/analyze@v3
+        id: analyze
+        with:
+          output: codeql-results
+
+      - name: summarize
+        run: devops/monitoring/summarize-codeql.sh codeql-results/javascript-typescript.sarif
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+  deploy:
+    needs: [checks, codeql]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: deploy over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_APP_DIR }}
+            devops/scripts/deploy.sh devops/compose/.env.prod

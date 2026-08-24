@@ -1,0 +1,882 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [pgcrypto, pg_trgm]
+}
+
+enum Scope {
+  pan_tunisian
+  regional
+}
+
+enum Region {
+  northwest
+  north
+  sahel
+  south
+}
+
+enum Era {
+  contemporary
+  historical
+  unknown
+}
+
+enum Setting {
+  urban
+  rural
+  unknown
+}
+
+enum Register {
+  neutral
+  formal
+  vulgar
+  archaic
+  unknown
+}
+
+enum CorpusUnit {
+  paragraph
+  sentence
+  phrase
+}
+
+enum Script {
+  arabic
+  arabizi
+  mixed
+  latin
+}
+
+enum DatasetSplit {
+  train
+  dev
+  test
+}
+
+enum TagKind {
+  scope
+  region
+  era
+  setting
+  register
+  code_switch
+  sense
+  quality
+}
+
+enum Domain {
+  everyday
+  food
+  admin
+  agriculture
+  kinship
+  other
+}
+
+enum Granularity {
+  word
+  phrase
+  sentence
+}
+
+enum PartOfSpeech {
+  noun
+  verb
+  adj
+  particle
+}
+
+enum OriginLayer {
+  arabic
+  arabic_derived
+  french
+  amazigh
+  italian
+  turkish
+  spanish
+  other
+  unknown
+}
+
+enum OriginStatus {
+  proposed
+  confirmed
+  disputed
+}
+
+enum TargetLang {
+  msa
+  fr
+  en
+}
+
+enum TranslationSource {
+  llm_draft
+  human
+  corrected_llm
+}
+
+enum License {
+  cc_by_sa
+  cc_by_nc
+  research_use_only
+  public_domain
+  unknown
+}
+
+enum RightsStatus {
+  granted
+  revoked
+  not_applicable
+}
+
+enum SourceKind {
+  youtube
+  forum
+  book
+  subtitle
+  contribution
+  elicitation
+  wikipedia
+  commoncrawl
+  tatoeba
+}
+
+enum CorrectionStatus {
+  proposed
+  accepted
+  rejected
+}
+
+enum FlagReason {
+  offensive
+  personal_data
+  wrong
+  copyright
+  other
+}
+
+enum FlagStatus {
+  open
+  resolved
+  dismissed
+}
+
+enum UserRole {
+  contributor
+  trusted_contributor
+  reviewer
+  admin
+  superadmin
+}
+
+enum TaskRole {
+  contributor
+  reviewer
+  admin
+}
+
+enum TaskType {
+  review
+  region_tag
+  confirm
+  translate_msa
+  translate_fr
+  translate_en
+  transliterate_to_arabic
+  transliterate_to_arabizi
+  standardise
+  adjudicate
+  link_lemma
+}
+
+enum TaskStatus {
+  open
+  claimed
+  done
+  rejected
+  needs_rework
+}
+
+enum PublicationKind {
+  paper
+  thesis
+  corpus
+  tool
+  book
+}
+
+enum PublicationStatus {
+  pending
+  approved
+  rejected
+}
+
+enum CommentStatus {
+  pending
+  approved
+  rejected
+}
+
+enum OutboxStatus {
+  pending
+  processing
+  sent
+  failed
+  failed_permanent
+}
+
+enum ConsentScope {
+  text_only
+  includes_voice
+}
+
+model Source {
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  kind           SourceKind
+  name           String
+  url            String?
+  licenseDefault License    @map("license_default")
+  active         Boolean    @default(true)
+  lastRunAt      DateTime?  @map("last_run_at") @db.Timestamptz(6)
+  rateLimit      Int?       @map("rate_limit")
+  proxyPool      String?    @map("proxy_pool")
+  notes          String?
+  createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  documents Document[]
+
+  @@map("sources")
+}
+
+model Document {
+  id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceId     String       @map("source_id") @db.Uuid
+  source       Source       @relation(fields: [sourceId], references: [id])
+  externalRef  String?      @map("external_ref")
+  title        String?
+  rawBody      String       @map("raw_body")
+  regionHint   Region?      @map("region_hint")
+  eraHint      Era?         @map("era_hint")
+  license      License
+  rightsStatus RightsStatus @default(not_applicable) @map("rights_status")
+  ingestedAt   DateTime     @map("ingested_at") @db.Timestamptz(6)
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  corpusItems CorpusItem[]
+
+  @@index([sourceId])
+  @@map("documents")
+}
+
+model CorpusItem {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  documentId    String       @map("document_id") @db.Uuid
+  document      Document     @relation(fields: [documentId], references: [id])
+  parentId      String?      @map("parent_id") @db.Uuid
+  parent        CorpusItem?  @relation("CorpusItemToParent", fields: [parentId], references: [id])
+  children      CorpusItem[] @relation("CorpusItemToParent")
+  unit          CorpusUnit
+  position      Int
+  text          String
+  script        Script
+  canonicalForm String?      @map("canonical_form")
+  canonicalMap  Json?        @map("canonical_map")
+  matchKey      String?      @map("match_key")
+  ruleVersion   Int?         @map("rule_version")
+  charOffset    Int          @map("char_offset")
+  datasetSplit  DatasetSplit @map("dataset_split")
+  version       Int          @default(1)
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tokens       Token[]
+  tags         Tag[]
+  tagConsensus TagConsensus[]
+  tasks        Task[]
+  translations Translation[]
+  submission   SubmissionMeta?
+
+  @@index([documentId, unit, position])
+  @@index([parentId])
+  @@map("corpus_items")
+}
+
+model Token {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  corpusItemId String     @map("corpus_item_id") @db.Uuid
+  corpusItem   CorpusItem @relation(fields: [corpusItemId], references: [id])
+  charStart    Int        @map("char_start")
+  charEnd      Int        @map("char_end")
+  surfaceText  String     @map("surface_text")
+  annotatorId  String     @map("annotator_id") @db.Uuid
+  annotator    User       @relation(fields: [annotatorId], references: [id])
+  isMachine    Boolean    @map("is_machine")
+  confidence   Decimal?   @db.Decimal(3, 2)
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  link Link?
+
+  @@index([corpusItemId])
+  @@map("tokens")
+}
+
+model Link {
+  id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tokenId          String          @unique @map("token_id") @db.Uuid
+  token            Token           @relation(fields: [tokenId], references: [id])
+  lexiconEntryId   String          @map("lexicon_entry_id") @db.Uuid
+  lexiconEntry     LexiconEntry    @relation(fields: [lexiconEntryId], references: [id])
+  lexiconVariantId String?         @map("lexicon_variant_id") @db.Uuid
+  lexiconVariant   LexiconVariant? @relation(fields: [lexiconVariantId], references: [id])
+  annotatorId      String          @map("annotator_id") @db.Uuid
+  annotator        User            @relation(fields: [annotatorId], references: [id])
+  isMachine        Boolean         @map("is_machine")
+  confidence       Decimal?        @db.Decimal(3, 2)
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([lexiconEntryId])
+  @@index([lexiconVariantId])
+  @@map("links")
+}
+
+model Tag {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  corpusItemId String     @map("corpus_item_id") @db.Uuid
+  corpusItem   CorpusItem @relation(fields: [corpusItemId], references: [id])
+  charStart    Int        @map("char_start")
+  charEnd      Int        @map("char_end")
+  kind         TagKind
+  value        String
+  annotatorId  String     @map("annotator_id") @db.Uuid
+  annotator    User       @relation(fields: [annotatorId], references: [id])
+  isMachine    Boolean    @map("is_machine")
+  confidence   Decimal?   @db.Decimal(3, 2)
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([corpusItemId, kind, charStart, charEnd])
+  @@index([annotatorId])
+  @@map("tags")
+}
+
+model TagConsensus {
+  corpusItemId      String     @map("corpus_item_id") @db.Uuid
+  corpusItem        CorpusItem @relation(fields: [corpusItemId], references: [id])
+  kind              TagKind
+  charStart         Int        @map("char_start")
+  charEnd           Int        @map("char_end")
+  agreedValues      String[]   @map("agreed_values")
+  agreement         Decimal    @db.Decimal(3, 2)
+  annotatorN        Int        @map("annotator_n")
+  needsAdjudication Boolean    @map("needs_adjudication")
+  computedAt        DateTime   @map("computed_at") @db.Timestamptz(6)
+
+  @@id([corpusItemId, kind, charStart, charEnd])
+  @@index([needsAdjudication])
+  @@map("tag_consensus")
+}
+
+model LexiconEntry {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  glossEn     String?       @map("gloss_en")
+  glossFr     String?       @map("gloss_fr")
+  glossMsa    String?       @map("gloss_msa")
+  domain      Domain?
+  granularity Granularity
+  pos         PartOfSpeech?
+  notes       String?
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  variants     LexiconVariant[]
+  origins      LexiconOrigin[]
+  translations Translation[]
+  links        Link[]
+
+  @@map("lexicon_entries")
+}
+
+model LexiconVariant {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lexiconEntryId String       @map("lexicon_entry_id") @db.Uuid
+  lexiconEntry   LexiconEntry @relation(fields: [lexiconEntryId], references: [id])
+  scope          Scope
+  era            Era
+  setting        Setting
+  register       Register
+  canonicalForm  String       @map("canonical_form")
+  matchKey       String       @map("match_key")
+  confidence     Decimal?     @db.Decimal(3, 2)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  regions      LexiconVariantRegion[]
+  forms        LexiconForm[]
+  translations Translation[]
+  media        Media[]
+  links        Link[]
+
+  @@map("lexicon_variants")
+}
+
+model LexiconVariantRegion {
+  lexiconVariantId String         @map("lexicon_variant_id") @db.Uuid
+  lexiconVariant   LexiconVariant @relation(fields: [lexiconVariantId], references: [id], onDelete: Cascade)
+  region           Region
+  attestationCount Int            @default(0) @map("attestation_count")
+  confidence       Decimal?       @db.Decimal(3, 2)
+
+  @@id([lexiconVariantId, region])
+  @@index([region, attestationCount(sort: Desc)])
+  @@map("lexicon_variant_regions")
+}
+
+model LexiconForm {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lexiconVariantId String         @map("lexicon_variant_id") @db.Uuid
+  lexiconVariant   LexiconVariant @relation(fields: [lexiconVariantId], references: [id])
+  text             String
+  script           Script
+  matchKey         String         @map("match_key")
+  isCanonical      Boolean        @default(false) @map("is_canonical")
+  frequency        Int            @default(0)
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  media Media[]
+
+  @@index([lexiconVariantId, script])
+  @@map("lexicon_forms")
+}
+
+model LexiconOrigin {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lexiconEntryId String       @map("lexicon_entry_id") @db.Uuid
+  lexiconEntry   LexiconEntry @relation(fields: [lexiconEntryId], references: [id], onDelete: Cascade)
+  origin         OriginLayer
+  sourceForm     String?      @map("source_form")
+  sourceLang     String?      @map("source_lang")
+  note           String?
+  proposedBy     String?      @map("proposed_by") @db.Uuid
+  proposer       User?        @relation(fields: [proposedBy], references: [id])
+  sessionId      String?      @map("session_id") @db.Uuid
+  ipHash         String?      @map("ip_hash")
+  status         OriginStatus @default(proposed)
+  confidence     Decimal?     @db.Decimal(3, 2)
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([lexiconEntryId])
+  @@index([origin])
+  @@map("lexicon_origins")
+}
+
+model Translation {
+  id               String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  corpusItemId     String?           @map("corpus_item_id") @db.Uuid
+  corpusItem       CorpusItem?       @relation(fields: [corpusItemId], references: [id], onDelete: Cascade)
+  lexiconEntryId   String?           @map("lexicon_entry_id") @db.Uuid
+  lexiconEntry     LexiconEntry?     @relation(fields: [lexiconEntryId], references: [id], onDelete: Cascade)
+  lexiconVariantId String?           @map("lexicon_variant_id") @db.Uuid
+  lexiconVariant   LexiconVariant?   @relation(fields: [lexiconVariantId], references: [id], onDelete: Cascade)
+  targetLang       TargetLang        @map("target_lang")
+  text             String
+  source           TranslationSource
+  translatorId     String?           @map("translator_id") @db.Uuid
+  translator       User?             @relation(fields: [translatorId], references: [id])
+  isPreferred      Boolean           @default(false) @map("is_preferred")
+  qualityScore     Decimal?          @map("quality_score") @db.Decimal(3, 2)
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([corpusItemId, targetLang])
+  @@index([lexiconEntryId, targetLang])
+  @@index([lexiconVariantId, targetLang])
+  @@map("translations")
+}
+
+model SubmissionMeta {
+  id                 String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  corpusItemId       String     @unique @map("corpus_item_id") @db.Uuid
+  corpusItem         CorpusItem @relation(fields: [corpusItemId], references: [id])
+  contributorName    String?    @map("contributor_name")
+  contributorEmail   String?    @map("contributor_email")
+  selfReportedRegion Region?    @map("self_reported_region")
+  selfReportedOrigin String?    @map("self_reported_origin")
+  sessionId          String?    @map("session_id") @db.Uuid
+  ipHash             String?    @map("ip_hash")
+  consentGiven       Boolean    @map("consent_given")
+  consentVoice       Boolean    @default(false) @map("consent_voice")
+  createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("submission_meta")
+}
+
+model Correction {
+  id          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  targetTable String           @map("target_table")
+  targetId    String           @map("target_id") @db.Uuid
+  field       String
+  oldValue    String?          @map("old_value")
+  newValue    String?          @map("new_value")
+  reason      String?
+  proposedBy  String?          @map("proposed_by") @db.Uuid
+  proposer    User?            @relation("CorrectionProposer", fields: [proposedBy], references: [id])
+  status      CorrectionStatus @default(proposed)
+  reviewedBy  String?          @map("reviewed_by") @db.Uuid
+  reviewer    User?            @relation("CorrectionReviewer", fields: [reviewedBy], references: [id])
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([targetTable, targetId])
+  @@map("corrections")
+}
+
+model Flag {
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  targetType String     @map("target_type")
+  targetId   String     @map("target_id") @db.Uuid
+  reason     FlagReason
+  note       String?
+  sessionId  String?    @map("session_id") @db.Uuid
+  ipHash     String?    @map("ip_hash")
+  status     FlagStatus @default(open)
+  resolvedBy String?    @map("resolved_by") @db.Uuid
+  resolver   User?      @relation(fields: [resolvedBy], references: [id])
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([targetType, targetId])
+  @@map("flags")
+}
+
+model User {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  role                UserRole
+  displayName         String?   @map("display_name")
+  email               String?   @unique
+  passwordHash        String?   @map("password_hash")
+  trustLevel          Int       @default(0) @map("trust_level")
+  regionSelfReported  Region?   @map("region_self_reported")
+  active              Boolean   @default(true)
+  emailConfirmed      Boolean   @default(false) @map("email_confirmed")
+  tokenVersion        Int       @default(0) @map("token_version")
+  githubId            String?   @unique @map("github_id")
+  totpSecret          String?   @map("totp_secret")
+  totpEnabled         Boolean   @default(false) @map("totp_enabled")
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until") @db.Timestamptz(6)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tokens                Token[]
+  links                 Link[]
+  tags                  Tag[]
+  lexiconOrigins        LexiconOrigin[]
+  translations          Translation[]
+  correctionsProposed   Correction[]     @relation("CorrectionProposer")
+  correctionsReviewed   Correction[]     @relation("CorrectionReviewer")
+  flagsResolved         Flag[]
+  tasksClaimed          Task[]           @relation("TaskClaimedBy")
+  tasksCompleted        Task[]           @relation("TaskCompletedBy")
+  auditLogEntries       AuditLog[]
+  storedObjectsUploaded StoredObject[]
+  refreshSessions       RefreshSession[]
+  publicationsSubmitted Publication[]
+
+  @@index([role, regionSelfReported])
+  @@map("users")
+}
+
+model RefreshSession {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  user      User      @relation(fields: [userId], references: [id])
+  jti       String    @unique
+  ipHash    String?   @map("ip_hash")
+  userAgent String?   @map("user_agent")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(6)
+
+  @@index([userId])
+  @@map("refresh_sessions")
+}
+
+model AuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actorId    String?  @map("actor_id") @db.Uuid
+  actor      User?    @relation(fields: [actorId], references: [id])
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id") @db.Uuid
+  diff       Json
+  ipHash     String?  @map("ip_hash")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@map("audit_log")
+}
+
+model Task {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  corpusItemId    String     @map("corpus_item_id") @db.Uuid
+  corpusItem      CorpusItem @relation(fields: [corpusItemId], references: [id])
+  type            TaskType
+  status          TaskStatus @default(open)
+  priority        Int        @default(0)
+  claimedBy       String?    @map("claimed_by") @db.Uuid
+  claimant        User?      @relation("TaskClaimedBy", fields: [claimedBy], references: [id])
+  claimedAt       DateTime?  @map("claimed_at") @db.Timestamptz(6)
+  completedBy     String?    @map("completed_by") @db.Uuid
+  completer       User?      @relation("TaskCompletedBy", fields: [completedBy], references: [id])
+  completedAt     DateTime?  @map("completed_at") @db.Timestamptz(6)
+  outputRecordId  String?    @map("output_record_id") @db.Uuid
+  requiresRole    TaskRole   @map("requires_role")
+  targetRegions   Region[]   @map("target_regions")
+  itemVersion     Int        @map("item_version")
+  idempotencySlot String     @default("") @map("idempotency_slot")
+  idemKey         String     @map("idem_key")
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status, type, priority(sort: Desc)])
+  @@index([claimedBy, status])
+  @@index([corpusItemId])
+  @@index([idemKey])
+  @@index([targetRegions], type: Gin)
+  @@map("tasks")
+}
+
+model StandardisationRule {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ruleVersion Int      @map("rule_version")
+  pattern     String
+  replacement String
+  script      Script
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([ruleVersion])
+  @@map("standardisation_rules")
+}
+
+model DatasetSnapshot {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  version         String
+  corpusItemCount Int          @map("corpus_item_count")
+  storedObjectId  String       @unique @map("stored_object_id") @db.Uuid
+  storedObject    StoredObject @relation(fields: [storedObjectId], references: [id])
+  ruleVersion     Int          @map("rule_version")
+  notes           String?
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  modelVersions ModelVersion[]
+
+  @@map("dataset_snapshots")
+}
+
+model ModelVersion {
+  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  snapshotId   String          @map("snapshot_id") @db.Uuid
+  snapshot     DatasetSnapshot @relation(fields: [snapshotId], references: [id])
+  metrics      Json
+  trainedAt    DateTime        @map("trained_at") @db.Timestamptz(6)
+  isProduction Boolean         @default(false) @map("is_production")
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("model_versions")
+}
+
+model Publication {
+  id          String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  authors     String
+  year        Int
+  venue       String?
+  doi         String?           @unique
+  url         String?
+  kind        PublicationKind
+  abstract    String?
+  submittedBy String?           @map("submitted_by") @db.Uuid
+  submitter   User?             @relation(fields: [submittedBy], references: [id])
+  status      PublicationStatus @default(pending)
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  comments PublicationComment[]
+
+  @@map("publications")
+}
+
+model PublicationComment {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  publicationId String        @map("publication_id") @db.Uuid
+  publication   Publication   @relation(fields: [publicationId], references: [id])
+  body          String
+  authorName    String?       @map("author_name")
+  sessionId     String?       @map("session_id") @db.Uuid
+  ipHash        String?       @map("ip_hash")
+  status        CommentStatus @default(pending)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([publicationId])
+  @@map("publication_comments")
+}
+
+model OutboxEvent {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventType   String       @map("event_type")
+  payload     Json
+  status      OutboxStatus @default(pending)
+  attempts    Int          @default(0)
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  processedAt DateTime?    @map("processed_at") @db.Timestamptz(6)
+
+  @@index([status, createdAt])
+  @@map("outbox_events")
+}
+
+model ContributorStats {
+  sessionId         String   @id @map("session_id") @db.Uuid
+  contributorName   String?  @map("contributor_name")
+  region            Region?
+  approvedCount     Int      @default(0) @map("approved_count")
+  submittedCount    Int      @default(0) @map("submitted_count")
+  rejectedCount     Int      @default(0) @map("rejected_count")
+  lastContributedAt DateTime @map("last_contributed_at") @db.Timestamptz(6)
+  computedAt        DateTime @map("computed_at") @db.Timestamptz(6)
+
+  @@index([approvedCount(sort: Desc)])
+  @@index([region, approvedCount(sort: Desc)])
+  @@map("contributor_stats")
+}
+
+model RegionStats {
+  region                      Region   @id
+  corpusItemCount             Int      @default(0) @map("corpus_item_count")
+  wordCount                   Int      @default(0) @map("word_count")
+  translationCount            Int      @default(0) @map("translation_count")
+  reviewerCount               Int      @default(0) @map("reviewer_count")
+  outOfRegionAdjudicationRate Decimal? @map("out_of_region_adjudication_rate") @db.Decimal(3, 2)
+  computedAt                  DateTime @map("computed_at") @db.Timestamptz(6)
+
+  @@map("region_stats")
+}
+
+model TranslatorStats {
+  id            Int      @id @default(1)
+  wordCount     Int      @default(0) @map("word_count")
+  sentenceCount Int      @default(0) @map("sentence_count")
+  hitRate       Decimal? @map("hit_rate") @db.Decimal(3, 2)
+  computedAt    DateTime @map("computed_at") @db.Timestamptz(6)
+
+  @@map("translator_stats")
+}
+
+model TranslatorRegionMiss {
+  region     Region   @id
+  missRate   Decimal  @map("miss_rate") @db.Decimal(3, 2)
+  computedAt DateTime @map("computed_at") @db.Timestamptz(6)
+
+  @@map("translator_region_miss")
+}
+
+model Speaker {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId       String?  @map("session_id") @db.Uuid
+  regionOrigin    Region?  @map("region_origin")
+  regionResidence Region?  @map("region_residence")
+  ageBand         String?  @map("age_band")
+  consentVoice    Boolean  @default(false) @map("consent_voice")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  media Media[]
+
+  @@map("speakers")
+}
+
+model Media {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lexiconVariantId String         @map("lexicon_variant_id") @db.Uuid
+  lexiconVariant   LexiconVariant @relation(fields: [lexiconVariantId], references: [id])
+  lexiconFormId    String?        @map("lexicon_form_id") @db.Uuid
+  lexiconForm      LexiconForm?   @relation(fields: [lexiconFormId], references: [id])
+  speakerId        String         @map("speaker_id") @db.Uuid
+  speaker          Speaker        @relation(fields: [speakerId], references: [id])
+  storedObjectId   String         @unique @map("stored_object_id") @db.Uuid
+  storedObject     StoredObject   @relation(fields: [storedObjectId], references: [id])
+  durationMs       Int            @map("duration_ms")
+  sampleRate       Int            @map("sample_rate")
+  consentScope     ConsentScope   @map("consent_scope")
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([lexiconVariantId])
+  @@map("media")
+}
+
+enum StoredObjectKind {
+  voice_clip
+  dataset_snapshot
+  db_backup
+  book_scan
+  other
+}
+
+enum StoredObjectStatus {
+  pending
+  stored
+  deleted
+}
+
+model StoredObject {
+  id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  kind        StoredObjectKind
+  bucket      String
+  storageKey  String             @unique @map("storage_key")
+  mimeType    String?            @map("mime_type")
+  sizeBytes   BigInt?            @map("size_bytes")
+  checksum    String?
+  status      StoredObjectStatus @default(pending)
+  isPublic    Boolean            @default(false) @map("is_public")
+  expiresAt   DateTime?          @map("expires_at") @db.Timestamptz(6)
+  uploadedBy  String?            @map("uploaded_by") @db.Uuid
+  uploader    User?              @relation(fields: [uploadedBy], references: [id])
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  confirmedAt DateTime?          @map("confirmed_at") @db.Timestamptz(6)
+  deletedAt   DateTime?          @map("deleted_at") @db.Timestamptz(6)
+
+  media           Media?
+  datasetSnapshot DatasetSnapshot?
+  databaseBackup  DatabaseBackup?
+
+  @@index([kind, status])
+  @@index([expiresAt])
+  @@map("stored_objects")
+}
+
+model DatabaseBackup {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  storedObjectId  String       @unique @map("stored_object_id") @db.Uuid
+  storedObject    StoredObject @relation(fields: [storedObjectId], references: [id])
+  encrypted       Boolean      @default(true)
+  restoreTestedAt DateTime?    @map("restore_tested_at") @db.Timestamptz(6)
+  restoreOk       Boolean?     @map("restore_ok")
+  createdAt       DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("database_backups")
+}

@@ -1,0 +1,18 @@
+{
+  "name": "@open-derja/db",
+  "private": true,
+  "version": "0.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "generate": "prisma generate --schema=schema.prisma",
+    "migrate:deploy": "prisma migrate deploy --schema=schema.prisma",
+    "migrate:diff": "prisma migrate diff --schema=schema.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
+  }
+}

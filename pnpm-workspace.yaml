@@ -1,0 +1,8 @@
+packages:
+  - backend
+  - backend/core
+  - db
+  - frontend
+  - shared
+  - scrapers
+  - worker

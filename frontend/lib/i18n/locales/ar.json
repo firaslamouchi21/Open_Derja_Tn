@@ -1,0 +1,17 @@
+{
+  "common": {
+    "loading": "جارٍ التحميل",
+    "error": "حدث خطأ ما",
+    "submit": "إرسال",
+    "cancel": "إلغاء",
+    "skip": "تخطي",
+    "next": "التالي"
+  },
+  "nav": {
+    "translate": "ترجمة",
+    "explore": "استكشاف",
+    "compare": "مقارنة",
+    "lexicon": "المعجم",
+    "contribute": "ساهم"
+  }
+}

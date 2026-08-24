@@ -1,0 +1,17 @@
+{
+  "common": {
+    "loading": "Chargement",
+    "error": "Une erreur est survenue",
+    "submit": "Envoyer",
+    "cancel": "Annuler",
+    "skip": "Passer",
+    "next": "Suivant"
+  },
+  "nav": {
+    "translate": "Traduire",
+    "explore": "Explorer",
+    "compare": "Comparer",
+    "lexicon": "Lexique",
+    "contribute": "Contribuer"
+  }
+}

@@ -1,7 +1,18 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import {
+  addFullSpanTag,
+  addLink,
+  addRegionTags,
+  addTag,
+  addToken,
   claimNextTask,
   completeTask,
+  computeCanonicalMap,
+  createLexiconForm,
+  createTranslation,
+  currentRuleVersion,
+  attestLexiconVariantRegion,
+  getActiveStandardisationRules,
   getClaimableTaskRole,
   getEligibleTaskTypes,
   onConsensusLowAgreement,
@@ -16,11 +27,8 @@ import {
   spawnTasks,
   tokenize,
 } from '@open-derja/core';
-import type { Region, Script, TagKind, TargetLang, Task, TaskType } from '@open-derja/db';
+import type { Prisma, Region, Script, TagKind, TargetLang, Task, TaskType } from '@open-derja/db';
 import { PrismaService } from '../../infra/database/prisma.service';
-import { AnnotationsService } from '../annotations/annotations.service';
-import { LexiconService } from '../lexicon/lexicon.service';
-import { TranslateService } from '../translate/translate.service';
 import type { RequestUser } from '../../common/guards/request-user.interface';
 import { ReviewTaskDto } from './dto/review-task.dto';
 import { RegionTagTaskDto } from './dto/region-tag-task.dto';
@@ -44,12 +52,7 @@ const TRANSLITERATE_TASK_SCRIPTS: Partial<Record<TaskType, Script>> = {
 
 @Injectable()
 export class TasksService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly annotations: AnnotationsService,
-    private readonly lexicon: LexiconService,
-    private readonly translateService: TranslateService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async claim(user: RequestUser): Promise<Task | undefined> {
     const eligibleTypes = getEligibleTaskTypes(user);
@@ -76,29 +79,23 @@ export class TasksService {
 
     const [completedTask] = await this.prisma.$transaction(async (tx) => {
       if (dto.qualityValue) {
-        await this.annotations.addFullSpanTag(
-          {
-            corpusItemId: task.corpusItemId,
-            kind: 'quality',
-            value: dto.qualityValue,
-            textLength: corpusItem.text.length,
-            annotatorId: user.id,
-            isMachine: false,
-          },
-          tx,
-        );
+        await addFullSpanTag(tx, {
+          corpusItemId: task.corpusItemId,
+          kind: 'quality',
+          value: dto.qualityValue,
+          textLength: corpusItem.text.length,
+          annotatorId: user.id,
+          isMachine: false,
+        });
       }
       if (dto.regions && dto.regions.length > 0) {
-        await this.annotations.addRegionTags(
-          {
-            corpusItemId: task.corpusItemId,
-            regions: dto.regions,
-            textLength: corpusItem.text.length,
-            annotatorId: user.id,
-            isMachine: false,
-          },
-          tx,
-        );
+        await addRegionTags(tx, {
+          corpusItemId: task.corpusItemId,
+          regions: dto.regions,
+          textLength: corpusItem.text.length,
+          annotatorId: user.id,
+          isMachine: false,
+        });
       }
       const done = await completeTask(tx, taskId, user.id);
       return [done];
@@ -125,16 +122,13 @@ export class TasksService {
     const corpusItem = await this.prisma.corpusItem.findUniqueOrThrow({ where: { id: task.corpusItemId } });
 
     const [completedTask] = await this.prisma.$transaction(async (tx) => {
-      await this.annotations.addRegionTags(
-        {
-          corpusItemId: task.corpusItemId,
-          regions: dto.regions,
-          textLength: corpusItem.text.length,
-          annotatorId: user.id,
-          isMachine: false,
-        },
-        tx,
-      );
+      await addRegionTags(tx, {
+        corpusItemId: task.corpusItemId,
+        regions: dto.regions,
+        textLength: corpusItem.text.length,
+        annotatorId: user.id,
+        isMachine: false,
+      });
       const done = await completeTask(tx, taskId, user.id);
       return [done];
     });
@@ -172,16 +166,13 @@ export class TasksService {
 
     const completedTask = await this.prisma.$transaction(async (tx) => {
       if (regionsToWrite && regionsToWrite.length > 0) {
-        await this.annotations.addRegionTags(
-          {
-            corpusItemId: task.corpusItemId,
-            regions: regionsToWrite,
-            textLength: corpusItem.text.length,
-            annotatorId: user.id,
-            isMachine: false,
-          },
-          tx,
-        );
+        await addRegionTags(tx, {
+          corpusItemId: task.corpusItemId,
+          regions: regionsToWrite,
+          textLength: corpusItem.text.length,
+          annotatorId: user.id,
+          isMachine: false,
+        });
       }
       return completeTask(tx, taskId, user.id);
     });
@@ -202,17 +193,14 @@ export class TasksService {
 
     const corpusItem = await this.prisma.corpusItem.findUniqueOrThrow({ where: { id: task.corpusItemId } });
 
-    const [translation, completedTask] = await this.prisma.$transaction(async (tx) => {
-      const created = await this.translateService.createTranslation(
-        {
-          corpusItemId: task.corpusItemId,
-          targetLang,
-          text: dto.text,
-          translatorId: user.id,
-          isMachine: false,
-        },
-        tx,
-      );
+    const [, completedTask] = await this.prisma.$transaction(async (tx) => {
+      const created = await createTranslation(tx, {
+        corpusItemId: task.corpusItemId,
+        targetLang,
+        text: dto.text,
+        translatorId: user.id,
+        isMachine: false,
+      });
       const done = await completeTask(tx, taskId, user.id, created.id);
       return [created, done];
     });
@@ -229,13 +217,11 @@ export class TasksService {
       throw new BadRequestException('This task is not a transliteration task');
     }
 
-    const [form, completedTask] = await this.prisma.$transaction(async (tx) => {
-      const created = await this.lexicon.createForm(
-        dto.lexiconVariantId,
-        { text: dto.text, script },
-        { isMachine: false },
-        tx,
-      );
+    const [, completedTask] = await this.prisma.$transaction(async (tx) => {
+      const created = await createLexiconForm(tx, dto.lexiconVariantId, { text: dto.text, script, isMachine: false });
+      if (!created) {
+        throw new NotFoundException('Lexicon variant not found');
+      }
       const done = await completeTask(tx, taskId, user.id, created.id);
       return [created, done];
     });
@@ -251,29 +237,29 @@ export class TasksService {
 
     const corpusItem = await this.prisma.corpusItem.findUniqueOrThrow({ where: { id: task.corpusItemId } });
     const tokenSpans = tokenize(corpusItem.text);
+    const activeRules = await getActiveStandardisationRules(this.prisma, corpusItem.script);
+    const ruleVersion = currentRuleVersion(activeRules);
+    const canonicalMap = computeCanonicalMap(corpusItem.text, dto.canonicalForm, ruleVersion);
 
     const [updatedItem, completedTask] = await this.prisma.$transaction(async (tx) => {
       const item = await tx.corpusItem.update({
         where: { id: task.corpusItemId },
         data: {
           canonicalForm: dto.canonicalForm,
-          canonicalMap: { text: corpusItem.text, canonicalForm: dto.canonicalForm },
-          ruleVersion: corpusItem.ruleVersion ?? 0,
+          canonicalMap: canonicalMap as unknown as Prisma.InputJsonValue,
+          ruleVersion,
           version: { increment: 1 },
         },
       });
       for (const span of tokenSpans) {
-        await this.annotations.addToken(
-          {
-            corpusItemId: task.corpusItemId,
-            charStart: span.charStart,
-            charEnd: span.charEnd,
-            surfaceText: span.surfaceText,
-            annotatorId: user.id,
-            isMachine: false,
-          },
-          tx,
-        );
+        await addToken(tx, {
+          corpusItemId: task.corpusItemId,
+          charStart: span.charStart,
+          charEnd: span.charEnd,
+          surfaceText: span.surfaceText,
+          annotatorId: user.id,
+          isMachine: false,
+        });
       }
       const done = await completeTask(tx, taskId, user.id);
       return [item, done];
@@ -298,17 +284,14 @@ export class TasksService {
       throw new NotFoundException('No token found at this task’s span — has this item been standardised?');
     }
 
-    const [link, completedTask] = await this.prisma.$transaction(async (tx) => {
-      const created = await this.annotations.addLink(
-        {
-          tokenId: token.id,
-          lexiconEntryId: dto.lexiconEntryId,
-          lexiconVariantId: dto.lexiconVariantId,
-          annotatorId: user.id,
-          isMachine: false,
-        },
-        tx,
-      );
+    const [, completedTask] = await this.prisma.$transaction(async (tx) => {
+      const created = await addLink(tx, {
+        tokenId: token.id,
+        lexiconEntryId: dto.lexiconEntryId,
+        lexiconVariantId: dto.lexiconVariantId,
+        annotatorId: user.id,
+        isMachine: false,
+      });
       const done = await completeTask(tx, taskId, user.id, created.id);
       return [created, done];
     });
@@ -320,7 +303,7 @@ export class TasksService {
       });
       const regions = new Set((corpusItem?.tags ?? []).map((t) => t.value as Region));
       for (const region of regions) {
-        await this.lexicon.attestRegion(dto.lexiconVariantId, region);
+        await attestLexiconVariantRegion(this.prisma, dto.lexiconVariantId, region);
       }
     }
 
@@ -337,18 +320,15 @@ export class TasksService {
 
     const completedTask = await this.prisma.$transaction(async (tx) => {
       for (const value of dto.values) {
-        await this.annotations.addTag(
-          {
-            corpusItemId: task.corpusItemId,
-            kind: dto.kind,
-            value,
-            charStart,
-            charEnd,
-            annotatorId: user.id,
-            isMachine: false,
-          },
-          tx,
-        );
+        await addTag(tx, {
+          corpusItemId: task.corpusItemId,
+          kind: dto.kind,
+          value,
+          charStart,
+          charEnd,
+          annotatorId: user.id,
+          isMachine: false,
+        });
       }
       return completeTask(tx, taskId, user.id);
     });

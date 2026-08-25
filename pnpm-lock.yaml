@@ -24,7 +24,7 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
 
-  backend:
+  control-plane/backend:
     dependencies:
       '@nest-lab/throttler-storage-redis':
         specifier: ^1.1.0
@@ -49,7 +49,7 @@ importers:
         version: link:core
       '@open-derja/db':
         specifier: workspace:*
-        version: link:../db
+        version: link:../../db
       argon2:
         specifier: ^0.31.2
         version: 0.31.2
@@ -94,7 +94,7 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
 
-  backend/core:
+  control-plane/backend/core:
     dependencies:
       '@aws-sdk/client-s3':
         specifier: ^3.678.0
@@ -104,11 +104,58 @@ importers:
         version: 3.1116.0
       '@open-derja/db':
         specifier: workspace:*
-        version: link:../../db
+        version: link:../../../db
     devDependencies:
       '@types/node':
         specifier: ^22.7.5
         version: 22.20.1
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+
+  control-plane/scrapers:
+    dependencies:
+      '@open-derja/core':
+        specifier: workspace:*
+        version: link:../backend/core
+      '@open-derja/db':
+        specifier: workspace:*
+        version: link:../../db
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.6.1
+    devDependencies:
+      '@types/node':
+        specifier: ^22.7.5
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.1
+        version: 4.23.12
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+
+  control-plane/worker:
+    dependencies:
+      '@open-derja/core':
+        specifier: workspace:*
+        version: link:../backend/core
+      '@open-derja/db':
+        specifier: workspace:*
+        version: link:../../db
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.6.1
+      pg-boss:
+        specifier: ^10.1.5
+        version: 10.4.2
+    devDependencies:
+      '@types/node':
+        specifier: ^22.7.5
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.1
+        version: 4.23.12
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
@@ -119,6 +166,9 @@ importers:
         specifier: ^5.22.0
         version: 5.22.0(prisma@5.22.0)
     devDependencies:
+      dotenv-cli:
+        specifier: ^7.4.2
+        version: 7.4.4
       prisma:
         specifier: ^5.22.0
         version: 5.22.0
@@ -165,6 +215,9 @@ importers:
       autoprefixer:
         specifier: ^10.4.20
         version: 10.5.4(postcss@8.5.26)
+      dotenv-cli:
+        specifier: ^7.4.2
+        version: 7.4.4
       postcss:
         specifier: ^8.4.47
         version: 8.5.26
@@ -175,28 +228,6 @@ importers:
         specifier: ^5.5.4
         version: 5.9.3
 
-  scrapers:
-    dependencies:
-      '@open-derja/core':
-        specifier: workspace:*
-        version: link:../backend/core
-      '@open-derja/db':
-        specifier: workspace:*
-        version: link:../db
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.6.1
-    devDependencies:
-      '@types/node':
-        specifier: ^22.7.5
-        version: 22.20.1
-      tsx:
-        specifier: ^4.19.1
-        version: 4.23.12
-      typescript:
-        specifier: ^5.6.3
-        version: 5.9.3
-
   shared:
     dependencies:
       zod:
@@ -205,31 +236,6 @@ importers:
     devDependencies:
       typescript:
         specifier: ^5.5.4
-        version: 5.9.3
-
-  worker:
-    dependencies:
-      '@open-derja/core':
-        specifier: workspace:*
-        version: link:../backend/core
-      '@open-derja/db':
-        specifier: workspace:*
-        version: link:../db
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.6.1
-      pg-boss:
-        specifier: ^10.1.5
-        version: 10.4.2
-    devDependencies:
-      '@types/node':
-        specifier: ^22.7.5
-        version: 22.20.1
-      tsx:
-        specifier: ^4.19.1
-        version: 4.23.12
-      typescript:
-        specifier: ^5.6.3
         version: 5.9.3
 
 packages:
@@ -1906,6 +1912,14 @@ packages:
 
   dlv@1.1.3:
     resolution: {integrity: sha512-+HlytyjlPKnIG8XuRG8WvmBP8xs8P71y+SKKS6ZXWoEgLuePxtDoUEiH7WkdePWrQ5JBpE6aoVqfZfJUQkjXwA==}
+
+  dotenv-cli@7.4.4:
+    resolution: {integrity: sha512-XkBYCG0tPIes+YZr4SpfFv76SQrV/LeCE8CI7JSEMi3VR9MvTihCGTOtbIexD6i2mXF+6px7trb1imVCXSNMDw==}
+    hasBin: true
+
+  dotenv-expand@10.0.0:
+    resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
+    engines: {node: '>=12'}
 
   dotenv-expand@12.0.3:
     resolution: {integrity: sha512-uc47g4b+4k/M/SeaW1y4OApx+mtLWl92l5LMPP0GNXctZqELk+YGgOPIIC5elYmUH4OuoK3JLhuRUYegeySiFA==}
@@ -5445,6 +5459,15 @@ snapshots:
   diff-sequences@29.6.3: {}
 
   dlv@1.1.3: {}
+
+  dotenv-cli@7.4.4:
+    dependencies:
+      cross-spawn: 7.0.6
+      dotenv: 16.6.1
+      dotenv-expand: 10.0.0
+      minimist: 1.2.8
+
+  dotenv-expand@10.0.0: {}
 
   dotenv-expand@12.0.3:
     dependencies:

@@ -1,4 +1,4 @@
-import { computeIdemKey, emptySlot, ordinalSlot, spanSlot } from '../../../../../backend/core/src/tasks/idem-key';
+import { computeIdemKey, emptySlot, ordinalSlot, spanSlot } from '../../../../../../control-plane/backend/core/src/tasks/idem-key';
 
 describe('computeIdemKey', () => {
   it('is deterministic for the same inputs', () => {

@@ -2,21 +2,16 @@
 CLAUDE.md
 FINISH_LINE.md
 .claude/
-docs/TECHNICAL_GUIDE.md
-docs/private docs/
-docs/proposal docs/technicaldoc.pdf
-# docs/ was renamed to Documentation/ on disk at some point outside git —
-# covering both names so the private guide stays ignored either way
-Documentation/TECHNICAL_GUIDE.md
 Documentation/private docs/
-Documentation/proposal docs/technicaldoc.pdf
 
-# ── Node / pnpm ───────────────────────────────────────────────────────
+
+
 node_modules/
 .pnpm-store/
+.fuse_hidden*
 
 
-# ── Build output ──────────────────────────────────────────────────────
+
 .next/
 dist/
 build/
@@ -24,36 +19,36 @@ build/
 coverage/
 *.tsbuildinfo
 
-# ── Env files ─────────────────────────────────────────────────────────
+
 .env
 .env.*
 !.env.example
 
-# ── Logs / OS cruft ───────────────────────────────────────────────────
+
 *.log
 .DS_Store
 Thumbs.db
 
-# ── Python (nlp) ──────────────────────────────────────────────────────
+
 __pycache__/
 *.pyc
 .venv/
 venv/
-nlp/.venv/
+intelligence-plane/nlp/.venv/
 
-# ── Rust (processing) ─────────────────────────────────────────────────
+
 target/
-processing/target/
+data-plane/target/
 
-# ── Prisma ────────────────────────────────────────────────────────────
+
 db/generated/
 **/generated/prisma/
 
-# ── Docker / local volumes ────────────────────────────────────────────
+
 devops/**/volumes/
 devops/**/data/
 
-# ── IDE ───────────────────────────────────────────────────────────────
+
 .idea/
 
 .vscode/*

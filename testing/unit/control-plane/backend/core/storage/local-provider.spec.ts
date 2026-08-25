@@ -1,4 +1,4 @@
-import { LocalStorageProvider, verifyLocalStorageToken } from '../../../../../backend/core/src/storage/local.provider';
+import { LocalStorageProvider, verifyLocalStorageToken } from '../../../../../../control-plane/backend/core/src/storage/local.provider';
 
 function parseSignedUrl(url: string) {
   const parsed = new URL(url);

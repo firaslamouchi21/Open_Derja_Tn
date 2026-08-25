@@ -50,8 +50,8 @@ services:
 
   nlp:
     build:
-      context: ../../nlp
-      dockerfile: ../devops/docker/nlp.Dockerfile
+      context: ../../intelligence-plane/nlp
+      dockerfile: ../../devops/docker/nlp.Dockerfile
     restart: unless-stopped
     ports:
       - "8001:8001"
@@ -63,7 +63,7 @@ services:
 
   processing:
     build:
-      context: ../../processing
+      context: ../../data-plane
       dockerfile: ../devops/docker/processing.Dockerfile
     restart: unless-stopped
     ports:

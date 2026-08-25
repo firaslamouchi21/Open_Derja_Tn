@@ -1,11 +1,11 @@
 use actix_web::{get, App, HttpServer, HttpResponse};
 use serde::Serialize;
 
-mod audit_diff;
+mod audit;
 mod dedup;
 mod export;
 mod media;
-mod normalize;
+mod text;
 
 #[derive(Serialize)]
 struct Health {

@@ -6,7 +6,10 @@
   "scripts": {
     "test:shell": "bats -r testing/shell",
     "test:unit": "jest --config testing/unit/jest.config.js",
-    "test:ops": "bats -r testing/ops"
+    "test:ops": "bats -r testing/ops",
+    "infra:up": "docker compose --env-file .env -f devops/compose/docker-compose.local.yml up -d",
+    "infra:down": "docker compose --env-file .env -f devops/compose/docker-compose.local.yml down",
+    "infra:config": "docker compose --env-file .env -f devops/compose/docker-compose.local.yml config"
   },
   "devDependencies": {
     "bats": "^1.13.0",

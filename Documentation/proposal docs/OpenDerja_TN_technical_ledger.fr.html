@@ -1,0 +1,2576 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>OpenDerja_TN — Proposition de projet et grand livre technique</title>
+<style>
+  @page { size: A4; margin: 18mm 17mm; }
+
+  :root {
+    --ink: #1c1b19; --ink-soft: #4a4640; --ink-faint: #7a746b;
+    --rule: #ddd8cf; --rule-soft: #ece8e0;
+    --accent: #8a4b2a; --accent-bg: #faf6f1; --paper: #fff;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 9.8pt; line-height: 1.52; color: var(--ink);
+    background: var(--paper); margin: 0; hyphens: none;
+  }
+  p { margin: 0 0 0.7em 0; }
+  strong, b { font-weight: 700; color: var(--ink); }
+
+  .cover { page-break-after: always; padding-top: 40mm; }
+  .cover .eyebrow {
+    font-family: "Segoe UI", Helvetica, sans-serif; font-size: 8.5pt;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 9mm;
+  }
+  .cover h1 { font-size: 30pt; line-height: 1.1; font-weight: 400; margin: 0 0 5mm; letter-spacing: -0.015em; }
+  .cover h1 .tn { color: var(--accent); }
+  .cover .standfirst { font-size: 11.5pt; line-height: 1.5; color: var(--ink-soft); max-width: 130mm; margin: 0 0 12mm; }
+  .cover .rule { border: 0; border-top: 1px solid var(--rule); margin: 0 0 5mm; }
+  .cover .meta { font-family: "Segoe UI", Helvetica, sans-serif; font-size: 9pt; color: var(--ink-faint); line-height: 1.8; }
+  .cover .meta b { color: var(--ink); font-weight: 600; }
+
+  h2 { font-family: "Segoe UI", Helvetica, sans-serif; font-size: 14pt; font-weight: 600; margin: 0 0 1.2mm; letter-spacing: -0.01em; }
+  .section { page-break-before: always; }
+  .section-head { border-top: 2px solid var(--ink); padding-top: 2.5mm; margin-bottom: 5.5mm; }
+  .section-head .num {
+    font-family: "Segoe UI", Helvetica, sans-serif; font-size: 8.5pt;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
+    display: block; margin-bottom: 1.5mm;
+  }
+  .section-head .kicker { font-size: 10pt; color: var(--ink-faint); font-style: italic; margin: 0; }
+
+  h3 {
+    font-family: "Segoe UI", Helvetica, sans-serif; font-size: 10pt; font-weight: 600;
+    margin: 6mm 0 2mm; page-break-after: avoid;
+  }
+  h3:first-child { margin-top: 0; }
+  h3 .n { color: var(--ink-faint); font-weight: 400; margin-right: 0.5em; }
+  h4 { font-family: "Segoe UI", Helvetica, sans-serif; font-size: 9.2pt; font-weight: 600; color: var(--ink-soft); margin: 4mm 0 1.2mm; page-break-after: avoid; }
+
+  ul, ol { margin: 0 0 0.75em 0; padding-left: 5mm; }
+  li { margin-bottom: 0.22em; padding-left: 0.8mm; }
+  ul li::marker { color: var(--accent); }
+  ol li::marker { color: var(--ink-faint); font-family: "Segoe UI", sans-serif; font-size: 8.6pt; }
+
+  table { width: 100%; border-collapse: collapse; margin: 2.5mm 0 4mm; font-size: 8.7pt; page-break-inside: avoid; }
+  thead th {
+    font-family: "Segoe UI", Helvetica, sans-serif; font-size: 7.5pt; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint);
+    text-align: left; padding: 0 2.5mm 1.4mm 0; border-bottom: 1px solid var(--ink);
+  }
+  tbody td { padding: 1.5mm 2.5mm 1.5mm 0; border-bottom: 1px solid var(--rule-soft); vertical-align: top; line-height: 1.42; }
+  tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
+  td:last-child, th:last-child { padding-right: 0; }
+  td.k { font-family: "Segoe UI", Helvetica, sans-serif; font-weight: 600; font-size: 8.3pt; white-space: nowrap; }
+  td.mono { font-family: Consolas, monospace; font-size: 8.1pt; }
+  td.num { text-align: right; white-space: nowrap; }
+  td.ar, .ar { font-size: 10.5pt; }
+
+  pre {
+    font-family: Consolas, monospace; font-size: 7.9pt; line-height: 1.45;
+    color: var(--ink-soft); background: var(--accent-bg); border-left: 2px solid var(--rule);
+    padding: 2.8mm 3.2mm; margin: 2.5mm 0 4mm; white-space: pre; overflow: hidden; page-break-inside: avoid;
+  }
+  code { font-family: Consolas, monospace; font-size: 0.89em; }
+
+  .note { border-left: 2px solid var(--accent); padding: 0.4mm 0 0.4mm 3.4mm; margin: 3mm 0 4mm; page-break-inside: avoid; }
+  .note .label {
+    font-family: "Segoe UI", Helvetica, sans-serif; font-size: 7.8pt; font-weight: 600;
+    letter-spacing: 0.11em; text-transform: uppercase; color: var(--accent);
+    display: block; margin-bottom: 1.2mm;
+  }
+  .note p:last-child { margin-bottom: 0; }
+  .aside {
+    font-size: 9pt; color: var(--ink-soft); font-style: italic;
+    border-top: 1px solid var(--rule-soft); border-bottom: 1px solid var(--rule-soft);
+    padding: 2.4mm 0; margin: 3mm 0 4mm; page-break-inside: avoid;
+  }
+  .aside p:last-child { margin-bottom: 0; }
+
+  .toc { page-break-after: always; }
+  .toc ol { list-style: none; padding: 0; margin: 0; column-count: 2; column-gap: 11mm; }
+  .toc li {
+    font-family: "Segoe UI", Helvetica, sans-serif; font-size: 9pt; padding: 1.3mm 0;
+    border-bottom: 1px solid var(--rule-soft); break-inside: avoid; margin: 0;
+  }
+  .toc li .n { color: var(--accent); font-variant-numeric: tabular-nums; margin-right: 2.5mm; font-size: 8.2pt; }
+
+  .lede { font-size: 10.8pt; line-height: 1.48; color: var(--ink-soft); margin-bottom: 5mm; }
+  .checklist { list-style: none; padding-left: 0; }
+  .checklist li { padding-left: 5mm; position: relative; font-size: 9pt; margin-bottom: 0.2em; }
+  .checklist li::before { content: "\25A1"; position: absolute; left: 0; color: var(--ink-faint); }
+  .tags { font-family: "Segoe UI", Helvetica, sans-serif; font-size: 8.3pt; color: var(--ink-faint); }
+  .tags span { display: inline-block; border: 1px solid var(--rule); border-radius: 2mm; padding: 0.5mm 2mm; margin: 0 1.2mm 1.2mm 0; }
+  .end { text-align: center; color: var(--ink-faint); font-size: 8.8pt; font-style: italic; margin-top: 8mm; padding-top: 4mm; border-top: 1px solid var(--rule); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="eyebrow">Proposition de projet et grand livre technique</div>
+  <h1>OpenDerja<span class="tn">_TN</span></h1>
+  <p class="standfirst">
+    Un corpus écrit ouvert et équilibré par région du derja tunisien — où les Tunisiens écrivent,
+    corrigent et confirment leur propre langue, et où ce qui en sort est citable, téléchargeable, et
+    encore bien vivant dans cinq ans.
+  </p>
+  <hr class="rule">
+  <div class="meta">
+    <b>Firas Lamouchi</b> · projet solo, open-source et ouvert à la contribution publique une fois le MVP livré<br>
+    Planification commencée le <b>14 avril 2026</b> · développement commencé le <b>28 mai 2026</b> · mis à jour le <b>25 août 2026</b>
+  </div>
+</div>
+
+<div class="toc">
+  <div class="section-head">
+    <span class="num">Sommaire</span>
+    <h2>Ce qu'il y a là-dedans</h2>
+    <p class="kicker">L'argumentaire, puis la machine, puis ce que je n'ai pas encore résolu.</p>
+  </div>
+  <ol>
+    <li><span class="n">01</span>La proposition</li>
+    <li><span class="n">02</span>Infrastructure et coût</li>
+    <li><span class="n">03</span>Sécurité et abus</li>
+    <li><span class="n">04</span>Juridique, licences, consentement</li>
+    <li><span class="n">05</span>Ce que je n'ai pas résolu</li>
+    <li><span class="n">06</span>Quatre régions, six axes</li>
+    <li><span class="n">07</span>Modèle de données</li>
+    <li><span class="n">08</span>Le moteur de tâches</li>
+    <li><span class="n">09</span>Comptes et permissions</li>
+    <li><span class="n">10</span>Architecture backend</li>
+    <li><span class="n">11</span>Assistance automatique — reportée</li>
+    <li><span class="n">12</span>Ingestion et scraping</li>
+    <li><span class="n">13</span>Standardisation, translittération, appariement</li>
+    <li><span class="n">14</span>Le traducteur</li>
+    <li><span class="n">15</span>Frontend et système de design</li>
+    <li><span class="n">16</span>Chaque page, spécifiée</li>
+    <li><span class="n">17</span>Le tableau de bord admin</li>
+    <li><span class="n">18</span>L'API publique</li>
+    <li><span class="n">19</span>Export et publication</li>
+    <li><span class="n">20</span>Séquence de construction</li>
+  </ol>
+
+  <div class="aside" style="margin-top:8mm">
+    <p><b>Comment lire ce document.</b> Le §1 est l'argumentaire de vente. Les §2–5 sont le test de
+    réalité pratique — coût, sécurité, assise juridique, et les problèmes ouverts — pour que vous sachiez
+    à quoi vous vous engagez vraiment avant que le schéma ne commence. Les §6–19 sont la référence de
+    construction : le modèle de données, les règles, les décisions déjà prises pour ne pas avoir à les
+    reprendre à 2h du matin. Le §20 est l'ordre dans lequel je construis. Le document compagnon
+    <em>Architecture &amp; Engineering Blueprint</em> couvre la façon dont le code a le droit d'être
+    structuré, et <em>VOICE.md</em> couvre la façon dont le site parle aux gens — un travail différent de
+    la façon dont ce document me parle à moi.</p>
+    <p>Ce document se situe entre deux autres que je n'ai pas encore écrits : une version non technique
+    pour les gens qui veulent juste comprendre ce que c'est et pourquoi, et une version orientée
+    développeurs pour quiconque veut rejoindre le projet et construire. Celui-ci s'adresse aux deux publics
+    à la fois, ce qui explique pourquoi il se lit comme il se lit.</p>
+    <p><b>Rien ici n'est définitif.</b> C'est le plan tel que je le comprends après y avoir réfléchi
+    pendant environ deux mois. Je sais déjà qu'une partie se révélera fausse une fois que je serai
+    vraiment en train de construire, et qu'une autre partie changera une fois le dépôt public et que
+    d'autres personnes commenceront à en contester des morceaux. C'est attendu, ce n'est pas un échec du
+    plan — il sera mis à jour au prochain grand jalon, pas figé dans le marbre dès maintenant.</p>
+  </div>
+</div>
+
+<!-- 01 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">01</span>
+    <h2>La proposition</h2>
+    <p class="kicker">Ce que c'est, ce que ce n'est pas, et pourquoi je le fais quand même.</p>
+  </div>
+
+  <p class="lede">
+    Une plateforme qui continue de tourner, sous licence ouverte, où les Tunisiens écrivent, corrigent et
+    confirment leur propre derja régional. Il en sort un corpus écrit et un lexique — équilibrés par
+    région, organisés en couches de granularité, rattachés à de vraies attestations, et disponibles au
+    téléchargement, à la navigation ou à l'interrogation.
+  </p>
+
+  <h3><span class="n">1.1</span>Ce que c'est</h3>
+  <ul>
+    <li><b>Texte d'abord, voix par conception.</b> La plateforme tourne sur du texte dès le premier jour
+    et porte l'attestation vocale pour une mise à jour future — pas greffée après coup. Le modèle de
+    consentement, le schéma et les tables qui vont avec (§7.11) existent dès la première migration, avant
+    même le premier enregistrement collecté.</li>
+    <li><b>Équilibré par région, exprès.</b> La couverture par région est un chiffre que je suis, que je
+    publie et pour lequel je recrute — pas quelque chose que j'espère voir s'arranger tout seul.</li>
+    <li><b>Vivant, pas archivé.</b> Les corpus universitaires s'arrêtent le jour où l'article est publié.
+    Celui-ci continue de grandir.</li>
+    <li><b>Conforme CODA.</b> Utilise les conventions CODA-TUN et NOTA plutôt que d'inventer encore un
+    autre standard orthographique.</li>
+    <li><b>Utilisable, pas seulement téléchargeable.</b> Le corpus est exposé comme un outil que les gens
+    ont une raison d'ouvrir, pas seulement un fichier que les chercheurs ont une raison de citer.</li>
+  </ul>
+
+  <h3><span class="n">1.2</span>Ce que ce n'est pas</h3>
+  <p>Le dire à voix haute n'est pas de la modestie. C'est ce qui empêche un chercheur qui connaît le
+  terrain de fermer l'onglet dans les trente premières secondes.</p>
+  <ul>
+    <li>Pas la première standardisation de l'arabe tunisien. CODA-TUN (LREC 2014) est arrivé le premier ; NOTA l'a remplacé.</li>
+    <li>Pas le premier corpus tunisien. Tunisiya, TARIC, TSAC, TEC, TunSwitch, TEDxTN existent déjà.</li>
+    <li>Pas la première plateforme de crowdsourcing pour un dialecte arabe. MyVoice/QCRI, DARIJA-C, KALAM'DZ sont arrivés avant.</li>
+    <li>Pas en concurrence avec des institutions qui ont financement et personnel.</li>
+  </ul>
+
+  <div class="note">
+    <span class="label">Alors qu'est-ce qui reste</span>
+    <p>Aucune plateforme existante ne combine tout ça au même endroit : <b>le texte maintenant et la voix
+    par conception plus tard ; la confirmation communautaire plutôt que la parole d'une seule autorité ;
+    la région et l'époque taguées ensemble, si bien que le vieux derja se retrouve à côté des quatre
+    régions d'aujourd'hui au lieu d'être une archive à part ; un traducteur qui fonctionne vraiment, pas
+    juste un fichier à télécharger ; des données ouvertes que n'importe qui peut récupérer ; et un lieu
+    commun pour publier et discuter de la recherche elle-même.</b> Chacun de ces éléments existe quelque
+    part, isolément. Nulle part ils n'existent ensemble, entretenus en continu, comme un seul service
+    ouvert. C'est tout l'argumentaire.</p>
+  </div>
+
+  <h3><span class="n">1.3</span>Ce qui compte comme réussite</h3>
+  <table>
+    <thead><tr><th style="width:19mm">Niveau</th><th>À quoi ça ressemble</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Minimum</td><td>Un jeu de données derja écrit publié, citable, sous licence ouverte, tagué par région, qui n'existait pas avant, avec des statistiques de couverture honnêtes — et un outil public construit dessus qu'un Tunisien non technique peut utiliser sans rien avoir à lire d'abord.</td></tr>
+      <tr><td class="k">Bien</td><td>Des gens qui contribuent depuis les quatre régions sans que j'aie à pousser. Des gens qui arrivent par le traducteur et qui restent. D'autres chercheurs qui utilisent les données. Une relation de travail avec un groupe de TAL arabe établi.</td></tr>
+      <tr><td class="k">Solide</td><td>Cité dans des travaux de TAL tunisien. Un classificateur régional et un service de mémoire de traduction que les gens utilisent vraiment. Assez de soutien pour que la maintenance ne repose plus seulement sur moi, pour toujours.</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="n">1.4</span>Pourquoi je le construis</h3>
+
+  <p><b>C'est un effort à but non lucratif, par conception, depuis la première ligne de code.</b> Pas
+  d'entreprise, pas de parts, aucun projet de faire un jour payer l'accès, rien ici construit pour être
+  vendu. Une ressource linguistique d'intérêt public ne mérite pas de mur payant.</p>
+
+  <p>Douze millions de personnes écrivent cette langue tous les jours — dans des textos, dans des
+  commentaires, au milieu de phrases en français — et il n'en existe presque aucune trace correcte. Ma
+  grand-mère a un mot pour désigner quelque chose, dans le nord-ouest, que je n'ai entendu nulle part
+  ailleurs, et quand elle arrêtera de le dire, il aura disparu. Personne ne l'a écrit. Ça arrive tout le
+  temps, et personne ne s'en occupe.</p>
+
+  <p>« Quelqu'un devrait écrire ça » est vrai depuis des décennies. Je préfère être celui qui en aura fait
+  une partie. Même la version minimale laisse derrière elle un jeu de données qui n'existait pas et un
+  outil que les gens peuvent utiliser — c'est une vraie chose accomplie, qui tient debout toute seule même
+  si rien après la phase 2 n'arrive jamais.</p>
+
+  <p>L'autre raison est tout aussi réelle : c'est un vrai travail d'ingénierie dans un domaine qui me
+  tient à cœur, et j'ai envie de l'avoir construit. Les deux raisons tiennent en même temps.</p>
+
+  <p>Les phases sont dimensionnées pour que la valeur survive même si les suivantes n'arrivent jamais. Si
+  je m'essouffle, ça laisse quelque chose de fini, pas quelque chose d'abandonné à moitié.</p>
+</div>
+
+<!-- 02 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">02</span>
+    <h2>Infrastructure et coût</h2>
+    <p class="kicker">Pas encore décidé, exprès — et une décision bien plus facile sans modèle sur la machine.</p>
+  </div>
+
+  <div class="note">
+    <span class="label">Où en est l'hébergement</span>
+    <p><b>L'hébergement est encore indécis.</b> Cette section sera mise à jour une fois la décision
+    prise. Ce que ce projet devient détermine ce dont il a besoin pour tourner, donc les specs restent
+    ouvertes jusqu'à ce que la construction soit plus avancée. Le déploiement est un problème de phase 2
+    (§20). Rien dans les phases 1 à 3 n'en dépend.</p>
+  </div>
+
+  <h3><span class="n">2.1</span>Hébergement</h3>
+  <p>Fournisseur indécis — sera mis à jour ici une fois choisi. Pas de local physique permanent, donc
+  l'auto-hébergement matériel n'est une option dans aucune version de ce projet ; la décision se joue
+  entre une poignée de petits fournisseurs VPS européens ou compatibles ARM, dimensionnée contre l'usage
+  mesuré une fois la construction plus avancée plutôt que devinée maintenant.</p>
+
+  <h3><span class="n">2.2</span>Forme du déploiement</h3>
+<pre>VPS  (fournisseur à définir — même topologie quel qu'il soit)
+ ├── cloudflared     tunnel — aucun port entrant ouvert sur la machine (§3.1)
+ ├── caddy           TLS, reverse proxy, limitation de débit, routage par nom d'hôte
+ ├── frontend        Next.js (site public + tableaux de bord)
+ ├── backend         NestJS — frontière de l'API, chaîne de guards (§10.1)
+ ├── worker          tâches de fond, concurrence plafonnée (§10.3)
+ ├── postgres        instance unique — tout l'actif du projet
+ ├── pgbouncer       pooling de connexions devant postgres (§10.2)
+ ├── redis           cache + sessions seulement, pas la file de tâches (§10.3)
+ ├── nlp             Python, health-check seulement, phase 1 (§11)
+ ├── processing      Rust, health-check seulement, phase 1 (§7.11)
+ └── backups         pg_dump nocturne, chiffré, -&gt; stockage objet hors machine</pre>
+  <p>Dix conteneurs au lieu de quatre — le backend séparé dans son propre processus, pgBouncer et Redis
+  ajoutés, et les deux services des phases futures qui apparaissent tôt comme des coquilles vides. Tout
+  reste multi-architecture, donc ARM contre x86 n'est pas une décision à prendre à l'avance. Des limites
+  mémoire explicites restent sur chacun d'eux, et ça compte encore plus maintenant qu'à quatre services,
+  pas moins.</p>
+  <p>Les deux services health-check-seulement et Redis sont vraiment légers — aucun d'eux ne détient de
+  vraies données ni ne fait de vrai travail pour l'instant, donc le bond en mémoire dû à leur ajout est
+  petit comparé à ce que coûterait un vrai modèle de ML en production (§11). pgBouncer lui-même est bon
+  marché ; ce contre quoi il protège, c'est Postgres qui manque de connexions, pas de mémoire. Le chiffre
+  qui compte vraiment reste ce que sera le VPS (§2.1) — cette forme tient confortablement dans le petit
+  palier, ce n'est juste plus le diagramme à quatre boîtes d'avant.</p>
+
+  <h3><span class="n">2.3</span>Sauvegardes</h3>
+  <p>Le nom de domaine n'est pas encore choisi — ça se réglera une fois la construction terminée et une
+  fois que je saurai ce qui tourne vraiment.</p>
+
+  <div class="note">
+    <span class="label">Les sauvegardes, qui ne sont pas négociables</span>
+    <p>Le corpus est la seule chose irremplaçable ici. Je peux réécrire le code en un week-end. Je ne peux
+    pas réécrire des mois d'annotation communautaire.</p>
+  </div>
+  <ul>
+    <li><code>pg_dump</code> nocturne, compressé et <b>chiffré avant de quitter la machine</b> — le dump
+    contient des emails, des valeurs ip_hash et des identifiants de session, exactement ce que le §4.3
+    s'efforce de protéger, donc ça ne peut pas voyager en clair.</li>
+    <li>Export hebdomadaire d'un instantané vers Hugging Face — une publication publique et une sauvegarde
+    hors site en une seule opération</li>
+    <li>Instantanés côté fournisseur activés (quelques euros par mois, clairement rentable)</li>
+    <li>Restauration testée trimestriellement — un workflow <code>verify-backup-restore.yml</code>
+    planifié (§10.0) le fait automatiquement, pas un rappel dans mon agenda que je peux repousser. Une
+    sauvegarde jamais testée n'est pas une sauvegarde.</li>
+    <li>Toute la pile dans <code>docker-compose.yml</code>, pour que changer de fournisseur prenne moins
+    d'une heure</li>
+  </ul>
+
+  <h3><span class="n">2.4</span>Coût</h3>
+  <p>Pas encore chiffré. Ça ne sert à rien de chiffrer une machine avant de savoir ce qui va vraiment
+  tourner dessus — le coût se réglera au lancement, une fois l'hébergement et le reste de cette forme
+  vraiment décidés, pas devinés maintenant.</p>
+
+  <h3><span class="n">2.5</span>Stockage objet — encore indécis</h3>
+  <p>Les sauvegardes et les exports d'instantanés ont besoin d'un endroit qui ne soit pas le serveur
+  d'application, et ça reste indécis en même temps que l'hébergement. Le besoin d'aujourd'hui est
+  petit — dumps nocturnes, exports hebdomadaires, confortablement dans n'importe quel palier gratuit. Le
+  besoin si la voix arrive (§7.11) est une question complètement différente, et c'est elle qui devrait
+  trancher plutôt que le besoin actuel.</p>
+  <p>L'axe qui compte pour l'audio n'est pas le prix du stockage — bon marché partout. C'est
+  l'<b>egress</b>, parce que servir les extraits audio en retour coûte de l'argent réel et les
+  fournisseurs varient d'un ordre de grandeur là-dessus. Trancher ça sur les besoins de sauvegarde
+  d'aujourd'hui reviendrait à trancher sur le mauvais critère.</p>
+  <table>
+    <thead><tr><th style="width:40mm">Candidat</th><th>Position</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Cloudflare R2</td><td>Zéro frais d'egress. Le candidat par défaut dès que la voix est sur la table.</td></tr>
+      <tr><td class="k">Backblaze B2</td><td>Stockage bon marché, l'egress coûte quelque chose. Très bien pour les sauvegardes.</td></tr>
+      <tr><td class="k">Stockage natif du fournisseur</td><td>Le moins cher s'il vient du même fournisseur que le VPS de toute façon, pas toujours compatible S3 de la même façon.</td></tr>
+      <tr><td class="k">S3 classique</td><td>Fonctionne, le plus cher en egress, aucune raison de le choisir en premier.</td></tr>
+    </tbody>
+  </table>
+  <p>Décidé en phase 2 en même temps que l'hébergement, dimensionné pour les sauvegardes, revisité avant
+  tout travail sur l'audio.</p>
+
+  <h3><span class="n">2.6</span>Email</h3>
+  <p>Les invitations aux relecteurs et la vérification d'email ont besoin d'une livraison fiable, et un
+  email auto-hébergé depuis une IP de VPS toute neuve finit systématiquement dans les spams — ça mord fort
+  le jour du déploiement si ce n'est pas anticipé. Resend est le principal, avec SMTP en repli plutôt qu'un
+  second fournisseur à configurer (§10.0, §9.11) : environ 0–10 €/mois à ce volume.</p>
+
+  <h3><span class="n">2.7</span>Ce que je ne fais pas</h3>
+  <p class="tags">
+    <span>AWS / Azure</span><span>Kubernetes</span><span>Postgres géré</span><span>CDN</span><span>multi-région</span><span>instances GPU</span><span>inférence permanente</span>
+  </p>
+  <p>Si je veux de l'expérience avec un fournisseur cloud pour une certification, c'est un bac à sable
+  séparé sur palier gratuit, avec des ressources jetables. Ça ne passe pas sur la facture ni la
+  disponibilité de ce projet.</p>
+</div>
+
+<!-- 03 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">03</span>
+    <h2>Sécurité et abus</h2>
+    <p class="kicker">Un modèle de menace dimensionné à ce qui va vraiment arriver, pas à ce qui sonne impressionnant.</p>
+  </div>
+
+  <h3><span class="n">3.1</span>Ce qui m'inquiète vraiment</h3>
+  <table>
+    <thead><tr><th style="width:40mm">Menace</th><th style="width:22mm">Probabilité</th><th>Ce qui l'arrête</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Soumissions spam</td><td>Élevée</td><td>Limites de débit par session et ip_hash ; le classement ne compte que les contributions approuvées donc le spam ne rapporte rien ; annulation en masse par session</td></tr>
+      <tr><td class="k">Empoisonnement délibéré des données</td><td>Moyenne</td><td>Rien ne devient canonique sur la parole d'une seule personne ; le consensus a besoin de plusieurs annotateurs ; tout est réversible</td></tr>
+      <tr><td class="k">Contenu offensant ou personnel publié publiquement</td><td>Moyenne</td><td>Bouton de signalement sur chaque permalien (§16.4), qui alimente la file de relecture des corrections</td></tr>
+      <tr><td class="k">Scraper une source qui n'est en fait pas autorisée</td><td>Moyenne</td><td>Lecture des CGU obligatoire avant qu'une source ne soit activée, pas seulement le robots.txt (§12.5)</td></tr>
+      <tr><td class="k">La file d'attente qui affame le frontend</td><td>Moyenne</td><td>Intervalle de sondage et concurrence pg-boss plafonnés ; travail en masse en heures creuses (§10.3)</td></tr>
+      <tr><td class="k">Les commentaires de publications qui deviennent une charge de modération sans fin</td><td>Moyenne</td><td>Retenus pour approbation en dessous de la confiance 1, et la fonctionnalité est désactivée si elle coûte plus qu'elle ne rapporte (§7.10)</td></tr>
+      <tr><td class="k">Compromission d'un compte relecteur</td><td>Faible</td><td>Argon2id, sessions httpOnly, 2FA sur l'admin, journal d'audit complet (§9.7)</td></tr>
+      <tr><td class="k">Accès entrant non autorisé</td><td>Faible</td><td>Éliminé structurellement, pas atténué — aucun port ouvert sur le VPS, point. Tout arrive via Cloudflare Tunnel (§10.0) ; il n'y a même pas de port à scanner ou à attaquer.</td></tr>
+      <tr><td class="k">Perte de données</td><td>Faible, fatale</td><td>§2.3</td></tr>
+      <tr><td class="k">Contestation juridique sur du contenu scrapé ou stocké</td><td>Faible à moyenne, revue à la hausse</td><td>Provenance et licence par enregistrement ; une liste de sources resserrée après la correction du §12 ; mise en quarantaine et purge des sources</td></tr>
+      <tr><td class="k">Plainte pour rétention de données au titre du RGPD</td><td>Faible</td><td>Routine d'anonymisation testée qui nettoie les identifiants et rend le texte orphelin (§4.3)</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="n">3.2</span>Base de référence</h3>
+  <p>Limitation de débit au niveau de Caddy, par IP pour l'anonyme et par clé pour l'API. Toutes les
+  entrées validées par des schémas zod partagés à la frontière. Requêtes paramétrées uniquement — Prisma
+  s'en charge, aucune interpolation de chaîne brute nulle part. En-têtes CSP, pas de scripts en ligne.
+  Secrets dans l'environnement, jamais commités, tournés à la moindre suspicion. Sous-domaine admin
+  restreint par IP là où je peux le gérer. Dépendances figées, scan de vulnérabilités actif.</p>
+</div>
+
+<!-- 04 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">04</span>
+    <h2>Juridique, licences, consentement</h2>
+    <p class="kicker">Deux licences, choisies séparément, et une case à cocher qu'on ne peut pas ajouter plus tard.</p>
+  </div>
+
+  <h3><span class="n">4.1</span>Deux licences</h3>
+  <table>
+    <thead><tr><th style="width:22mm">Actif</th><th style="width:44mm">Licence</th><th>Raisonnement</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Code</td><td>MIT ou Apache-2.0</td><td>Permissive. L'adoption compte plus que le contrôle.</td></tr>
+      <tr><td class="k">Jeu de données</td><td>CC-BY-SA ou CC-BY-NC — pas encore tranché</td><td>Ce n'est pas une question de protéger des revenus — il n'y en a pas. C'est d'empêcher quelqu'un d'autre de prendre ce que les contributeurs ont construit gratuitement, de l'enfermer, et de le leur revendre. Le partage à l'identique ou le non-commercial ferment tous les deux cette porte ; le permissif pur ne la ferme pas. Ça demande une vraie décision, pas un choix par défaut.</td></tr>
+    </tbody>
+  </table>
+
+  <p>Le crédit du code vit séparément du crédit du corpus. <code>docs/CONTRIBUTORS.md</code> nomme les
+  gens qui travaillent sur le code ; le classement public <code>/contributors</code> (§16.1) crédite les
+  gens qui travaillent sur le corpus. Contribution différente, public différent — fusionner les deux
+  enterrait le groupe bien plus large qui fait le vrai travail de données sous une poignée d'auteurs de
+  commits.</p>
+
+  <h3><span class="n">4.2</span>Consentement</h3>
+  <p>Une case à cocher explicite à la soumission : ce contenu peut entrer dans un jeu de données sous
+  licence ouverte, usage commercial inclus. Deux lignes d'interface. Sans ça, aucun contenu contribué n'est
+  jamais utilisable commercialement en toute sécurité, et le consentement ne peut pas être recueilli plus
+  tard une fois que les contributeurs sont passés à autre chose.</p>
+  <p>Ce consentement couvre l'enregistrement dans son ensemble, pas seulement le texte brut — y compris
+  quand un relecteur attribue plus tard une origine au mot d'un contributeur, ou le tague vulgaire,
+  archaïque, ou régional. Ce sont des jugements posés par quelqu'un d'autre, publiés à côté de la
+  contribution, et « ce contenu peut entrer dans un jeu de données sous licence ouverte » est écrit pour
+  désigner l'enregistrement annoté, pas seulement la chaîne brute que quelqu'un a tapée. Ça vaut le coup
+  de le rendre explicite plutôt que de le laisser en hypothèse.</p>
+  <div class="note">
+    <span class="label">La clause voix embarque dès la première contribution, des années à l'avance</span>
+    <p>La case à cocher porte une clause voix séparée dès le premier jour, même si l'enregistrement
+    n'existe pas et n'existera pas avant longtemps (§7.11). Le consentement texte ne couvre pas la voix, et
+    il ne peut pas être recueilli rétroactivement — le même argument, deux fois plus dur, parce qu'un
+    enregistrement identifie une personne d'une façon qu'une phrase ne fait pas. Le défaut est texte
+    seulement. La voix est un second opt-in, explicite.</p>
+  </div>
+
+  <h3><span class="n">4.3</span>Révocation — la seule chose qui supprime pour de vrai</h3>
+  <div class="note">
+    <span class="label">Deux règles de ce document entrent en collision ici</span>
+    <p>Le §17.2 dit que rien n'est supprimé pour de vrai — suppression douce plus une entrée d'audit,
+    parce que le jeu de données est tout l'actif du projet. Mais héberger dans l'UE place ça sous le RGPD.
+    Si quelqu'un révoque son consentement, garder son <code>ip_hash</code> et son email est un problème
+    qu'un simple drapeau de suppression douce ne règle pas. Une ligne marquée supprimée reste une ligne
+    conservée.</p>
+  </div>
+  <p>La sortie consiste à séparer deux choses qu'on traitait comme une seule : <b>la personne</b> et
+  <b>la langue</b>. Les données personnelles peuvent vraiment être effacées. La contribution linguistique
+  n'est plus une donnée personnelle une fois qu'elle n'est plus rattachée à personne.</p>
+<pre>lors d'une révocation de consentement (tâche horaire : anonymise_revoked)
+  Nettoyage DUR, irréversible, aucune copie d'audit conservée :
+    submission_meta.contributor_email, contributor_name, ip_hash, session_id -> null
+    users.email, users.display_name -> null (s'ils avaient un compte)
+    audit_log.ip_hash -> null pour cet acteur ;  audit_log.diff nettoyé
+  CONSERVÉ, définitivement orphelin :
+    le texte de l'élément du corpus, ses tags/tokens/liens, ses traductions, sa région/époque/registre,
+    son dataset_split
+  ENREGISTRÉ :
+    documents.rights_status -> 'revoked' ; une entrée d'audit SANS identifiant — action, horodatage, décompte</pre>
+  <ul>
+    <li>Le texte reste, la personne s'en va. Les instantanés déjà publiés ne sont pas affectés — ils n'ont
+    jamais porté d'identifiants (§19.2).</li>
+    <li>Irréversible, et c'est le but : réservé aux admins, confirmation tapée, limité en fréquence.</li>
+    <li>La suppression totale est honorée sur demande ; la révocation par défaut se limite à
+    l'anonymisation.</li>
+  </ul>
+  <p><b>La voix est l'exception de l'exception.</b> Quand des enregistrements existeront (§7.11), révoquer
+  le consentement voix supprime carrément l'objet et la ligne <code>media</code> — impossible de se
+  rabattre sur l'anonymisation comme pour le texte, parce qu'un enregistrement est quasi-biométrique.
+  C'est le deuxième et dernier endroit où quelque chose est vraiment détruit, conçu maintenant, avant même
+  qu'un seul enregistrement n'existe.</p>
+
+  <h3><span class="n">4.4</span>Contenu scrapé</h3>
+  <p>Stocké avec sa source et son drapeau de licence, exclu par défaut du palier commercialement propre.
+  Public n'est pas une licence — le texte scrapé est réservé à un usage recherche sauf preuve du contraire
+  (§12.2). Les demandes de retrait sont honorées via le mécanisme de signalement (§16.4) et la mise en
+  quarantaine des sources. Aucune donnée personnelle issue de sources sociales — les identifiants d'auteur
+  sont retirés à l'ingestion.</p>
+
+  <h3><span class="n">4.5</span>Créditer les travaux antérieurs</h3>
+  <p>CODA-TUN, NOTA et tout corpus que je réutilise sont cités sur la page méthodologie et dans la fiche du
+  jeu de données.</p>
+</div>
+
+<!-- 05 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">05</span>
+    <h2>Ce que je n'ai pas résolu</h2>
+    <p class="kicker">Écrit noir sur blanc, parce qu'un risque qu'on n'a pas nommé n'est pas un risque qu'on gère.</p>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:7mm">#</th><th style="width:70mm">Problème</th><th>Où ça en est</th></tr></thead>
+    <tbody>
+      <tr><td class="k">1</td><td><b>Hébergement indécis.</b> Sera mis à jour ici une fois la décision prise.</td><td>Laissé ouvert jusqu'à ce que la construction soit finie et que je puisse mesurer. Bien moins d'enjeu sans modèle sur la machine.</td></tr>
+      <tr><td class="k">2</td><td><b>Licence du jeu de données.</b> Permissive, partage à l'identique, ou non-commerciale.</td><td>Doit être tranchée avant la première publication publique.</td></tr>
+      <tr><td class="k">3</td><td>Les <b>frontières régionales</b> sont une hypothèse de travail, pas de la dialectologie établie.</td><td>Le tagging multi-région (§6.4) laisse les données me montrer où les frontières tombent vraiment.</td></tr>
+      <tr><td class="k">4</td><td><b>Recrutement de relecteurs.</b> Quatre régions ont besoin de relecteurs venant de quatre régions et je n'ai aucun réseau pour ça.</td><td>Non résolu, le risque non technique le plus sérieux. Le routage (§8.5) limite les dégâts, ne règle pas le problème.</td></tr>
+      <tr><td class="k">5</td><td><b>Vérité terrain régionale.</b> La région auto-déclarée est le seul signal, et il n'est pas fiable — les gens déménagent.</td><td>Atténué en demandant l'origine séparément de la résidence. Pas résolu.</td></tr>
+      <tr><td class="k">6</td><td>Les <b>livres et l'imprimé</b> ont besoin d'OCR arabe avec gestion de mise en page RTL.</td><td>Reporté. La voie principale vers era: historical.</td></tr>
+      <tr><td class="k">7</td><td><b>Rester en vie.</b> Dépend de la continuité de l'effort non rémunéré d'une seule personne.</td><td>Ne peut pas être pleinement atténué. La discipline de périmètre est la seule vraie défense.</td></tr>
+      <tr><td class="k">8</td><td><b>Le sahel comme une seule région</b> — Sfax pourrait être assez distinct de Sousse pour être séparé.</td><td>Surveiller le désaccord entre annotateurs, séparer seulement si les données l'exigent.</td></tr>
+      <tr><td class="k">9</td><td><b>Fatigue de la file de relecture sans filtre de dialecte</b> — la fuite de bruit passe d'environ 20–30 % à 40–50 % de ce qui atteint la relecture (§12.3).</td><td>Compromis accepté pour l'instant. Petits lots, désactiver les sources à faible rendement. Faire venir un filtre plus tôt que la phase 4 reste une question ouverte — à revoir si la file dépasse les relecteurs.</td></tr>
+      <tr><td class="k">10</td><td><b>Durabilité de l'IP du scraper</b> — un seul serveur, une seule adresse, les sources HTML finiront par la bannir.</td><td>Réduit par un budget de proxys et du backoff (§12.5). Pas éliminé.</td></tr>
+      <tr><td class="k">11</td><td><b>Démarrage à froid du traducteur</b> — tant que le lexique n'a pas de couverture, la plupart des recherches renvoient « non attesté » et ça a l'air cassé.</td><td>Amorcer avec des entrées écrites à la main dans les quatre régions avant le lancement ; présenter chaque échec comme une invitation, pas comme un raté (§14.4).</td></tr>
+      <tr><td class="k">12</td><td><b>Stockage objet indécis</b>, et le critère décisif — l'egress pour la voix — est une préoccupation de phase 5.</td><td>Choisir quelque chose pour les sauvegardes maintenant, revoir avant l'audio (§2.5).</td></tr>
+      <tr><td class="k">13</td><td><b>Le consentement voix ne peut pas être ajouté après coup</b>, et la révocation voix est la deuxième exception au principe de non-suppression.</td><td>La clause de consentement embarque dès la première contribution (§4.2). Le chemin de suppression est conçu avant même qu'un enregistrement n'existe (§4.3).</td></tr>
+      <tr><td class="k">14</td><td><b>Les commentaires de publications sont un travail sans limite</b> — la seule surface qui peut générer de l'effort qui n'est pas de l'effort de corpus.</td><td>Retenus pour approbation en dessous de la confiance 1, désactivés entièrement si ça coûte plus que ça ne rapporte (§7.10).</td></tr>
+    </tbody>
+  </table>
+
+  <div class="aside">
+    <p><b>Côté commercial.</b> Je ne compte pas dessus — voir §1, je n'essaie même pas. Tout ce qui est
+    après la phase 2 est dimensionné pour que la valeur survive même si le reste de cette liste reste
+    exactement aussi longue pour toujours.</p>
+  </div>
+</div>
+
+<!-- 06 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">06</span>
+    <h2>Quatre régions, six axes</h2>
+    <p class="kicker">Se tromper là-dessus fait que tout ce qui suit est faux avec.</p>
+  </div>
+
+  <h3><span class="n">6.1</span>Régions — plates, sans sous-régions</h3>
+  <table>
+    <thead><tr><th style="width:25mm">Valeur</th><th>Couvre</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">northwest</td><td>Le Kef, Jendouba, Siliana, Kasserine, les hauts plateaux de l'ouest</td></tr>
+      <tr><td class="mono">north</td><td>Tunis, Bizerte, Nabeul, Ariana, Manouba, Ben Arous</td></tr>
+      <tr><td class="mono">sahel</td><td>Sousse, Monastir, Mahdia, Sfax, le centre côtier</td></tr>
+      <tr><td class="mono">south</td><td>Gabès, Médenine, Tataouine, Tozeur, Kébili, Douz, Gafsa</td></tr>
+    </tbody>
+  </table>
+  <p>Quatre valeurs, pas de sous-régions tant qu'il n'y a pas de données pour les justifier. La structure
+  <code>subregion</code> existe dès le premier jour et reste vide — l'ajouter plus tard est une migration
+  sur une seule colonne, pas un changement de schéma.</p>
+
+  <h3><span class="n">6.2</span>Six axes indépendants</h3>
+  <p>C'est la décision dont tout le reste dépend. Région, époque et cadre ne sont pas la même sorte de
+  chose et ne doivent jamais être écrasés dans une seule liste.</p>
+  <table>
+    <thead><tr><th style="width:22mm">Axe</th><th style="width:58mm">Valeurs</th><th>Remarque</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">scope</td><td class="mono">pan_tunisian · regional</td><td>Si c'est marqué régionalement ou non, pas à quel point c'est répandu</td></tr>
+      <tr><td class="mono">region</td><td class="mono">un <b>ensemble</b> parmi : northwest · north · sahel · south</td><td>Un ou plusieurs. Vide quand c'est pan-tunisien. §6.4.</td></tr>
+      <tr><td class="mono">subregion</td><td class="mono">vide (réservé)</td><td>Reporté</td></tr>
+      <tr><td class="mono">era</td><td class="mono">contemporary · historical</td><td>Le « vieux derja » vit ici, pas dans la région</td></tr>
+      <tr><td class="mono">setting</td><td class="mono">urban · rural · unknown</td><td>Traverse les régions, ne les suit pas</td></tr>
+      <tr><td class="mono">register</td><td class="mono">neutral · formal · vulgar · archaic</td><td>Sans ça, le résultat n'est pas exploitable pour grand-chose. Politique d'affichage au §16.4.</td></tr>
+    </tbody>
+  </table>
+  <p>« Nord-ouest + rural + historique » est une vraie chose qu'on peut demander. Quatre cases plates ne
+  pourraient pas l'exprimer — et cette combinaison est exactement le genre de matériau que personne n'a
+  collecté, ce qui explique en grande partie pourquoi ce projet existe.</p>
+
+  <h3><span class="n">6.3</span>Granularité — encore un axe séparé</h3>
+  <table>
+    <thead><tr><th style="width:24mm"></th><th>Pan-tunisien</th><th>Régional</th></tr></thead>
+    <tbody>
+      <tr><td class="k">mot</td><td>vocabulaire partagé</td><td>un mot du nord-ouest pour un objet du quotidien</td></tr>
+      <tr><td class="k">phrase</td><td>tournure utilisée partout</td><td>une construction qui trahit d'où on vient</td></tr>
+      <tr><td class="k">paragraphe</td><td>texte suivi neutre</td><td>discours suivi avec marquage régional</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="n">6.4</span>La région est un ensemble, parce que le dialecte est un continuum</h3>
+  <p>Les isoglosses ne respectent pas les cases. Un mot rural peut être partagé entre le nord-ouest et le
+  sud tout en étant inconnu à Tunis. Un vocabulaire côtier peut couvrir le nord et le sahel et s'arrêter
+  là. Ni l'un ni l'autre n'est pan-tunisien, et ni l'un ni l'autre n'appartient à une seule région.</p>
+  <p>Avec une colonne à valeur unique, chaque cas comme ça n'a que deux mauvaises options : choisir une
+  région et jeter une vraie attestation, ou dire pan-tunisien et jeter le fait même que c'est marqué.
+  Les deux abîment les chiffres de couverture, qui sont précisément ce que ce projet prétend bien faire.
+  Donc :</p>
+  <ul>
+    <li><b><code>scope</code>, c'est le marquage.</b> Est-ce que ça porte un signal régional, oui ou non ? C'est vraiment binaire.</li>
+    <li><b><code>region</code>, c'est l'étendue.</b> Quelles régions l'attestent, une à quatre. Les quatre à la fois n'est pas la même affirmation que pan-tunisien — « utilisé partout et marqué dans chacune » diffère de « non marqué ».</li>
+  </ul>
+  <p>Il n'y a donc de colonne région à valeur unique nulle part. Les éléments du corpus portent plusieurs
+  lignes <code>tag</code> sur le même intervalle (§7.3) ; les variantes du lexique utilisent une table
+  <code>lexicon_variant_regions</code> (§7.5), qui donne aussi à chaque région son propre compte
+  d'attestations.</p>
+  <div class="aside">
+    <p>Ça permet aussi à la question des frontières régionales (§5, problème 3) de répondre d'elle-même.
+    Si nord-ouest et sud continuent d'être tagués ensemble, c'est une preuve de l'endroit où la frontière
+    tombe vraiment. Une colonne à valeur unique aurait détruit cette preuve dès l'insertion, à chaque
+    fois.</p>
+  </div>
+</div>
+<!-- 07 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">07</span>
+    <h2>Modèle de données</h2>
+    <p class="kicker">Une seule structure avec annotation au niveau des intervalles, parce que les niveaux se contaminent entre eux.</p>
+  </div>
+
+  <h3><span class="n">7.1</span>Le problème de jointure</h3>
+  <p>Une phrase est souvent marquée comme régionale par un seul mot en elle. Un paragraphe peut citer une
+  variété dans laquelle il n'est pas écrit. Trois tables indépendantes ne peuvent pas contenir ça, donc
+  c'est une seule structure avec des annotations rattachées à des intervalles de caractères.</p>
+
+  <h3><span class="n">7.2</span>Documents et éléments du corpus</h3>
+<pre>documents
+  id, source_id fk -&gt; sources
+  external_ref      text          -- id vidéo, url, isbn ; null pour les contributions
+  title, raw_body   text          -- raw_body est l'original, jamais retouché ensuite
+  region_hint       enum          -- signal faible venant de la source, pas un fait ; à valeur unique exprès
+  era_hint, license enum
+  rights_status     enum          -- granted | revoked | not_applicable (§4.3)
+  ingested_at       timestamptz
+
+corpus_items
+  id, document_id fk, parent_id fk    -- parent null au niveau racine
+  unit              enum      -- paragraph | sentence | phrase      (pas de token)
+  position          int       -- ordre au sein du parent
+  text              text      -- immuable une fois inséré
+  script            enum      -- arabic | arabizi | mixed | latin
+  canonical_form    text      -- forme CODA, null tant que non standardisé
+  canonical_map     jsonb     -- alignement d'offsets : text -&gt; canonical_form
+  match_key         text      -- normalisé pour la recherche, jamais affiché (§13.5)
+  rule_version      int
+  char_offset       int       -- offset dans le parent, pour reconstruction
+  dataset_split     enum      -- train | dev | test ; fixé à l'insertion, jamais modifié
+  version           int       -- incrémenté à chaque changement accepté (§8.1)
+
+  index (document_id, unit, position)
+  index (parent_id)
+  index gin (match_key gin_trgm_ops)</pre>
+
+  <p>Les contributions sont enveloppées dans un document synthétique à un seul élément de corpus, pointant
+  vers la source <code>contribution</code>. C'est délibéré, pas juste soigné : <code>license</code>,
+  <code>rights_status</code> et la provenance vivent sur <code>documents</code> et nulle part ailleurs,
+  donc « est-ce exportable commercialement ? » est une seule requête contre une seule table, quelle que
+  soit l'origine. Un <code>document_id</code> nullable aurait signifié copier ces colonnes sur les
+  éléments du corpus et dédoubler cette vérification pour toujours.</p>
+
+  <p><code>region_hint</code> reste un enum à valeur unique alors même que le §6.4 a fait un vrai effort
+  pour faire de la région un ensemble partout ailleurs. C'est délibéré, pas un oubli : un indice est une
+  supposition sur d'où vient probablement toute une source — une chaîne, la base d'utilisateurs générale
+  d'un forum — avant que quiconque n'ait lu un seul mot. Il a le droit d'être faux et singulier parce que
+  rien en aval ne lui fait confiance ; l'affirmation de région réelle, qui doit bien être un ensemble, vit
+  sur les tags rattachés aux intervalles (§7.3), pas ici.</p>
+
+  <div class="note">
+    <span class="label">Pourquoi les tokens ne sont pas des lignes ici</span>
+    <p>Le mouvement évident serait un troisième niveau sous les phrases. Ça casse dès qu'on standardise
+    quoi que ce soit. Convertir en CODA change le nombre de mots et tous les offsets après la première
+    modification — l'arabizi <em>« bch nemchi »</em> devient
+    <span dir="rtl" lang="ar" class="ar">&#x0628;&#x0627;&#x0634; &#x0646;&#x0645;&#x0634;&#x064A;</span>,
+    les clitiques s'étendent, deux tokens en deviennent trois. Chaque ligne de token et chaque annotation
+    qui pointe dessus arrête tranquillement de correspondre. Rien ne plante. Les données se mettent juste
+    à mentir.</p>
+    <p>Les tokens ont donc leur propre table (<code>tokens</code>), ancrée sur des offsets dans
+    <code>text</code>. <code>text</code> ne change jamais, donc ces offsets restent justes pour toujours.
+    Une table <code>links</code> séparée est l'unique pont entre un token et le lexique —
+    <code>token_id</code> y est unique, donc rien n'empêche qu'un token pointe vers deux entrées de
+    lexique différentes, une contrainte qu'une table partagée unique n'aurait jamais pu exprimer.</p>
+  </div>
+
+  <p>La standardisation ne modifie jamais <code>text</code>. Elle écrit une seconde version à côté, plus
+  <code>canonical_map</code> — l'alignement d'offsets que le moteur de règles produit de toute façon
+  (§13.4). N'importe quel intervalle sur l'original se projette sur la forme canonique via cette carte, et
+  comme la carte porte son <code>rule_version</code>, changer les règles régénère les deux ensemble.</p>
+
+  <h3><span class="n">7.3</span>Tokens, liens et tags — sur des intervalles, pas des niveaux</h3>
+  <p>C'est ça qui règle la contamination. Un paragraphe tagué <code>south</code> peut contenir un
+  intervalle de trois mots tagué comme emprunt du nord. Les deux sont vrais, les deux sont stockés, pas de
+  dispute.</p>
+  <p>Trois tables, pas une seule table polymorphe <code>annotations</code> — la version à table unique est
+  l'endroit où le flou des noms s'était glissé, parce qu'une ligne <code>type: region</code> et une ligne
+  <code>type: token</code> n'ont rien en commun sauf de partager une table. Les séparer s'est révélé être
+  une vraie correction de bug, pas juste cosmétique : c'est ce qui permet de déclarer
+  <code>links.token_id</code> unique, ci-dessous.</p>
+<pre>tokens                        -- un intervalle dans le texte d'un élément du corpus
+  id, corpus_item_id fk
+  char_start, char_end   int
+  surface_text   text     -- le texte littéral du token
+  annotator_id fk    -- l'utilisateur 'system' pour la tokenisation automatique
+  is_machine   bool
+  confidence   numeric(3,2)
+  index (corpus_item_id)
+
+links                         -- l'UNIQUE pont entre un token et le lexique
+  id, token_id fk UNIQUE      -- un lien par token, jamais deux
+  lexicon_entry_id fk, lexicon_variant_id fk null
+  annotator_id fk, is_machine bool, confidence numeric(3,2)
+  index (lexicon_entry_id)
+  index (lexicon_variant_id)
+
+tags                          -- tout le reste : scope, region, era, setting,
+                               -- register, code_switch, sense, quality
+  id, corpus_item_id fk
+  char_start, char_end   int
+  kind    enum   -- scope | region | era | setting | register
+                 -- | code_switch | sense | quality
+  value   text
+  annotator_id fk    -- l'utilisateur 'system' pour les suggestions automatiques
+  is_machine   bool
+  confidence   numeric(3,2)
+
+  index (corpus_item_id, kind, char_start, char_end)
+  index (annotator_id)</pre>
+
+  <p>Tokeniser est une passe à part entière, qui insère une ligne <code>tokens</code> par token —
+  retokeniser veut dire insérer des lignes, pas reconstruire un arbre. Un tag de région est une ligne
+  <em>par région</em> — taguer un intervalle nord-ouest et sud, c'est deux lignes, et c'est comme ça que
+  la sémantique d'ensemble du §6.4 fonctionne sans colonne tableau.</p>
+
+  <div class="note">
+    <span class="label">Trois choses que ça donne gratuitement</span>
+    <p><b>L'alternance codique</b> — un emprunt français est un intervalle avec <code>kind: code_switch,
+    value: fr</code>. <b>Corpus et lexique se rejoignent</b> — une ligne <code>links</code> qui pointe un
+    token vers une entrée de lexique transforme « cette phrase atteste la forme du nord-ouest » en une
+    seule requête. <b>Le désaccord survit</b> — deux annotateurs écrivent deux lignes <code>tags</code> ;
+    le consensus se calcule à partir d'elles, sans jamais les écraser.</p>
+  </div>
+
+  <h3><span class="n">7.4</span>Consensus — dérivé, jamais destructeur</h3>
+  <p>Indexé par intervalle, pas par élément du corpus, et ça compte plus qu'il n'y paraît. Une phrase
+  porte couramment plusieurs tags du même genre — trois intervalles <code>code_switch</code>, deux
+  intervalles avec des identités régionales différentes. (Les liens n'ont pas besoin de ça — un token a
+  au plus un lien, donc il n'y a rien sur quoi trouver un consensus.) Indexer par élément du corpus et
+  genre seulement, et calculer le consensus pour le second intervalle écrase le premier. Plus quelqu'un
+  tague une phrase avec soin, plus la table jette de son travail.</p>
+<pre>tag_consensus                -- matérialisé, rafraîchi à chaque écriture de tag
+  corpus_item_id fk, kind enum, char_start int, char_end int
+  agreed_values       text[]         -- un ensemble : la région peut faire consensus sur plus d'une valeur
+  agreement           numeric(3,2)   -- 1.0 = unanimité
+  annotator_n         int
+  needs_adjudication  bool
+  computed_at         timestamptz
+
+  PRIMARY KEY (corpus_item_id, kind, char_start, char_end)
+  index (needs_adjudication) where needs_adjudication</pre>
+  <ul>
+    <li><b>Les tags portant sur tout l'élément ont quand même un intervalle.</b> <code>register</code>,
+    <code>era</code>, <code>scope</code> sont écrits avec <code>char_start = 0</code>,
+    <code>char_end = length(text)</code>. Jamais null — Postgres ne traite pas les null comme égaux dans
+    une clé unique, donc un intervalle nullable laisserait passer des doublons exactement là où
+    l'unicité est le but.</li>
+    <li><b>L'accord se calcule sur un ensemble.</b> Deux personnes qui disent toutes les deux « nord-ouest
+    et sud » sont d'accord. Une qui dit « nord-ouest » et une qui dit « nord-ouest et sud » sont
+    partiellement d'accord — la lecture honnête, et un signal utile pour la question des frontières.</li>
+  </ul>
+
+  <h3><span class="n">7.5</span>Lexique — trois couches</h3>
+<pre>lexicon_entries                -- le sens, agnostique à la région
+  id, gloss_en, gloss_fr, gloss_msa
+  domain   enum   -- everyday | food | admin | agriculture | kinship | ...
+  granularity enum, pos enum, notes
+
+lexicon_variants                -- une réalisation d'une entrée du lexique
+  id, lexicon_entry_id fk
+  scope, era, setting, register     -- axes à valeur unique seulement
+  canonical_form  text
+  match_key       text              -- §13.5
+  confidence      numeric(3,2)
+
+lexicon_variant_regions        -- étendue : une ligne par région attestante (§6.4)
+  lexicon_variant_id fk ON DELETE CASCADE, region enum
+  attestation_count int, confidence numeric(3,2)
+  PRIMARY KEY (lexicon_variant_id, region)
+  index (region, attestation_count desc)
+
+lexicon_forms                  -- une graphie écrite d'une variante
+  id, lexicon_variant_id fk, text, script, match_key
+  is_canonical bool, frequency int
+  unique (lexicon_variant_id, script) where is_canonical</pre>
+  <div class="aside">
+    <p><b>Pourquoi trois couches.</b> La question à laquelle le produit existe pour répondre — « voici
+    quatre façons de le dire, laquelle est celle-ci ? » — devient une seule jointure. À plat, on ne peut
+    pas la poser. Trois couches permettent aussi d'exprimer les faux amis : une même graphie qui rejoint
+    deux entrées de lexique via deux variantes différentes. Ça arrive tout le temps, et un modèle plat le
+    corrompt silencieusement.</p>
+  </div>
+
+  <h3><span class="n">7.6</span>Origine des mots</h3>
+  <p>Les strates du derja, c'est son histoire — substrat amazigh, superstrat arabe, puis le français,
+  l'italien, le turc et l'espagnol arrivés par l'occupation, le commerce et les migrations. Enregistrer de
+  quelle strate vient un mot transforme une liste de vocabulaire en document de cette histoire, et c'est
+  la chose la plus intéressante du site pour quiconque n'est pas linguiste. Aucun corpus tunisien existant
+  ne porte de tagging étymologique systématique.</p>
+
+  <p>Ça se rattache à <code>lexicon_entries</code>, pas à <code>lexicon_variants</code> — l'origine est
+  une propriété de l'histoire du mot, pas de la façon dont Le Kef le dit par rapport à Douz. L'exception
+  est réelle mais rare : parfois des régions ont emprunté des mots <em>différents</em> pour le même sens à
+  des sources différentes. C'est sans doute deux entrées de lexique, et je préfère laisser le cas rare
+  porter une note plutôt que de dupliquer la colonne sur les variantes pour une minorité d'entrées.</p>
+
+<pre>lexicon_origins                -- la plupart des entrées du lexique n'en ont pas, et c'est très bien ainsi
+  id, lexicon_entry_id fk ON DELETE CASCADE
+  origin       enum
+  source_form  text null   -- 'écurie', 'tanwart' — le mot dont ça vient
+  source_lang  text null
+  note         text null   -- la dérivation, en prose, avec une citation s'il y en a une
+  proposed_by  fk, status enum   -- proposed | confirmed | disputed
+  confidence   numeric(3,2)
+  index (lexicon_entry_id);  index (origin) where status = 'confirmed'
+
+origin_enum:
+  arabic          -- direct, reconnaissable comme arabe standard
+  arabic_derived  -- vient de l'arabe mais a dérivé en forme ou en sens
+  french          amazigh         italian
+  turkish         spanish         other
+  unknown         -- explicitement enregistré comme inconnu</pre>
+
+  <p>L'enum vit dans <code>shared</code> avec les autres (§10.1). Deux choses à ce sujet :</p>
+  <ul>
+    <li><b>L'italien et le turc sont là dès le début parce qu'on les rencontre vite.</b> Le tunisien a une
+    vraie strate italienne via la Sicile et les ports, et une strate administrative et culinaire ottomane.
+    Les laisser de côté et les contributeurs les rangeraient sous <code>other</code>, et on ne les
+    récupère jamais proprement après.</li>
+    <li><b><code>unknown</code> n'est pas la même chose qu'aucune ligne.</b> Aucune ligne veut dire que
+    personne n'a regardé. Une ligne disant <code>unknown</code> veut dire que quelqu'un a regardé et n'a
+    pas pu trancher. Le second cas est une information.</li>
+  </ul>
+
+  <h4>Exemples</h4>
+  <table>
+    <thead><tr><th style="width:20mm">Strate</th><th style="width:34mm">Derja</th><th style="width:34mm">Vient de</th><th>Sens</th></tr></thead>
+    <tbody>
+      <tr><td class="k">amazigh</td><td><span class="ar" dir="rtl" lang="ar">فكرون</span> fakrun</td><td class="mono">ifker</td><td>tortue</td></tr>
+      <tr><td class="k">amazigh</td><td><span class="ar" dir="rtl" lang="ar">نوارة</span> nawwara</td><td class="mono">tanwart</td><td>fleur</td></tr>
+      <tr><td class="k">french</td><td><span class="ar" dir="rtl" lang="ar">فرشيطة</span> farshiṭa</td><td class="mono">fourchette</td><td>fourchette</td></tr>
+      <tr><td class="k">french</td><td><span class="ar" dir="rtl" lang="ar">بيرو</span> birou</td><td class="mono">bureau</td><td>bureau</td></tr>
+      <tr><td class="k">french</td><td><span class="ar" dir="rtl" lang="ar">تريسيتي</span> trisiti</td><td class="mono">électricité</td><td>électricité</td></tr>
+      <tr><td class="k">french</td><td><span class="ar" dir="rtl" lang="ar">كوري</span> kouri</td><td class="mono">écurie</td><td>écurie</td></tr>
+      <tr><td class="k">italian</td><td><span class="ar" dir="rtl" lang="ar">كروسة</span> karrusa</td><td class="mono">carrozza</td><td>charrette</td></tr>
+      <tr><td class="k">italian</td><td><span class="ar" dir="rtl" lang="ar">بانكة</span> banka</td><td class="mono">banca</td><td>banque</td></tr>
+      <tr><td class="k">italian</td><td><span class="ar" dir="rtl" lang="ar">سيمانة</span> simana</td><td class="mono">settimana</td><td>semaine</td></tr>
+      <tr><td class="k">turkish</td><td><span class="ar" dir="rtl" lang="ar">طبسي</span> ṭabsi</td><td class="mono">tepsi</td><td>plateau, plat</td></tr>
+      <tr><td class="k">turkish</td><td><span class="ar" dir="rtl" lang="ar">بقلاوة</span> baklawa</td><td class="mono">baklava</td><td>—</td></tr>
+      <tr><td class="k">arabic_derived</td><td><span class="ar" dir="rtl" lang="ar">باهي</span> bahi</td><td class="mono"><span class="ar" dir="rtl" lang="ar">باهٍ</span> classique : splendide</td><td>a dérivé vers l'ordinaire « bon, bien, OK »</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <span class="label">La meilleure entrée de la page n'est pas un mot</span>
+    <p>Le suffixe <code>-ji</code> (<span class="ar" dir="rtl" lang="ar">ـجي</span>) vient de l'agentif
+    turc <em>-ci</em>, et le tunisien l'applique à des racines arabes —
+    <span class="ar" dir="rtl" lang="ar">قهواجي</span> <em>gahwaji</em>, le vendeur de café. Le derja n'a
+    pas seulement emprunté des mots turcs, il a emprunté un bout de grammaire turque et l'utilise encore
+    de façon productive. Ça mérite sa propre note sur <code>/origins</code>.</p>
+  </div>
+
+  <h4>Contestés</h4>
+  <table>
+    <thead><tr><th style="width:44mm">Derja</th><th>L'argument</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ar" dir="rtl" lang="ar">سبيطار</span> sbiṭar — hôpital</td><td>Français <em>hôpital</em> ou italien <em>ospedale</em> ? Les deux plausibles, les deux défendus.</td></tr>
+      <tr><td><span class="ar" dir="rtl" lang="ar">فيشتة</span> fishta — fête</td><td>Français <em>fête</em> ou italien <em>festa</em> ?</td></tr>
+      <tr><td><span class="ar" dir="rtl" lang="ar">برشا</span> barsha — beaucoup</td><td>Le mot le plus disputé du tunisien. Turc, arabe et d'autres ont tous leurs défenseurs.</td></tr>
+    </tbody>
+  </table>
+  <p>Trois entrées contestées à côté des confirmées valent plus que cinquante entrées bien rangées. Elles
+  disent à un linguiste de passage que je sais que l'étymologie est débattue, et ce sont des invitations à
+  argumenter — un engagement que je n'ai pas à fabriquer.</p>
+
+  <div class="note">
+    <span class="label">Jamais obligatoire, jamais bloquant</span>
+    <p>L'étymologie ne déclenche aucune tâche, ne compte dans aucune métrique de complétude, et une entrée
+    de lexique sans ligne d'origine n'est pas incomplète. Quelqu'un sait comment sa grand-mère dit un mot ;
+    il ne sait généralement pas que ce mot vient du turc ottoman, et le demander produirait soit des
+    suppositions, soit l'arrêt pur et simple de sa contribution. C'est un savoir en opt-in, de la part de
+    qui l'a — donc pas de champ origine sur le formulaire de contribution. Ça vit sur la page de l'entrée
+    de lexique comme « ajoutez ce que vous savez », jamais sur le chemin entre l'arrivée et la soumission
+    (§9.6).</p>
+  </div>
+
+  <p><b>Un piège juridique :</b> une dérivation recopiée d'un dictionnaire étymologique publié est le
+  travail savant de quelqu'un d'autre, et le palier d'export <code>etymology</code> (§19.2) en fait une
+  question de redistribution. Donc les origines sont soit du savoir de contributeur, soit citées, et
+  <code>note</code> porte la citation quand il y en a une.</p>
+
+  <h3><span class="n">7.7</span>Traductions — clés explicites, pas de polymorphisme</h3>
+  <p>Une phrase peut avoir plusieurs traductions valides, donc les traductions sont des lignes. Mais
+  <em>comment</em> elles pointent vers leur cible compte autant que le fait qu'elles existent.</p>
+  <p>La forme tentante est <code>target_type</code> plus un <code>target_id uuid</code> brut. Postgres ne
+  peut absolument rien contraindre là-dessus : pas de clé étrangère, pas de comportement de suppression,
+  aucune garantie que l'id pointe vers quelque chose de réel. Supprimer une variante et ses traductions
+  deviennent des orphelines <em>que rien dans la base ne peut détecter</em>. Elles s'accumulent en
+  silence et finissent par se retrouver dans un export.</p>
+<pre>translations
+  id uuid pk
+  corpus_item_id      uuid REFERENCES corpus_items(id) ON DELETE CASCADE
+  lexicon_entry_id    uuid REFERENCES lexicon_entries(id) ON DELETE CASCADE
+  lexicon_variant_id  uuid REFERENCES lexicon_variants(id) ON DELETE CASCADE
+  target_lang enum, text, source enum, translator_id fk
+  is_preferred bool, quality_score numeric(3,2)
+
+  CONSTRAINT single_translation_target CHECK (
+    (corpus_item_id IS NOT NULL)::int + (lexicon_entry_id IS NOT NULL)::int
+    + (lexicon_variant_id IS NOT NULL)::int = 1 )
+
+  index (corpus_item_id, target_lang) where corpus_item_id is not null
+  index (lexicon_entry_id, target_lang) where lexicon_entry_id is not null
+  index (lexicon_variant_id, target_lang) where lexicon_variant_id is not null
+
+  -- une préférée par langue, par type de cible
+  unique (corpus_item_id, target_lang) where is_preferred and corpus_item_id is not null
+  unique (lexicon_entry_id, target_lang) where is_preferred and lexicon_entry_id is not null
+  unique (lexicon_variant_id, target_lang) where is_preferred and lexicon_variant_id is not null</pre>
+  <p>Un peu plus verbeux que la version polymorphe, et ça vaut le coup — l'intégrité devient le travail de
+  la base de données au lieu d'être quelque chose que l'appli est censée se rappeler à 1h du matin. Les
+  trois index « préférée » sont nécessaires, pas un seul : le lexique est exactement l'endroit où une
+  double « glose française préférée » ferait mal, parce que le traducteur la lit directement.</p>
+
+  <div class="aside">
+    <p><b>Le seul endroit où je garde du polymorphisme, exprès.</b> <code>corrections</code> (§7.8)
+    utilise encore <code>target_table</code> + <code>target_id</code>, parce qu'une correction peut
+    cibler presque n'importe quel champ de presque n'importe quelle table, et trois colonnes nullables
+    deviendraient quinze. Compromis accepté : ça ne peut pas cascader et c'est validé côté code
+    applicatif. Ça tient parce que les corrections sont un enregistrement de workflow, pas du contenu de
+    corpus, et parce que rien n'est jamais supprimé pour de vrai (§4.3).</p>
+  </div>
+
+  <h3><span class="n">7.8</span>Tables de support</h3>
+<pre>sources        id, kind (youtube|forum|book|subtitle|contribution|elicitation
+               |wikipedia|commoncrawl|tatoeba), name, url, license_default,
+               active, last_run_at, rate_limit, proxy_pool, notes
+
+submission_meta  id, corpus_item_id, contributor_name, contributor_email (nullable),
+               self_reported_region, self_reported_origin, session_id,
+               ip_hash, consent_given, consent_voice
+               -- les métadonnées d'un élément de corpus contribué, nommée à part de
+               -- « contribution » l'acte, pour que les deux ne partagent pas un mot
+
+corrections    id, target_table, target_id, field, old_value, new_value,
+               reason, proposed_by, status, reviewed_by
+
+flags          id, target_type, target_id, reason enum, note, session_id,
+               ip_hash, status enum, resolved_by
+               -- reason : offensive | personal_data | wrong | copyright | other
+               -- personal_data réutilise la routine anonymise_revoked (§4.3) une fois
+               -- qu'un admin confirme — le même nettoyage, déclenché par un signalement
+               -- tiers plutôt qu'une auto-révocation, pas un chemin manuel séparé
+
+users          id, role, display_name, email, password_hash, trust_level,
+               region_self_reported, active
+
+audit_log      id, actor_id, action, entity_type, entity_id, diff jsonb, ip_hash
+
+stored_objects     id, kind (voice_clip|dataset_snapshot|db_backup|book_scan|other),
+                   bucket, storage_key UNIQUE, mime_type, size_bytes, checksum,
+                   status (pending|stored|deleted), is_public, expires_at, uploaded_by
+                   -- source de vérité unique pour tout ce qui est en stockage objet,
+                   -- au lieu d'une colonne storage_key brute sur chaque table qui en a besoin
+dataset_snapshots  id, version, corpus_item_count, stored_object_id fk UNIQUE,
+                   rule_version, notes
+model_versions     id, snapshot_id fk, metrics jsonb, trained_at, is_production
+standardisation_rules
+                   id, rule_version, pattern, replacement, script,
+                   description, active</pre>
+  <p>Chaque table porte aussi <code>created_at</code> et <code>updated_at</code>, avec fuseau horaire.
+  Je n'ai laissé <code>updated_at</code> hors des blocs ci-dessus que pour qu'ils restent lisibles — ce
+  n'est optionnel nulle part.</p>
+
+  <h3><span class="n">7.9</span>Des champs bon marché maintenant, impossibles plus tard</h3>
+  <table>
+    <thead><tr><th style="width:30mm">Champ</th><th>Pourquoi il doit être là dès la première ligne</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">license<br>rights_status</td><td>Le contenu scrapé et le contenu contribué portent des droits différents. Sans ça, il est impossible d'isoler un jour un sous-ensemble propre commercialement.</td></tr>
+      <tr><td class="mono">dataset_split</td><td>Fixé à l'insertion, jamais modifié. Sans ça, impossible de faire une revendication de précision honnête — ce serait corriger ses propres copies.</td></tr>
+      <tr><td class="mono">rule_version</td><td>Les règles orthographiques changeront. Les instantanés déjà publiés doivent rester reproductibles après ça.</td></tr>
+      <tr><td class="mono">is_machine</td><td>Sépare la supposition d'une machine du jugement d'un humain. Sans ça, la sortie d'un modèle contamine les données d'entraînement et personne ne le remarque.</td></tr>
+      <tr><td class="mono">version</td><td>Permet au moteur de tâches de distinguer « encore valide » de « à refaire » (§8.1).</td></tr>
+      <tr><td class="mono">consent_voice</td><td>Le consentement texte ne couvre pas la voix, et on ne peut pas le recueillir rétroactivement (§4.2).</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="n">7.10</span>Publications — phase 2</h3>
+  <p>Une page qui rassemble les travaux sur le derja tunisien — articles, thèses, corpus, outils — que les
+  gens peuvent enrichir et discuter.</p>
+<pre>publications          id, title, authors, year, venue, doi, url,
+                      kind enum (paper|thesis|corpus|tool|book),
+                      abstract, submitted_by, status enum
+                      unique (doi) where doi is not null
+
+publication_comments  id, publication_id fk, body, author_name,
+                      session_id,        -- même modèle anonyme que les contributions
+                      status enum</pre>
+  <div class="note">
+    <span class="label">Les commentaires sont une surface de modération que rien d'autre ici ne crée</span>
+    <p>Tout le reste dans ce système est borné — un tag de région, une traduction, un vote. La discussion
+    en texte libre ne l'est pas, et c'est la seule partie qui peut générer du travail qui n'est pas du
+    travail de corpus. Donc : même modèle de session que les contributions, tout ce qui est en dessous du
+    niveau de confiance 1 retenu pour approbation, et <b>la fonctionnalité est carrément désactivée si
+    elle coûte plus d'attention qu'elle n'en rapporte.</b> L'écrire maintenant fait que la désactiver plus
+    tard est une décision toujours sur la table, pas un échec.</p>
+  </div>
+  <p><b>L'amorcer avant de le lancer</b> — une bibliographie vide a l'air abandonnée. La préremplir avec
+  les travaux cités au §1.2 et au §13.1 : CODA-TUN, NOTA, Tunisiya, TARIC, TSAC, TEC, TunSwitch, TEDxTN,
+  MADAR, MyVoice, DARIJA-C, KALAM'DZ. Cette lecture est déjà faite ; la page, c'est surtout de la saisie.</p>
+  <div class="aside">
+    <p>Un chercheur qui arrive ici devrait trouver le domaine, pas seulement ce projet. Être l'endroit où
+    se rassemblent les travaux sur le derja tunisien est une façon moins chère de devenir une référence
+    que de produire le meilleur corpus — et ça transforme le §1.2 d'un paragraphe défensif en une page
+    vivante. C'est aussi la voie la plus directe vers le problème 4 du §5 : les gens qui utilisent une
+    bibliographie de TAL tunisien sont des gens qui pourraient relire des données du nord-ouest ou du
+    sud.</p>
+  </div>
+
+  <h3><span class="n">7.11</span>Média — phase 5, vide pour l'instant</h3>
+  <p>Ces tables existent dans le schéma et ne contiennent rien. Elles sont là parce que la question de
+  consentement qui leur est rattachée ne peut pas être répondue rétroactivement (§4.2).</p>
+<pre>speakers   id, session_id, region_origin enum, region_residence enum,
+           age_band enum, consent_voice bool
+
+media      id, lexicon_variant_id fk, lexicon_form_id fk null, speaker_id fk,
+           stored_object_id fk UNIQUE,  -- stockage objet, pas Postgres (§7.8)
+           duration_ms, sample_rate, consent_scope enum</pre>
+  <p>Le consentement voix apparaît trois fois dans ce schéma, exprès, pas par accident :
+  <code>submission_meta.consent_voice</code> (§7.8) est l'opt-in capturé au moment de la soumission, avant
+  même qu'un enregistrement n'existe. <code>speakers.consent_voice</code> est ce même fait recopié en
+  avant sur un profil de locuteur une fois qu'il en existe un en phase 5. <code>media.consent_scope</code>
+  est celui qui gouverne vraiment un extrait précis — texte seulement contre voix incluse — et fait
+  autorité si les deux autres venaient à diverger, puisque c'est le plus proche de l'enregistrement réel.</p>
+  <p><b>Basique veut dire basique.</b> La voix de la phase 5, c'est de l'audio d'attestation : quelqu'un
+  enregistre un extrait d'une variante qu'il a déjà soumise, et ça se rejoue sur l'entrée de lexique. Pas
+  de reconnaissance vocale, pas de synthèse vocale, pas d'alignement forcé, pas de modèles de parole.
+  L'extrait prouve qu'une forme écrite se dit vraiment comme ça, par quelqu'un de là-bas — la seule chose
+  que le texte ne peut pas prouver tout seul.</p>
+  <p>L'audio change trois choses structurellement, et c'est pour ça que ce n'est pas juste « une migration
+  plus tard » :</p>
+  <ol>
+    <li><b>Le stockage quitte Postgres.</b> Un élément de corpus fait environ 1 Ko. Un extrait de dix
+    secondes en fait environ 150. Ça veut dire du stockage objet avec une politique de cycle de vie, et
+    <code>pg_dump</code> ne le couvre pas — un second chemin de sauvegarde avec sa propre économie et son
+    propre test de restauration (§2.5). La ligne <code>stored_objects</code> se résout via une URL
+    présignée — l'extrait lui-même ne passe jamais par l'API. Le fournisseur derrière est interchangeable
+    (disque local en dev, R2 ou S3 en production, une seule interface, §10.0) — <b>construit</b> comme
+    <code>control-plane/backend/core/src/storage/</code>, avec un adaptateur local et un adaptateur R2 déjà écrits, juste
+    pas encore branchés sur une route — donc cette décision n'est pas à reprendre deux fois.</li>
+    <li><b><code>speakers</code> n'a pas d'équivalent texte.</b> Un enregistrement atteste une variante
+    <em>telle que parlée par une personne</em> dont l'origine peut ne pas correspondre à la région de la
+    variante.</li>
+    <li><b>Le consentement cesse d'être nettoyable.</b> Le §4.3 fonctionne parce qu'une phrase dont les
+    identifiants ont été retirés est vraiment anonyme. Un enregistrement ne l'est pas — c'est
+    quasi-biométrique et on ne peut pas l'anonymiser en mettant une colonne à null. <b>La révocation voix
+    veut dire suppression</b>, la deuxième exception au principe « rien n'est jamais supprimé pour de
+    vrai ».</li>
+  </ol>
+</div>
+
+<!-- 08 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">08</span>
+    <h2>Le moteur de tâches</h2>
+    <p class="kicker">La pièce que je regretterais le plus de rater.</p>
+  </div>
+
+  <p class="lede">Tout ce qui suit concerne la curation et la vérification de matériau qui existe déjà
+  dans le pipeline — relecture, tagging, traduction, adjudication. Ce n'est pas la seule porte d'entrée.
+  N'importe qui peut ajouter du matériau tout neuf directement, sans tâche requise : un nouveau mot, une
+  phrase ou un paragraphe sur <code>/contribute</code>, une nouvelle origine de mot sur
+  <code>/origins</code>, une nouvelle citation sur <code>/research</code>. Cette section est la couche de
+  relecture posée par-dessus, pas un portail devant.</p>
+
+  <p>Contribuer, ce n'est pas seulement écrire quelque chose et repartir, non plus. Celui qui écrit un
+  élément de corpus peut, en option, le traduire lui-même, ajouter une graphie arabe ou arabizi, et dire à
+  quelle région ça appartient — derja pan-tunisien standard, ou une région précise s'il la connaît. Tout
+  ce qu'il saute ne se perd pas et ne reste pas à moitié fait : ça devient exactement la même tâche
+  <code>translate_*</code>, <code>transliterate_*</code> ou <code>region_tag</code> (§8.2) qu'un élément
+  de corpus scrapé aurait déclenchée. Écrire son propre matériau et compléter celui de quelqu'un d'autre,
+  c'est la même file de tâches, juste abordée par les deux bouts.</p>
+
+  <div class="note">
+    <span class="label">Une seule colonne de statut ne peut pas faire ça</span>
+    <p>Une entrée peut être traduite mais pas translittérée, ou translittérée mais pas relue. Des axes de
+    complétude séparés. Une seule colonne de statut les force dans un ordre qui n'existe pas et rend
+    invisible le travail à moitié fait.</p>
+  </div>
+
+  <h3><span class="n">8.1</span>Schéma</h3>
+<pre>tasks
+  id, corpus_item_id fk, type enum
+  status    enum   -- open | claimed | done | rejected | needs_rework
+  priority  int
+  claimed_by fk null, claimed_at, completed_by fk null, completed_at
+  output_record_id uuid     -- pointe vers la ligne qu'elle a produite
+  requires_role  enum
+  target_regions enum[] null   -- les régions en conflit, ou l'indice (§8.5)
+  item_version int
+  idempotency_slot text not null default ''
+  idem_key  text   -- sha256(corpus_item_id : type : item_version : idempotency_slot)
+
+  index (status, type, priority desc)
+  index (claimed_by, status)
+  index (corpus_item_id)
+
+  -- au plus UNE tâche vivante par (élément de corpus, type, version, slot)
+  unique (idem_key) where status in ('open','claimed','needs_rework')</pre>
+
+  <div class="note">
+    <span class="label">Pourquoi la clé d'idempotence existe</span>
+    <p>« Ouvrir la tâche Y si elle n'est pas déjà là » a l'air très bien jusqu'à ce que quelqu'un corrige
+    un élément de corpus déjà traité. La correction arrive, l'élément change, les règles de génération se
+    déclenchent à nouveau et remettent en file <code>translate_msa</code> et <code>link_lemma</code> — les
+    deux déjà terminées. Affiner une autre annotation, même chose. La file se remplit de doublons de
+    travail déjà clos et les relecteurs arrêtent de faire confiance à leur boîte de réception, qui est la
+    seule surface par laquelle passe toute la boucle de contribution.</p>
+  </div>
+
+  <ul>
+    <li><b><code>corpus_items.version</code></b> monte à chaque changement accepté — une correction
+    appliquée, une standardisation, un tag arbitré. C'est ce que veut dire « cette tâche porte sur
+    <em>cet</em> état ».</li>
+    <li><b><code>idem_key</code></b> vaut <code>sha256(corpus_item_id : type : item_version :
+    idempotency_slot)</code>. Mêmes quatre entrées, même clé, doublon rejeté par l'index au lieu d'être
+    mis en file.</li>
+    <li><b><code>idempotency_slot</code> sépare plusieurs tâches légitimes du même type sur un même
+    élément de corpus.</b> Vide pour le travail à l'échelle de l'élément (<code>review</code>,
+    <code>region_tag</code>, <code>translate_*</code>, <code>transliterate_*</code>,
+    <code>standardise</code>), <code>char_start:char_end</code> pour le travail à l'échelle d'un
+    intervalle (<code>link_lemma</code>, <code>adjudicate</code>), un ordinal pour le cas N-parmi-plusieurs
+    (<code>confirm</code> → 1, 2). L'omettre et l'index unique fusionne discrètement deux confirmations en
+    une, un seul lien de lemme par phrase au lieu d'un par token, et un second intervalle disputé dans le
+    néant. Rien de tout ça ne lève d'erreur.</li>
+    <li><b>L'index est partiel, sur les statuts vivants seulement.</b> Mettre <code>status</code> dans la
+    clé unique elle-même a l'air équivalent et ne l'est pas — ça contraint aussi les lignes historiques et
+    bloque les transitions de reprise légitimes. Le limiter à open/claimed/needs_rework dit l'intention
+    réelle : jamais deux tâches vivantes pour le même travail, laisser l'historique clos tranquille.</li>
+    <li><b>Un incrément de version est ce qui rouvre vraiment le travail</b>, et tous les incréments
+    n'invalident pas tout. Chaque règle déclare quels changements tuent sa sortie — un nouveau tag de
+    région n'invalide pas une translittération terminée ; une standardisation invalide bien
+    <code>link_lemma</code>. Cette correspondance vit comme donnée dans le module de règles.</li>
+  </ul>
+
+  <div class="aside">
+    <p><b>Construit.</b> Le schéma, la réclamation atomique, le cycle de vie complet/rejet/reprise, la
+    clé d'idempotence exactement comme ci-dessus, et les règles de génération pour chaque ligne du §8.3 —
+    tout ça vit dans <code>control-plane/backend/core/src/tasks/</code>, un paquet sans dépendance à un framework que la
+    couche NestJS appelle. Les complétions <code>review</code>, <code>region_tag</code> et
+    <code>confirm</code> sont branchées de bout en bout et ont été testées contre une base de données en
+    fonctionnement. Les complétions <code>translate_*</code>, <code>transliterate_*</code>,
+    <code>standardise</code>, <code>adjudicate</code> et <code>link_lemma</code> ne sont pas encore
+    branchées — elles ont besoin des modules lexique et traduction, qui ne sont encore que des coquilles
+    vides, et <code>link_lemma</code> a en plus besoin d'une passe de tokenisation qui n'existe pas encore,
+    puisque rien n'écrit actuellement de lignes <code>tokens</code>.</p>
+  </div>
+
+  <h3><span class="n">8.2</span>Types de tâches</h3>
+  <table>
+    <thead><tr><th style="width:44mm">Type</th><th>Produit</th><th style="width:18mm">Slot</th><th style="width:20mm">Rôle min.</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">review</td><td>tag qualité + région, ou un rejet</td><td>vide</td><td>reviewer</td></tr>
+      <tr><td class="mono">region_tag</td><td>tag de région</td><td>vide</td><td>contributor</td></tr>
+      <tr><td class="mono">confirm</td><td>vote d'accord sur un tag existant</td><td>ordinal</td><td>contributor</td></tr>
+      <tr><td class="mono">translate_msa / _fr / _en</td><td>ligne de traduction</td><td>vide</td><td>contributor</td></tr>
+      <tr><td class="mono">transliterate_to_arabic</td><td>ligne de forme de lexique, script = arabic</td><td>vide</td><td>contributor</td></tr>
+      <tr><td class="mono">transliterate_to_arabizi</td><td>ligne de forme de lexique, script = arabizi</td><td>vide</td><td>contributor</td></tr>
+      <tr><td class="mono">standardise</td><td>canonical_form + canonical_map</td><td>vide</td><td>reviewer</td></tr>
+      <tr><td class="mono">adjudicate</td><td>la décision finale là où les annotateurs étaient en désaccord</td><td>intervalle</td><td>reviewer</td></tr>
+      <tr><td class="mono">link_lemma</td><td>une ligne <code>links</code>, token vers variante de lexique</td><td>intervalle</td><td>reviewer</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="n">8.3</span>Règles de génération</h3>
+<pre>si élément de corpus ingéré      -&gt; générer review
+si review approuvée              -&gt; générer region_tag, translate_msa
+si region_tag terminée           -&gt; générer confirm  slot=1, slot=2  (annotateurs différents)
+si traduction ajoutée            -&gt; si arabizi : générer transliterate_to_arabic
+                                 -&gt; si arabic :  générer transliterate_to_arabizi
+si accord du consensus &lt; 0.6     -&gt; générer adjudicate  slot=&lt;intervalle&gt;  (routé, §8.5)
+si élément de corpus standardisé -&gt; générer link_lemma  slot=&lt;intervalle&gt;  par token
+si correction acceptée           -&gt; incrémenter corpus_item.version
+                                 -&gt; régénérer seulement ce que ce changement invalide</pre>
+  <p style="font-size:8.8pt;color:var(--ink-faint)"><b>Construit, pas encore branché.</b> Chaque règle
+  ci-dessus existe aujourd'hui comme une fonction pure dans
+  <code>control-plane/backend/core/src/tasks/spawn-rules.ts</code>. <code>si review approuvée</code>, <code>si
+  region_tag terminée</code>, et la règle d'adjudication déclenchée par le consensus sont vraiment
+  appelées depuis le code de complétion de tâches en fonctionnement. <code>si traduction ajoutée</code> et
+  <code>si élément de corpus standardisé</code> sont écrites et testées mais rien ne les appelle encore,
+  parce que rien ne crée encore les enregistrements de traduction ou de standardisation qui les
+  déclencheraient.</p>
+
+  <h3><span class="n">8.4</span>Réclamation et libération</h3>
+  <ul>
+    <li>La réclamation est atomique — <code>UPDATE … WHERE status='open' RETURNING</code>. Deux workers n'obtiennent jamais la même ligne.</li>
+    <li>Les réclamations expirent ; une tâche libère tout ce qui est détenu depuis plus de deux heures.</li>
+    <li>Un worker détient au plus 5 réclamations à la fois, pour que personne n'accapare la file.</li>
+    <li><code>needs_rework</code> n'est pas <code>rejected</code> : la reprise retourne dans la file, le rejet la ferme.</li>
+  </ul>
+
+  <h3><span class="n">8.5</span>Routage régional, et le biais qu'il empêche</h3>
+  <div class="note">
+    <span class="label">L'échec contre lequel je conçois ce système</span>
+    <p>Quand le consensus tombe sous le seuil, une tâche <code>adjudicate</code> se déclenche. Si le
+    bassin de relecteurs est très nordiste — et au début il le sera, parce que c'est là qu'est mon
+    réseau — un relecteur du nord peut rejeter en toute confiance une variante du sud parfaitement bonne
+    juste parce qu'il ne l'a jamais entendue. Ça ne fait pas que perdre une ligne. Ça élimine
+    systématiquement exactement le matériau que ce projet existe pour collecter, tout en ayant l'air
+    d'être du contrôle qualité pendant tout ce temps.</p>
+  </div>
+  <p>Donc l'adjudication ne va pas à qui est disponible. La tâche porte <code>target_regions</code> — un
+  ensemble, parce que le §6.4 a fait de la région un ensemble et qu'un conflit nord-ouest contre sud
+  contient deux régions.</p>
+<pre>quand adjudicate est généré :
+  target_regions = les régions des tags en conflit, ou le region_hint du document de l'élément
+
+  1. proposer UNIQUEMENT aux relecteurs dont la région auto-déclarée est DANS target_regions
+  2. après 7 jours non réclamée -&gt; ouvrir à tout le monde, marquer out_of_region, et le dire :
+     « aucun relecteur de cette région n'était disponible »
+  3. une adjudication out_of_region peut confirmer ou remonter à un admin.
+     Ne jamais rejeter pour des raisons régionales, ne jamais supprimer une variante.</pre>
+  <p>Un relecteur correspondant à n'importe quelle région de l'ensemble compte comme étant de la région.
+  La fenêtre de sept jours est par tâche, pas par région — sinon un conflit à deux régions attendrait deux
+  fois plus longtemps qu'un conflit à une région, ce qui est à l'envers, puisque les cas disputés sont
+  ceux qui ont le plus besoin d'être tranchés.</p>
+  <ul>
+    <li>Même idée pour <code>region_tag</code> et <code>confirm</code> : une confirmation d'un relecteur
+    de cette région compte à plein poids, une venue de l'extérieur compte moins.</li>
+    <li>Le taux out_of_region est sur l'aperçu admin (§17.1). S'il grimpe, la réponse est de recruter dans
+    cette région — problème 4 du §5 — pas de relâcher le seuil.</li>
+    <li>C'est pour ça que <code>region_self_reported</code> est sur la table users et est demandé à
+    l'invitation d'un relecteur, plutôt que d'être une décoration de profil optionnelle.</li>
+  </ul>
+
+  <h3><span class="n">8.6</span>Ce que ça permet de répondre facilement</h3>
+  <p>Ce qui n'est pas fini, par type et par âge. Quelle région a le plus de travail bloqué. Qui contribue
+  quoi et à quelle vitesse. Si le pipeline est engorgé à la relecture, à la traduction ou à la
+  standardisation. Des requêtes, pas des enquêtes.</p>
+</div>
+
+<!-- 09 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">09</span>
+    <h2>Comptes et permissions</h2>
+    <p class="kicker">La friction tue le volume. L'anonymat tue la qualité. On choisit par rôle, pas une fois pour toutes.</p>
+  </div>
+
+  <h3><span class="n">9.1</span>La tension</h3>
+  <p>Chaque étape entre « je veux aider » et « j'ai soumis quelque chose » coûte des contributions, et les
+  contributions sont la ressource sur laquelle tourne tout ce projet. Mais la qualité de l'annotation a
+  besoin de responsabilisation. Une seule politique ne peut pas servir les deux, donc il n'y en a pas
+  qu'une.</p>
+
+  <div class="note">
+    <span class="label">Pourquoi les contributeurs n'ont pas de vrais comptes</span>
+    <p>Il existe quelque part une version de ce projet où les contributeurs s'inscrivent proprement —
+    email, mot de passe, vérification, un profil. C'est plus propre. Chaque règle devient plus simple. Je
+    saurais exactement qui a écrit quoi.</p>
+    <p>C'est aussi un fantasme, parce que personne ne fait ça. Imaginez la scène : quelqu'un clique sur un
+    lien, il est curieux, il a peut-être quinze secondes de bonne volonté, et la première chose qu'il
+    rencontre, c'est <em>Créez votre compte.</em> Parti. Pas agacé, pas en train de peser le pour et le
+    contre — parti, instantanément, comme je le serais moi-même. Je demanderais à un inconnu d'ouvrir un
+    compte sur un site dont il n'a jamais entendu parler, tenu par un type dont il n'a jamais entendu
+    parler, pour qu'il puisse offrir un mot gratuitement.</p>
+    <p>Donc les contributeurs ont un cookie et une case pour leur nom, et je vis avec des garanties
+    d'identité plus faibles. C'est tout le compromis, et ce n'est pas serré.</p>
+  </div>
+
+  <h3><span class="n">9.2</span>Niveaux</h3>
+  <table>
+    <thead><tr><th style="width:32mm">Rôle</th><th style="width:42mm">Auth</th><th>Peut faire</th></tr></thead>
+    <tbody>
+      <tr><td class="k">anonymous</td><td>aucune</td><td>naviguer, chercher, télécharger, voir les statistiques</td></tr>
+      <tr><td class="k">contributor</td><td>nom + email optionnel, pas de mot de passe</td><td>soumettre, confirmer et voter, proposer des corrections, tâches simples</td></tr>
+      <tr><td class="k">trusted contributor</td><td>email vérifié, confiance ≥ 2</td><td>+ traduction, translittération</td></tr>
+      <tr><td class="k">reviewer</td><td>authentification complète, sur invitation seulement</td><td>+ file de relecture, standardisation, adjudication</td></tr>
+      <tr><td class="k">admin</td><td>authentification complète + 2FA</td><td>+ utilisateurs, sources, publication d'instantanés</td></tr>
+      <tr><td class="k">superadmin</td><td>authentification complète + 2FA</td><td>tout, y compris les opérations destructrices</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="n">9.3</span>Comment fonctionne la contribution anonyme</h3>
+<pre>session_id   // cookie httpOnly, uuid, 1 an — relie entre elles les soumissions d'une même personne
+ip_hash      // sha256(ip + sel serveur) — détection d'abus seulement, jamais une IP brute
+name         // texte libre, affichage seulement, PAS une revendication d'identité
+email        // optionnel, pour le crédit et le suivi
+consent      // case à cocher explicite, stockée par soumission</pre>
+  <p><b>Intégrité du classement :</b> classé par contributions <em>approuvées</em>, jamais par soumissions
+  brutes. Classer par brut reviendrait à payer les gens pour spammer. Les collisions de noms ne posent pas
+  de problème — c'est de la motivation, pas un justificatif. C'est l'identifiant de session qui agrège
+  vraiment le travail de quelqu'un.</p>
+
+  <h3><span class="n">9.4</span>Niveaux de confiance</h3>
+<pre>confiance 0   nouveau / anonyme                    -&gt; confirmer + soumettre seulement
+confiance 1   3+ entrées approuvées                 -&gt; tâches region_tag
+confiance 2   email vérifié,
+              10+ approuvées, &lt;10 % rejetées        -&gt; traduction, translittération
+confiance 3   10+ approuvées sur 2+ types de tâches, &lt;5 % rejetées
+                                                    -&gt; éligible à une invitation de relecteur</pre>
+  <p>Calculé chaque nuit à partir de l'historique d'approbation, pas distribué à la main. La confiance se
+  gagne ; le rôle de relecteur se donne. L'éligibilité ne promeut jamais automatiquement — un admin envoie
+  quand même l'invitation, et capture la région du relecteur en le faisant, parce que le routage en
+  dépend (§8.5).</p>
+
+  <h3><span class="n">9.5</span>Connexion des relecteurs</h3>
+  <p>Un vrai compte, pas un cookie — email et mot de passe, ou GitHub OAuth. Chaque action privilégiée
+  écrit dans <code>audit_log</code> avec acteur, diff et ip_hash. Le design des tokens, des sessions et de
+  la 2FA derrière tout ça est un sujet à part entière, couvert intégralement aux §9.7–§9.10 plutôt que
+  répété ici.</p>
+  <div class="aside">
+    <p><b>Construit jusqu'ici :</b> email/mot de passe seulement — hachage argon2id, JWT access + refresh
+    avec rotation et détection de réutilisation, double-soumission CSRF, la chaîne complète
+    <code>ThrottlerGuard → AuthGuard → RolesGuard → TrustGuard</code> (§9.6, §9.10). GitHub OAuth n'est
+    pas encore branché. L'inscription a brièvement eu un vrai bug qui mérite d'être noté plutôt que
+    corrigé discrètement et oublié : chaque inscription était codée en dur sur <code>role: 'reviewer'</code>,
+    donc quiconque s'inscrivait obtenait un accès relecteur. Trouvé et corrigé avant que ça ne quitte
+    jamais une base de dev — ça part maintenant par défaut sur <code>contributor</code> comme il se doit —
+    mais c'est le genre d'erreur d'une ligne qui mérite d'être nommée pour que ça n'arrive pas deux fois.</p>
+  </div>
+
+  <h3><span class="n">9.6</span>La hiérarchie reste interne</h3>
+  <p>Niveaux de confiance, rôles, types de tâches, règles de génération, seuils de consensus, routage
+  d'adjudication — tout ça, c'est ce qui garde le système honnête. Rien de tout ça n'est le problème d'un
+  contributeur et rien de tout ça n'apparaît devant lui.</p>
+  <p>Un contributeur voit une case, une question, un bouton. Il ne voit pas son niveau de confiance, ne
+  sait pas que finir un tag de région a déclenché deux tâches de confirmation, ne choisit pas de type de
+  tâche, et ne se fait jamais dire qu'il n'est éligible à rien. Le travail qu'il ne peut pas encore faire
+  n'est simplement pas proposé — pas d'état verrouillé, pas de barre de progression vers une permission,
+  pas d'explication d'un système qu'il n'a rien demandé à connaître. La promotion se fait en silence :
+  plus de types de travail commencent à apparaître.</p>
+  <p>Le classement est le seul statut visible où que ce soit, et c'est un classement plutôt qu'un rang —
+  qui a contribué, pas à quel palier tout le monde se situe.</p>
+  <div class="note">
+    <span class="label">La règle pour chaque écran destiné aux contributeurs</span>
+    <p><b>Une question, trois secondes, aucune explication requise.</b> Si un écran a besoin d'un
+    paragraphe d'instructions, c'est l'écran qui a tort, pas la personne qui le lit.</p>
+    <p>Chaque phrase entre l'arrivée et la soumission est prise sur un budget compté en secondes. Je n'ai
+    pas de citation pour dire combien exactement et je n'en ai pas besoin — je sais à quelle vitesse je
+    ferme un onglet qui veut que je lise quelque chose avant de me laisser faire quoi que ce soit, et je
+    n'ai aucune raison de penser que qui que ce soit sera plus patient avec le mien que je ne le suis avec
+    le leur.</p>
+  </div>
+  <p>Toute cette complexité reste entièrement instrumentée. Elle fait juste face au tableau de bord admin
+  (§17.1) au lieu du contributeur.</p>
+
+  <h3><span class="n">9.7</span>Design des tokens et des sessions</h3>
+  <p>JOSE (HS256), pas une bibliothèque JWT au hasard — une implémentation bien auditée plutôt que
+  choisir le paquet qui a le plus d'étoiles cette année. Un token porte quatre choses en plus du
+  <code>sub</code> et de l'expiration habituels : <code>token_version</code> (incrémenté pour invalider
+  tous les tokens d'un utilisateur d'un coup — le bouton « déconnecter partout » et « quelque chose ne va
+  pas, tue les sessions de ce compte » réunis dans un seul champ), <code>sid</code> (identifiant de
+  session, pour qu'une connexion puisse être révoquée sans toucher aux autres), <code>rjti</code> (un
+  identifiant de token tournant sur le refresh token spécifiquement, pour qu'un refresh token volé et
+  utilisé deux fois soit détectable — la réutilisation veut dire que quelqu'un d'autre l'a). Les mots de
+  passe sont en argon2id, réservés aux relecteurs et admins puisque les contributeurs n'ont pas du tout de
+  mot de passe (§9.3).</p>
+
+  <h3><span class="n">9.8</span>Flux de session</h3>
+  <p>Token d'accès court, refresh token plus long, paire standard. Le refresh fait tourner le token à
+  chaque utilisation — l'ancien <code>rjti</code> arrête de fonctionner dès qu'un nouveau est émis, ce qui
+  est ce qui rend la détection de réutilisation possible. La déconnexion révoque le <code>sid</code> côté
+  serveur plutôt que de simplement supprimer un cookie côté client, pour qu'un token volé ne reste pas
+  valide après que l'utilisateur légitime pense s'être déconnecté. Incrémenter <code>token_version</code>
+  est l'instrument brutal pour « tout, partout, maintenant » — utilisé pour un changement de mot de passe
+  ou une compromission suspectée, pas pour une déconnexion de routine.</p>
+
+  <h3><span class="n">9.9</span>Vérification d'email et réinitialisation de mot de passe</h3>
+  <p>Les deux passent par un OTP à usage unique et à durée limitée envoyé par email, pas un lien magique
+  avec un token longue durée qui traîne indéfiniment dans une boîte de réception. Limité en débit par
+  adresse et par IP, et la réponse est identique que l'adresse existe ou non dans le système — « si un
+  compte existe, on a envoyé un code » — pour que l'endpoint ne puisse pas servir à vérifier qui a un
+  compte ici.</p>
+
+  <h3><span class="n">9.10</span>Spécificités de la connexion relecteur et admin</h3>
+  <ul>
+    <li>Les connexions ratées verrouillent temporairement le compte après une poignée de tentatives, avec
+    un backoff, pas un verrouillage permanent et dur pour lequel un utilisateur légitime devrait ensuite
+    m'écrire un email.</li>
+    <li>La 2FA TOTP est obligatoire pour admin et superadmin, optionnelle mais encouragée pour les
+    relecteurs.</li>
+    <li>GitHub OAuth est préféré au mot de passe pour les relecteurs spécifiquement parce que la plupart
+    d'entre eux sont probablement des gens techniques qui ont déjà un compte GitHub — un mot de passe de
+    moins dont je suis responsable.</li>
+  </ul>
+  <div class="note">
+    <span class="label">Délibérément pas repris d'ailleurs</span>
+    <p>Quelques motifs qui apparaissent dans d'autres systèmes que j'ai construits ou vus, et qui n'ont
+    pas leur place ici, dits explicitement pour que personne ne se demande pourquoi ils manquent :
+    <b>l'usurpation d'identité</b> (un admin qui se connecte « en tant que » un utilisateur) — rien ici
+    n'en a besoin et c'est une responsabilité qui traînerait sans être utilisée. <b>Le chiffrement de
+    numéro d'identité nationale / CIN</b> — ce projet ne collecte jamais d'identifiant gouvernemental,
+    donc rien à chiffrer. <b>Les paiements</b> — déjà couvert (§4), il n'y a pas de palier payant, donc
+    pas de flux de paiement à sécuriser. <b>Un flux de token mobile séparé</b> — il n'y a pas d'appli
+    native (§20), donc pas de client séparé pour lequel concevoir des tokens.</p>
+  </div>
+
+  <h3><span class="n">9.11</span>Envoi d'emails</h3>
+  <p>Motif outbox : écrire « envoyer cet email » est une ligne de base de données dans la même
+  transaction que ce qui l'a déclenchée, pas un appel direct à une API d'email au milieu d'une requête.
+  Une tâche de fond dispatche l'outbox de façon asynchrone et réessaie en cas d'échec. Ça veut dire qu'un
+  fournisseur d'email capricieux ne peut jamais faire échouer l'action réelle — une inscription réussit
+  même si l'email de vérification est retardé de quelques minutes, au lieu que toute la requête échoue
+  parce que Resend a eu une mauvaise seconde. Resend est le principal, avec SMTP comme chemin de repli
+  plutôt qu'une deuxième chose à configurer et à oublier (§2.6).</p>
+</div>
+
+<!-- 10 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">10</span>
+    <h2>Architecture backend</h2>
+    <p class="kicker">Un monorepo, deux applications. Toujours pas de ML dans le chemin de requête — ça n'a pas changé.</p>
+  </div>
+
+  <h3><span class="n">10.0</span>Stack technique</h3>
+  <p>Le tableau complet avant le raisonnement. Tout ce qui suit est une décision, pas une case en
+  attente — si ce document dit « à définir » ailleurs (hébergement, domaine), c'est l'exception, pas ce
+  tableau.</p>
+  <table>
+    <thead><tr><th style="width:26mm">Couche</th><th style="width:36mm">Choix</th><th>Remarque</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Frontend</td><td>Next.js (App Router)</td><td>SSR pour les pages publiques — les exigences de citation et de recherche du §16 en ont besoin</td></tr>
+      <tr><td class="k">Backend</td><td>NestJS 11, TypeScript</td><td>Possède la frontière de l'API ; la chaîne de guards remplace l'ancienne conception à app unique avec gestionnaires de routes</td></tr>
+      <tr><td class="k">ORM</td><td>Prisma</td><td>Schéma dans <code>db/</code></td></tr>
+      <tr><td class="k">Base de données</td><td>PostgreSQL, derrière pgBouncer</td><td>Mode transaction, pool de 20 (§10.2)</td></tr>
+      <tr><td class="k">Cache / sessions</td><td>Redis</td><td>Pas la file de tâches — c'est toujours pg-boss (§10.3)</td></tr>
+      <tr><td class="k">File de tâches</td><td>pg-boss sur Postgres</td><td>BullMQ sur Redis est une évolution future documentée, pas le choix par défaut</td></tr>
+      <tr><td class="k">Auth</td><td>jose (JOSE), HS256, argon2id</td><td>Design complet aux §9.7–§9.11</td></tr>
+      <tr><td class="k">Service NLP</td><td>Python, FastAPI</td><td>Health-check seulement, phase 1 — <b>construit</b>, conteneurisé ; le vrai travail de modèle est en phase 4, hors machine (§11)</td></tr>
+      <tr><td class="k">Service Processing</td><td>Rust, Actix</td><td>Health-check seulement — <b>construit</b>, conteneurisé ; le reste tant que le profilage du pipeline TypeScript à l'échelle réelle du corpus n'a pas montré qu'une étape précise (dédoublonnage MinHash/LSH, tokenisation, export) est le goulot d'étranglement — pas une simple échéance de phase (§7.11)</td></tr>
+      <tr><td class="k">Reverse proxy</td><td>Caddy (interne)</td><td></td></tr>
+      <tr><td class="k">Edge / tunnel</td><td>Cloudflare Tunnel (cloudflared)</td><td>Aucun port entrant ouvert sur le VPS</td></tr>
+      <tr><td class="k">Email</td><td>Resend, repli SMTP</td><td>Motif outbox (§9.11)</td></tr>
+      <tr><td class="k">Système de design</td><td>shadcn/ui + Tailwind</td><td>Écarts RTL vérifiés, pas supposés résolus (§15.2)</td></tr>
+      <tr><td class="k">Gestionnaire de processus</td><td>pm2</td><td>Fait tourner le conteneur NestJS en mode cluster, 2 instances, seuil de redémarrage par instance — <b>construit</b>, <code>control-plane/backend/ecosystem.config.js</code></td></tr>
+      <tr><td class="k">Suivi d'erreurs</td><td>Sentry (@sentry/node, @sentry/react)</td><td>Gratuit à cette échelle — c'est comme ça que le « taux d'erreur » de l'aperçu admin (§17.1) aura une vraie source au lieu d'être un chiffre sans rien derrière. Pas encore branché dans le backend.</td></tr>
+      <tr><td class="k">Observabilité</td><td>OpenTelemetry + logs structurés</td><td>Une machine gérée en solo sans logs structurés est indéboguable au moment où quelque chose casse sans personne autour pour demander. Pas encore branché.</td></tr>
+      <tr><td class="k">Analytics</td><td>PostHog (palier gratuit)</td><td>Remplace une hypothèse antérieure d'un Umami/Plausible auto-hébergé (§20) — réutiliser un outil déjà connu bat réévaluer les plateformes d'analytics depuis zéro. Pas encore branché.</td></tr>
+      <tr><td class="k">Stockage objet</td><td>Interchangeable : disque local (dev) | R2 | S3</td><td>Une interface, fournisseur changé par variable d'environnement. Uploads et téléchargements passent par des URLs présignées — les fichiers ne traversent jamais l'API (§7.11). <b>Construit</b> comme interface plus les deux adaptateurs (<code>control-plane/backend/core/src/storage/</code>) ; pas encore appelé depuis une route.</td></tr>
+      <tr><td class="k">Temps réel</td><td>Pas par défaut — sondage</td><td>socket.io + un adaptateur Redis est le chemin de mise à niveau si l'aperçu admin ou la file de relecture ont vraiment besoin de push plutôt que de sondage un jour (§17.1). Pas coupé par réflexe ; juste pas encore nécessaire.</td></tr>
+      <tr><td class="k">CI/CD</td><td>GitHub Actions</td><td><code>master.yml</code> (lint/typecheck/test/dérive de migration/CodeQL, <b>construit</b>) et <code>verify-backup-restore.yml</code> (§2.3, <b>construit</b>) — <code>infra-watch.yml</code> pas encore construit</td></tr>
+      <tr><td class="k">Gestionnaire de paquets</td><td>pnpm, un workspace, un lockfile</td><td></td></tr>
+    </tbody>
+  </table>
+<pre>open_derja/            -- UN dépôt, UN workspace pnpm, UN lockfile
+├── control-plane/     -- tout ce qui est TypeScript : E/S, orchestration, machines à états
+│   ├── backend/           -- NestJS : chaîne de guards, logique métier, accès aux données
+│   │   └── core/           -- logique de domaine : tâches, consensus, confiance, standardisation,
+│   │                          stockage. Sans framework, son propre paquet workspace,
+│   │                          importé par backend, worker et scrapers
+│   ├── worker/             -- tâches planifiées pg-boss ; expire_claims en fonctionnement,
+│   │                          dispatcher d'outbox pas encore construit
+│   └── scrapers/           -- runners d'ingestion (amorcé comme paquet,
+│                              pipeline/ et sources/ encore vides)
+├── data-plane/         -- Rust, Actix — travail par lots déterministe, gourmand en CPU.
+│                           Health-check seulement jusqu'à ce qu'une étape se révèle être
+│                           un goulot d'étranglement à l'échelle réelle du corpus
+├── intelligence-plane/ -- Python, FastAPI — health-check seulement, phase 1
+│   └── nlp/
+├── frontend/           -- Next.js : site public + tableaux de bord
+├── shared/              -- types, enums, schémas zod. Zéro dépendance, zéro logique.
+├── db/                  -- schéma prisma, migrations, seeds
+├── devops/              -- Dockerfiles, compose, Caddy/cloudflared, sauvegardes
+├── docs/                -- ce grand livre, le blueprint, VOICE.md, CONTRIBUTORS.md,
+│                            journal de vérification
+└── testing/             -- e2e, organisé par surface</pre>
+  <p>Les trois groupes de premier niveau — <code>control-plane</code>, <code>data-plane</code>,
+  <code>intelligence-plane</code> — correspondent à ce qui varie vraiment dans la façon dont chaque
+  brique tourne : TypeScript pour tout ce qui dépend d'E/S ou d'une machine à états, Rust pour le travail
+  par lots gourmand en CPU une fois qu'il s'avère nécessaire plutôt que supposé, Python pour l'inférence
+  et l'entraînement tenus à l'écart du chemin de requête. <code>frontend</code>, <code>shared</code>,
+  <code>db</code> et <code>devops</code> restent hors de ce découpage exprès — ils ne sont pas propres à
+  une plateforme. <code>shared</code> en particulier est le vocabulaire que chaque plateforme doit
+  partager, et comme rien d'écrit en Rust ou en Python ne peut importer un paquet TypeScript de toute
+  façon, le nicher dans <code>control-plane</code> dénaturerait ce qu'il est vraiment. <code>core</code>
+  vit sous <code>control-plane/backend/</code> plutôt qu'à la racine de <code>control-plane/</code> —
+  ça reste son propre paquet workspace sans framework, juste imbriqué un niveau sous l'application qui
+  s'en sert le plus. La direction des dépendances n'a pas changé : backend → core → db/shared, frontend ne
+  parle jamais qu'à backend via le client typé, rien n'importe vers le haut. C'est un seul monorepo de
+  bout en bout, pas cinq dépôts séparés — toute la raison d'être de <code>shared</code>, c'est qu'une
+  région, un rôle ou un type de tâche ne puisse pas signifier deux choses différentes à deux endroits
+  différents, et ça ne tient que si tout est dans un seul workspace avec un seul lockfile.</p>
+  <div class="aside">
+    <p><code>nlp/</code> est en Python et ne peut pas importer <code>shared</code> directement. Ce n'est
+    pas un problème pour l'instant : ni <code>nlp/</code> ni le service Rust ne portent de
+    logique sensible aux enums dans leur forme phase-1 health-check-seulement — rien là-dedans ne décide
+    une région, un rôle, ou un type de tâche. À revoir avec un contrat OpenAPI/JSON généré depuis
+    <code>shared</code> seulement si un service Python commence à prendre des décisions qui doivent
+    s'accorder avec ce vocabulaire — le plus vraisemblablement quand le classificateur de dialecte de la
+    phase 4 arrivera.</p>
+  </div>
+
+  <h3><span class="n">10.1</span>Forme</h3>
+  <p>Deux applications, pas une, et toujours un seul dépôt. NestJS possède la frontière de l'API et la
+  chaîne de guards — authentification, validation, logique métier, accès aux données. Next.js possède le
+  rendu — le site public et les tableaux de bord — et ne parle à NestJS que via un client typé, jamais
+  directement à la base de données. L'arborescence des fichiers est au §10.0 ; rien ci-dessous ne la
+  redérive.</p>
+  <p>Séparer l'application n'a pas changé pourquoi c'est un seul dépôt. Les enums — région, type de tâche,
+  rôle, script, origine — sont définis une fois dans <code>shared</code> et importés des deux côtés, donc
+  une liste déroulante et une contrainte de base de données ne peuvent pas diverger parce que c'est
+  littéralement le même fichier. Les schémas zod valident à la frontière et typent les formulaires depuis
+  une seule définition. Une installation, un pipeline CI, un déploiement — cette partie du raisonnement
+  n'avait pas besoin de changer juste parce que le backend a eu son propre processus.</p>
+  <p>Pas des microservices, et puisque l'assistance automatique est reportée (§11), pas de vrai travail de
+  ML non plus — les deux conteneurs de service du §10.0 existent pour prouver la forme du déploiement, pas
+  pour prendre des décisions. Quand l'inférence par lots arrivera un jour, elle tournera hors machine
+  (§11.3), donc elle ne devient jamais une troisième vraie charge de travail sur cette machine.</p>
+
+  <h3><span class="n">10.2</span>pgBouncer</h3>
+  <p>Se place entre l'application et Postgres en mode pooling par transaction, pool de taille 20. Postgres
+  a un plafond dur de connexions concurrentes, et NestJS, le worker et pg-boss qui ouvrent tous leurs
+  propres connexions directement, c'est exactement comme une petite machine finit par en manquer sous une
+  charge réelle — pas une hypothèse, un mode d'échec connu pour quiconque fait tourner Postgres derrière
+  plus d'un processus.</p>
+  <p>Un invariant qui vaut la peine d'être dit clairement pour ne pas être redécouvert à la dure :
+  <code>DATABASE_URL</code> pointe vers pgBouncer et c'est ce que l'application utilise en fonctionnement.
+  <code>DIRECT_URL</code> pointe directement vers Postgres et c'est ce qu'utilisent les migrations Prisma —
+  le pooling en mode transaction ne supporte pas les prepared statements et les fonctionnalités au niveau
+  session dont les migrations ont besoin. Deux URLs, deux rôles, et les confondre est le genre d'erreur qui
+  ne se manifeste qu'une fois, au pire moment.</p>
+
+  <h3><span class="n">10.3</span>Tâches de fond</h3>
+  <p>Redis gagne sa place pour le cache et les sessions (§9.7), pas pour la file de tâches — ce sont des
+  métiers différents, et les confier au même système voudrait dire qu'une panne de Redis emporte les deux
+  d'un coup. pg-boss reste sur Postgres pour la file, pour la même raison qu'il a été choisi avant même
+  que Redis ne soit dans le paysage : un service de moins à faire tourner, une chose de moins à sauvegarder,
+  et le volume ici n'approche jamais de justifier une seconde technologie de file faisant le même travail
+  que Redis pourrait théoriquement faire aussi.</p>
+  <table>
+    <thead><tr><th style="width:36mm">Tâche</th><th style="width:34mm">Fréquence</th><th>Ce qu'elle fait</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">expire_claims</td><td>5 min</td><td>libère les tâches réclamées depuis plus de 2h</td></tr>
+      <tr><td class="mono">refresh_consensus</td><td>à l'écriture + toutes les heures</td><td>recalcule l'accord, marque pour adjudication</td></tr>
+      <tr><td class="mono">recompute_trust</td><td>nocturne</td><td>met à jour les niveaux de confiance des contributeurs</td></tr>
+      <tr><td class="mono">refresh_stats</td><td>10 min</td><td>couverture, classement, taux de succès du traducteur</td></tr>
+      <tr><td class="mono">scrape_sources</td><td>par source</td><td>récupère du nouveau matériau depuis les sources actives</td></tr>
+      <tr><td class="mono">anonymise_revoked</td><td>toutes les heures</td><td>nettoie les identifiants pour les consentements révoqués (§4.3)</td></tr>
+      <tr><td class="mono">export_snapshot</td><td>manuel / hebdomadaire</td><td>gèle, calcule le checksum, chiffre, upload</td></tr>
+      <tr><td class="mono">backup_db</td><td>quotidien</td><td>pg_dump, chiffre, expédie hors machine</td></tr>
+    </tbody>
+  </table>
+  <div class="note">
+    <span class="label">Ce que ça coûte, et le plafond qui compense</span>
+    <p>pg-boss sonde la base de données. Un worker qui martèle Postgres pour la génération de tâches, le
+    consensus et l'export est en concurrence avec le même Postgres qui sert le site — sur une petite
+    machine, la file peut affamer le frontend. Donc le sondage est plafonné plutôt que laissé aux valeurs
+    par défaut : un plancher de 2s sur l'intervalle de sondage, un plafond dur sur la concurrence, des
+    lots assez petits pour qu'aucune tâche ne reste sur une longue transaction. Tout ce qui est
+    volumineux — export d'instantané, régénération après un changement de règle — tourne comme une seule
+    tâche planifiée à une heure calme. Toutes les valeurs de config dans le panneau admin (§17.2), pas des
+    constantes enterrées dans le code.</p>
+  </div>
+
+  <h3><span class="n">10.4</span>Conventions d'API</h3>
+<pre>POST   /api/corpus-items/contribute   créer (contribution) — CONSTRUIT
+GET    /api/corpus-items/:id          données de la page permalien — CONSTRUIT
+GET    /api/corpus-items?region=&amp;...  navigation / recherche
+POST   /api/tasks/claim               réclamation atomique — CONSTRUIT
+POST   /api/tasks/:id/complete        soumettre un résultat — CONSTRUIT
+POST   /api/tasks/:id/review          complétion d'une tâche review — CONSTRUIT
+POST   /api/tasks/:id/region-tag      complétion d'une tâche region_tag — CONSTRUIT
+POST   /api/tasks/:id/confirm         complétion d'une tâche confirm — CONSTRUIT
+POST   /api/tasks/:id/skip            libérer, sans pénalité
+GET    /api/tasks/inbox               ce que cet utilisateur peut travailler
+POST   /api/tags                      ajouter un tag
+POST   /api/corrections               proposer une correction
+POST   /api/flags                     signaler quelque chose (§16.4)
+GET    /api/translate                 le point d'entrée de recherche (§14)
+GET    /api/stats/coverage            statistiques publiques de couverture</pre>
+  <p>Le contrat lui-même n'a pas changé — seul le framework qui le sert a changé. Chaque route ci-dessus
+  est la même route qu'à l'époque où une seule application Next.js s'en occupait ; c'est juste NestJS qui
+  répond maintenant. Les marqueurs <code>CONSTRUIT</code> sont l'état réel à la date de cette révision —
+  tout le reste de la liste est encore le plan, pas le code.</p>
+</div>
+<!-- 11 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">11</span>
+    <h2>Assistance automatique — reportée</h2>
+    <p class="kicker">Planifiée, dimensionnée, et pas construite dès le premier jour.</p>
+  </div>
+
+  <div class="note">
+    <span class="label">La décision</span>
+    <p>Il n'y a <b>aucun machine learning dans ce système au lancement</b> — pas de modèle, pas
+    d'inférence, rien dans le chemin de requête qui puisse être lent, faux, ou en panne. Il y a un
+    service Python dès la phase 1, délibérément minimal : un conteneur FastAPI avec health-check, aucun
+    modèle chargé et aucune empreinte mémoire significative, existant uniquement pour que la forme du
+    déploiement — un conteneur, joignable, avec health-check, présent dans le fichier compose — soit
+    prouvée tôt plutôt que d'être une surprise de phase 4. La distinction qui compte reste la même : le
+    service existe, mais rien dedans ne prend encore de décision. La classification de dialecte, les
+    embeddings et la traduction automatique restent en <b>phase 4</b> — et quand ils arriveront, ils
+    tourneront hors machine, pas sur le serveur d'application.</p>
+  </div>
+
+  <h3><span class="n">11.1</span>Pourquoi c'est reporté</h3>
+  <ul>
+    <li><b>C'était le plus gros facteur du coût d'infrastructure.</b> Un modèle de classe MARBERT pèse
+    1,5 à 2 Go. Même en ne le chargeant que la nuit, le démarrer pendant que Postgres digère la file est
+    une façon réaliste de se faire tuer par OOM. L'abandonner ne gère pas ce risque, il le supprime (§2).</li>
+    <li><b>Ça ne fait pas la partie intéressante.</b> Il n'existe pas de modèle préentraîné au niveau des
+    sous-régions tunisiennes. Un classificateur peut dire qu'une phrase est tunisienne. Il ne peut pas
+    dire qu'elle vient du Kef et pas de Sfax. Ce jugement — la vraie contribution ici — reste humain de
+    toute façon.</li>
+    <li><b>Impossible de l'entraîner avant que le corpus n'existe.</b> La classification régionale a
+    besoin de ce jeu de données d'abord. Construire le consommateur avant l'entrée, c'est à l'envers.</li>
+  </ul>
+
+  <h3><span class="n">11.2</span>Ce qui fait le travail à la place</h3>
+  <p>Des règles : détection de script, bornes de longueur, un pré-filtre par expression régulière sur des
+  marqueurs, suppression des quasi-doublons (§12.3). Plus faible, et le §12.3 dit exactement ce que ça
+  coûte. Je préfère ça à avoir besoin d'un vrai modèle et d'un GPU dès le premier jour — le service à côté
+  existe déjà (§10.0), il ne fait juste encore rien. La translittération n'est pas affectée — ça a
+  toujours été un moteur de règles (§13).</p>
+
+  <h3><span class="n">11.3</span>À quoi la phase 4 pourrait ressembler</h3>
+  <p>Pas planifié en détail — c'est la phase 4, et je la concevrai correctement quand j'y arriverai. Juste
+  pour que ce ne soit pas complètement vide, en gros ce vers quoi j'irais :</p>
+  <ul>
+    <li>Un pré-filtre de dialecte — quelque chose de classe MARBERT, tournant hors ligne sur l'arriéré
+    pour réduire la charge des relecteurs, pas pour prendre des décisions.</li>
+    <li>Un classificateur régional, entraîné sur ce corpus une fois qu'il sera assez gros — la vraie
+    contribution de recherche, et la raison pour laquelle le corpus doit venir en premier.</li>
+    <li>Des embeddings hébergés + pgvector pour l'appariement flou. La recherche exacte et par trigrammes
+    est déjà livrée en phase 2 sans aucun modèle (§14.2), donc ça ne couvre que le cas flou.</li>
+  </ul>
+  <p>Quoi que ça devienne, ça tournera hors machine, facturé à la seconde, pas sur le serveur
+  d'application — de ça je suis sûr, puisque c'est ce qui garde la machine petite (§2). Et chaque fois
+  qu'une sortie de machine arrivera, elle entrera comme une suggestion, <code>is_machine: true</code>,
+  jamais directement dans un champ canonique (§7.9, §12.4). Cette règle n'attend pas que les détails
+  ci-dessus soient tranchés.</p>
+</div>
+
+<!-- 12 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">12</span>
+    <h2>Ingestion et scraping</h2>
+    <p class="kicker">L'automatisation existe pour protéger la seule chose que je ne peux pas acheter davantage : l'attention des relecteurs.</p>
+  </div>
+
+  <div class="note">
+    <span class="label">YouTube n'est pas une source</span>
+    <p>Les Developer Policies de l'API YouTube exigent que le texte des commentaires, les titres de vidéo
+    et les noms des créateurs soient rafraîchis ou supprimés dans les 30 jours suivant leur stockage — une
+    horloge glissante, permanente, tant que quoi que ce soit est conservé. C'est incompatible avec un
+    corpus construit pour être permanent, et ça contredit directement l'invariant selon lequel
+    <code>raw_body</code> est immuable (§7.2, §12.6). Les commentaires YouTube sont exclus comme source.
+    Les forums sont la source de la phase 1 à la place.</p>
+  </div>
+
+  <h3><span class="n">12.1</span>Types de sources</h3>
+  <table>
+    <thead><tr><th style="width:28mm">Source</th><th style="width:36mm">Rendement</th><th style="width:30mm">Difficulté</th><th>Droits</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Forums</td><td>volume élevé, informel, scripts mélangés</td><td>moyenne — parsing HTML</td><td>Aucune clause de rétention imposée par une plateforme. La source de la phase 1. Les CGU de chaque site lues avant activation (§12.2).</td></tr>
+      <tr><td class="k">Contribution directe</td><td>faible volume, meilleure qualité</td><td>aucune</td><td>Propre — consentement explicite. Le seul palier entièrement sûr commercialement.</td></tr>
+      <tr><td class="k">Sollicitation ciblée</td><td>visant des lacunes connues</td><td>aucune</td><td>Propre.</td></tr>
+      <tr><td class="k">Livres / imprimé</td><td>faible volume, haute qualité, historique</td><td>élevée — OCR, RTL, mise en page</td><td>Droit d'auteur sauf domaine public. La voie principale vers era: historical.</td></tr>
+      <tr><td class="k">Sous-titres</td><td>moyen, beaucoup de dialogue</td><td>moyenne</td><td>Généralement sous droit d'auteur. Vérification de licence par source.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <span class="label">Le scraping aggrave exactement le biais que ce projet existe pour corriger</span>
+    <p>Ce qui est en ligne est disproportionnellement nordiste et urbain. Ne scraper que ça, et on obtient
+    un corpus biaisé vers Tunis — garanti. Le contrepoids est la <b>sollicitation ciblée</b> : le système
+    trouve des entrées de lexique sans variante du sud, ou des phrases sans équivalent du nord-ouest, et
+    demande directement aux gens de ces régions. Une lacune devient une question à laquelle quelqu'un peut
+    répondre en dix secondes au lieu d'un vague appel à l'aide.</p>
+  </div>
+
+  <h3><span class="n">12.2</span>Ce qui est scrapé et ce qui ne l'est pas</h3>
+  <table>
+    <thead><tr><th style="width:26mm">Source</th><th style="width:22mm">Statut</th><th>Pourquoi</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Forums tunisiens</td><td><b>En cours d'utilisation</b></td><td>Récupération HTML sous les CGU propres à chaque site, pas un contrat d'API de plateforme avec une clause de rétention attachée. Les CGU de chaque site sont lues avant l'activation.</td></tr>
+      <tr><td class="k">Blogs, sites personnels</td><td><b>En cours d'utilisation</b></td><td>Mêmes conditions que les forums. Le droit d'auteur ordinaire s'applique à ce qui est stocké (§12.6).</td></tr>
+      <tr><td class="k">Commentaires de sites d'actualités</td><td>Au cas par cas</td><td>CGU lues par site, même processus que pour les forums.</td></tr>
+      <tr><td class="k">Wikipédia en arabe tunisien (<code>aeb.wikipedia.org</code>), Wiktionnaire</td><td><b>En cours d'utilisation</b></td><td>CC BY-SA, dumps explicites publiés pour la réutilisation, aucune exigence de rafraîchissement, aucun risque de limitation de débit. Petit mais déjà segmenté et déjà écrit en derja en script arabe — bon pour valider le pipeline avant de se battre avec une API de plateforme.</td></tr>
+      <tr><td class="k">Common Crawl, filtré aux domaines <code>.tn</code></td><td><b>En cours d'utilisation</b></td><td>Sous licence permissive exactement pour ça, énorme, aucune relation de plateforme à entretenir.</td></tr>
+      <tr><td class="k">Tatoeba</td><td><b>En cours d'utilisation</b></td><td>Paires de phrases CC-BY, une partie en arabe tunisien, déjà parallèles — directement utiles pour le traducteur.</td></tr>
+      <tr><td class="k">YouTube (API)</td><td><b>Exclu</b></td><td>La règle des 30 jours de rafraîchissement/suppression (§12.1) est incompatible avec un corpus permanent et contredit directement l'immuabilité de <code>raw_body</code>. Tranché, pas un « pour l'instant » — point final.</td></tr>
+      <tr><td class="k">Facebook / Instagram</td><td><b>Exclu</b></td><td>Les CGU interdisent la collecte automatisée ; Meta poursuit les scrapers en justice.</td></tr>
+      <tr><td class="k">Reddit</td><td><b>Exclu</b></td><td>API payante avec ses propres conditions de rétention et d'usage commercial depuis 2023.</td></tr>
+      <tr><td class="k">Twitter/X (API)</td><td><b>Exclu</b></td><td>Payant, conditions de stockage et de redistribution restrictives.</td></tr>
+      <tr><td class="k">TikTok</td><td><b>Exclu</b></td><td>API développeur propre avec conditions commerciales ; pas rentable à cette échelle.</td></tr>
+    </tbody>
+  </table>
+  <p>Les trois ajouts depuis la première version de ce document — Wikipédia, Common Crawl, Tatoeba — sont
+  ce qui a vraiment fini dans la liste des sources de la phase 1 une fois que j'ai cherché des sources
+  ouvertes, basées sur des dumps, plutôt que seulement des sources façonnées par des plateformes.
+  L'argument « la licence voyage avec les données » ci-dessous est la vraie raison pour laquelle elles
+  battent les API de plateformes du côté exclu, pas juste une question de permission sur le papier.</p>
+
+  <div class="note">
+    <span class="label">Politique de droits pour le texte scrapé</span>
+    <p>Chaque source est vérifiée contre ses conditions d'utilisation, pas seulement son robots.txt — ce
+    sont deux documents séparés et la permission de l'un n'implique pas celle de l'autre. Le texte scrapé
+    et stocké est traité comme réservé à un usage recherche et exclu du palier commercialement propre par
+    défaut (§4.4), quelle que soit la source. La protection des données suit la posture RGPD du §4,
+    puisque l'hébergement se trouve dans l'UE.</p>
+  </div>
+
+  <div class="aside">
+    <p><b>Pourquoi les dumps ouverts battent les API de plateformes, dit une fois pour ne pas
+    l'oublier.</b> La licence doit voyager <em>avec</em> les données. Un dump CC-BY-SA téléchargé une fois
+    m'appartient, à garder et republier indéfiniment. Tout ce qui est accédé via une API de plateforme
+    porte la laisse de cette plateforme pour toujours — obligations de rafraîchissement, autorisation
+    révocable, conditions qui peuvent changer sous mes pieds avec 30 jours de préavis. Un corpus censé me
+    survivre ne peut être construit de façon fiable qu'à partir du premier type — c'est la vraie raison
+    pour laquelle Wikipédia, Common Crawl et Tatoeba sont dedans et YouTube, Reddit et Twitter/X sont
+    dehors, pas juste que les API coûtent de l'argent.</p>
+  </div>
+
+  <p>La logique de filtrage qui décide ce qu'un scraper garde ou jette n'est pas encore tranchée non
+  plus — ce qui suit est la forme générale, pas un jeu de règles final. Il faut s'attendre à ce que les
+  seuils et les marqueurs réels bougent une fois que de vraies données commenceront à arriver.</p>
+
+  <h3><span class="n">12.3</span>Étapes du pipeline</h3>
+<pre>récupération brute
+  -&gt; stockage tel quel dans documents.raw_body   (jamais retouché ensuite)
+  -&gt; nettoyage         (retrait des urls, mentions, emoji, normalisation des espaces)
+  -&gt; filtre de longueur (3–500 tokens)
+  -&gt; détection de script
+  -&gt; pré-filtre par expression régulière       (marqueurs lexicaux spécifiquement tunisiens)
+  -&gt; suppression des quasi-doublons             (MinHash LSH, seuil 0,85)
+  -&gt; découpage en éléments de corpus            (paragraphe -&gt; phrase)
+  -&gt; calcul du match_key                        (§13.5)
+  -&gt; insertion des éléments de corpus, attribution du dataset_split
+  -&gt; génération des tâches de relecture
+
+  [phase 4]  classification de dialecte — par lots hors ligne, s'intercale avant le découpage en éléments de corpus</pre>
+
+  <div class="note">
+    <span class="label">Fatigue de la file de relecture — ce que coûte l'abandon du classificateur</span>
+    <p>Les règles seules laissent passer plus de bruit qu'un modèle ne le ferait. Meilleure estimation :
+    abandonner un filtre de dialecte par apprentissage automatique fait monter la fuite de bruit — l'arabe
+    standard et d'autres dialectes maghrébins qui ne sont pas vraiment du derja tunisien — d'environ
+    20–30 % à 40–50 % de ce qui atteint la relecture. C'est une charge de relecture manuelle réelle et
+    nettement plus lourde à travers les phases 1 à 3, pas une erreur d'arrondi.</p>
+    <p>La solution, c'est le débit, pas la finesse : petits lots d'ingestion, la liste de marqueurs
+    conservée comme donnée versionnée pour qu'elle s'améliore grâce aux vrais rejets, et le taux de rejet
+    d'une source traité comme une raison de la désactiver. La question de savoir si ça vaut le coup de
+    faire venir un filtre de dialecte plus tôt que la phase 4 pour réduire cette fuite plus vite reste
+    ouverte — notée ici plutôt que tranchée.</p>
+  </div>
+
+  <div class="note">
+    <span class="label">Le scraping ne sert pas l'argument du signal régional — une vraie limite, pas une note de bas de page</span>
+    <p>Une phrase scrapée n'a aucune métadonnée de région. Aucune. Alors comment un relecteur la
+    tague-t-il <code>northwest</code> ? En reconnaissant des marqueurs du nord-ouest dans le texte — ce qui
+    veut dire que l'étiquette régionale sur le contenu scrapé encode ce que les relecteurs croient déjà
+    être régional, pas une preuve indépendante que ça l'est vraiment. C'est circulaire. Nourrir ça à un
+    classificateur plus tard (§11.3), et j'aurai entraîné un modèle à reproduire les a priori de mes
+    relecteurs et appelé ça une découverte.</p>
+    <p>Le matériau contribué est d'une nature différente : quelqu'un dit « je suis du Kef, chez nous on le
+    dit comme ça. » Preuve faible, mais <em>indépendante</em> des traits linguistiques que j'essaie
+    d'apprendre — un témoignage, pas une inférence. <b>Conséquence, comme politique :</b> les éléments de
+    corpus scrapés partent par défaut sur <code>region: unknown</code> plutôt que d'être tagués par
+    intuition linguistique. Un relecteur ne peut taguer la région d'un élément scrapé que lorsqu'un
+    contributeur de cette région a indépendamment attesté la même variante. Le scraping achète du volume
+    et une couverture générale du derja. Il ne peut pas, à lui seul, acheter des revendications
+    régionales — la sollicitation ciblée est le pipeline porteur de ce sur quoi ce projet se différencie
+    vraiment.</p>
+  </div>
+
+  <h3><span class="n">12.4</span>La déduplication s'applique aussi aux contributions</h3>
+  <p>MinHash se trouve dans le pipeline du scraper, ce qui laisse un trou évident : quelqu'un soumet une
+  phrase déjà dans le corpus, et elle passe comme du nouveau travail qu'un relecteur devra rejeter.</p>
+  <p>Donc la même vérification de quasi-doublon tourne sur le chemin de contribution, contre
+  <code>match_key</code> — et la réponse est la partie intéressante. Pas « rejeté, doublon », qui sonne
+  comme une gifle. Plutôt : <em>on a déjà celui-là — mais personne n'a enregistré comment le sud le dit.
+  Tu sais, toi ?</em> Ça transforme un rejet en invitation à contribuer, le même tour que le §14.4 joue
+  avec les échecs du traducteur.</p>
+
+  <h3><span class="n">12.5</span>Rester dans les règles, pas juste éviter un bannissement</h3>
+  <p>Deux problèmes différents vivent ici et ont besoin de deux solutions différentes. Se faire bannir par
+  IP est une nuisance opérationnelle. Violer les conditions d'utilisation d'une plateforme, ou une loi de
+  protection des données, est un problème d'une autre nature — la solution n'est pas un proxy, c'est de ne
+  pas scraper cette source du tout (§12.2).</p>
+  <ul>
+    <li><b>Chaque source a ses CGU lues avant sa première exécution</b>, pas seulement son robots.txt
+    vérifié. Ce sont deux documents différents répondant à des questions différentes, et un site peut
+    autoriser les robots dans l'un tout en interdisant le stockage dans l'autre.</li>
+    <li><b>Un serveur veut dire une seule IPv4</b>, donc scraper en volume depuis une seule adresse risque
+    un bannissement même sur une source pleinement autorisée. Prévoir la rotation de proxys pour
+    tout ce qui est parsé en HTML dès le départ, plutôt que
+    la découvrir la semaine après le premier bannissement.</li>
+    <li><b>Les limites de débit et le backoff sont une config par source</b>, sur la ligne de la source,
+    modifiable depuis le panneau admin, backoff exponentiel sur les erreurs 429 et 403.</li>
+    <li><b>Deux exécutions ratées désactivent la source</b> et lèvent une alerte (§17.1), au lieu de
+    continuer à marteler un hôte qui a déjà dit non.</li>
+    <li><b>Scraper lentement et constamment</b> plutôt que par rafales. Il n'y a pas d'échéance — ce
+    projet est censé s'accumuler pendant des années, et être poli est à la fois le choix conforme et le
+    choix le moins cher opérationnellement.</li>
+  </ul>
+
+  <h3><span class="n">12.6</span>Règles</h3>
+  <ul>
+    <li>Le matériau brut est immuable. Chaque étape lit une représentation et en écrit une nouvelle — ce
+    qui explique exactement pourquoi une source avec une clause de rafraîchissement/suppression obligatoire
+    (§12.1) ne peut pas être une source ici.</li>
+    <li>La sortie d'une machine — chaque fois qu'elle existe — entre comme une suggestion, jamais comme un
+    fait.</li>
+    <li>Chaque source est enregistrée avec sa licence par défaut <em>et</em> son statut de CGU issu du
+    §12.2, pour que les droits s'attachent à l'ingestion plutôt que d'être devinés plus tard.</li>
+    <li>Les scrapers respectent le robots.txt, les limites de débit, et les conditions d'utilisation du
+    site — les deux premiers ne remplacent pas le troisième.</li>
+    <li>Les identifiants d'auteur sont retirés à l'ingestion. Aucune donnée personnelle issue de sources
+    sociales, jamais (§4.4).</li>
+  </ul>
+</div>
+
+<!-- 13 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">13</span>
+    <h2>Standardisation, translittération, appariement</h2>
+    <p class="kicker">Trois métiers différents sur le même texte. Les garder séparés est tout le truc.</p>
+  </div>
+
+  <h3><span class="n">13.1</span>Ne pas inventer une orthographe</h3>
+  <p>CODA-TUN (LREC 2014) et NOTA définissent déjà une orthographe conventionnelle pour l'arabe tunisien,
+  et CODA* maintient une base de données orthographique vérifiée à travers les dialectes. Les utiliser bat
+  inventer autre chose : relu par les pairs, gratuit, et ça fait fonctionner ce jeu de données avec toute
+  la chaîne d'outils CAMeL et MADAR. Inventer un standard rival coûte des mois et rend les données moins
+  utiles au bout du compte.</p>
+
+  <h3><span class="n">13.2</span>Les règles sont des données versionnées, pas du code</h3>
+<pre>standardisation_rules
+  id, rule_version, pattern, replacement, script, description, active</pre>
+  <p>Une règle orthographique changera au bout de six mois. Si les formes canoniques sont écrasées sur
+  place sans version enregistrée, chaque instantané déjà publié devient irreproductible et incohérent en
+  interne. Les règles comme lignes versionnées rendent la régénération déterministe — et rejouable à une
+  version antérieure, ce qui est ce qui rend un mauvais changement de règle récupérable (§17.2).</p>
+
+  <h3><span class="n">13.3</span>Correspondance arabizi</h3>
+  <p>L'arabizi vers l'arabe n'est pas une correspondance un-à-un. Des chiffres remplacent des lettres sans
+  équivalent latin, et plusieurs correspondances dépendent du contexte.</p>
+  <table>
+    <thead><tr><th style="width:18mm">Arabizi</th><th style="width:18mm">Arabe</th><th style="width:18mm">Arabizi</th><th style="width:18mm">Arabe</th><th style="width:18mm">Arabizi</th><th>Arabe</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="mono">2</td><td class="ar" dir="rtl" lang="ar">&#x0621;</td>
+        <td class="mono">3</td><td class="ar" dir="rtl" lang="ar">&#x0639;</td>
+        <td class="mono">5</td><td class="ar" dir="rtl" lang="ar">&#x062E;</td>
+      </tr>
+      <tr>
+        <td class="mono">6</td><td class="ar" dir="rtl" lang="ar">&#x0637;</td>
+        <td class="mono">7</td><td class="ar" dir="rtl" lang="ar">&#x062D;</td>
+        <td class="mono">8</td><td class="ar" dir="rtl" lang="ar">&#x063A;</td>
+      </tr>
+      <tr>
+        <td class="mono">9</td><td class="ar" dir="rtl" lang="ar">&#x0642;</td>
+        <td></td><td></td><td></td><td></td>
+      </tr>
+    </tbody>
+  </table>
+  <table>
+    <thead><tr><th style="width:20mm">Ambigu</th><th style="width:32mm">Peut être</th><th>Remarque</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">« e »</td><td class="ar" dir="rtl" lang="ar">&#x0647; / &#x064A;</td><td>ou muet</td></tr>
+      <tr><td class="mono">« a »</td><td class="ar" dir="rtl" lang="ar">&#x0629; / &#x0627;</td><td>ou une fatha</td></tr>
+      <tr><td class="mono">« ch »</td><td class="ar" dir="rtl" lang="ar">&#x0634;</td><td>influence française — pas « sh »</td></tr>
+      <tr><td class="mono">« ou »</td><td class="ar" dir="rtl" lang="ar">&#x0648;</td><td>influence française</td></tr>
+      <tr><td class="mono">« th »</td><td class="ar" dir="rtl" lang="ar">&#x0630; / &#x062B;</td><td>selon le contexte</td></tr>
+    </tbody>
+  </table>
+  <p>Ce tableau mérite d'être publié à part — utile aux gens qui se moquent du reste du corpus, et une
+  façon peu coûteuse d'avoir l'air de savoir ce que je fais dès le début.</p>
+
+  <h3><span class="n">13.4</span>Le flux de standardisation</h3>
+  <ol>
+    <li>Le moteur de règles produit une forme canonique suggérée et marque les intervalles dont il n'est
+    pas sûr.</li>
+    <li>Le relecteur voit la suggestion avec ces intervalles surlignés et les corrige en ligne.</li>
+    <li>La forme acceptée est stockée avec son <code>rule_version</code> et avec
+    <code>canonical_map</code> — l'alignement d'offsets entre l'original et la forme canonique, que le
+    moteur a déjà calculé en appliquant ses règles. Cette carte garde les intervalles de tokens (§7.2)
+    utilisables contre les deux versions du texte.</li>
+    <li>Les corrections qui reviennent souvent sont des règles candidates. L'interface du relecteur fait
+    remonter les corrections manuelles les plus fréquentes.</li>
+  </ol>
+
+  <h3><span class="n">13.5</span>La clé d'appariement — une troisième représentation</h3>
+
+  <div class="note">
+    <span class="label">Postgres n'a pas de configuration de recherche textuelle en arabe</span>
+    <p>Ça compte et c'est facile à rater. Postgres livre des configurations de recherche textuelle pour
+    l'anglais, le français, l'espagnol, le turc et une douzaine d'autres. Il n'y en a pas pour l'arabe.
+    <code>to_tsvector('arabic', …)</code> n'existe pas. Tout plan qui dit « on utilisera la recherche
+    plein texte » pour le traducteur signe un chèque que la base de données ne peut pas honorer.</p>
+  </div>
+
+  <p>Trois options, et ce document en choisit une plutôt que de laisser la question ouverte :</p>
+  <table>
+    <thead><tr><th style="width:38mm">Option</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td class="k">config simple +<br>normalisation maison</td><td>Fonctionne. Pas de racinisation, donc <span class="ar" dir="rtl" lang="ar">كتب</span> ne correspondra pas à <span class="ar" dir="rtl" lang="ar">يكتب</span>. Pour la recherche dans le lexique, c'est surtout correct — je fais correspondre des formes attestées, pas du texte libre fléchi.</td></tr>
+      <tr><td class="k">pg_trgm</td><td>Trigrammes de caractères, agnostique à la langue, vraiment bon pour la tolérance aux fautes de frappe et les variations orthographiques — ce qui est l'essentiel de ce qu'est réellement la recherche en derja. <b>Le cheval de bataille.</b></td></tr>
+      <tr><td class="k">Racinisateur arabe Snowball</td><td>Existe, calibré pour l'arabe standard. Une racinisation d'arabe standard appliquée au derja sera fausse assez souvent pour faire mal. <b>Non.</b></td></tr>
+    </tbody>
+  </table>
+  <p><b>Décision : <code>pg_trgm</code> plus la config <code>simple</code>, pas de racinisateur.</b> Le
+  derja n'a pas de morphologie standard sur laquelle racinifier, et je fais correspondre contre des formes
+  canoniques que je contrôle.</p>
+
+  <h4>Normaliser avant toute comparaison</h4>
+  <p>Sans ça, le traducteur rate constamment, parce que l'arabe a plusieurs façons d'écrire la même chose
+  et les gens les utilisent toutes. Avant d'indexer ou de comparer :</p>
+<pre>variantes de alif fusionnées   أ إ آ ٱ  ->  ا
+taa marbuta -> haa             ة  ->  ه
+alif maqsura -> yaa            ى  ->  ي
+diacritiques retirées          fatha, damma, kasra, shadda, sukun
+tatweel retiré                 ـ
+chiffres arabes-indiens        ٠-٩  ->  0-9   (l'arabizi mélange les deux)</pre>
+
+  <div class="note">
+    <span class="label">Ce n'est pas le même métier que la standardisation CODA</span>
+    <p>CODA produit la forme canonique qui est <em>stockée et affichée</em>. Ceci produit une clé
+    d'appariement que personne ne voit jamais. Les confondre est un vrai piège : on veut que la recherche
+    soit agressive et tolérante, et on ne veut absolument pas que cette agressivité fuite dans les formes
+    canoniques publiées. Deux couches, deux buts, deux colonnes.</p>
+  </div>
+
+<pre>corpus_items.match_key      text   -- normalisé, indexé, jamais affiché
+lexicon_variants.match_key  text
+
+lexicon_forms.match_key     text
+index gin (match_key gin_trgm_ops)</pre>
+</div>
+
+<!-- 14 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">14</span>
+    <h2>Le traducteur</h2>
+    <p class="kicker">La raison pour laquelle quiconque ouvre le site. Livré en phase 2, n'a besoin d'aucun modèle.</p>
+  </div>
+
+  <h3><span class="n">14.1</span>Ce que c'est</h3>
+  <ul>
+    <li><b>Derja → arabe standard / français / anglais.</b> N'importe quel script, n'importe quelle région.</li>
+    <li><b>Arabe standard / français / anglais → derja, avec un sélecteur de région.</b> Personne d'autre
+    n'offre cette direction. « Dis ça en derja du sud » est quelque chose qu'aucun outil existant ne sait
+    faire, et c'est la démo qui pousse les gens à partager le lien.</li>
+  </ul>
+  <p>Le résultat n'est pas une seule chaîne. Ce sont les formes attestées avec leurs régions, leurs
+  scripts, un lien vers l'élément de corpus d'où elles viennent, et — là où quelqu'un l'a enregistré —
+  d'où vient le mot (§7.6). Ce dernier détail ne coûte rien et fait beaucoup de travail : voir qu'un mot
+  qu'on utilise tous les jours est arrivé via le turc ottoman, c'est ce qui fait que la page ressemble à
+  un ouvrage de référence plutôt qu'à un simple dictionnaire.</p>
+
+  <h3><span class="n">14.2</span>Ça n'a besoin d'aucun modèle</h3>
+  <ul>
+    <li><b>Mot et phrase</b> — recherche via <code>lexicon_entries</code> → <code>lexicon_variants</code>
+    → <code>lexicon_forms</code>. Correspondance exacte sur <code>match_key</code>, puis correspondance
+    normalisée via les règles de standardisation, puis similarité <code>pg_trgm</code> pour les fautes de
+    frappe et les variations orthographiques (§13.5).</li>
+    <li><b>Phrase</b> — similarité par trigrammes sur <code>corpus_items.match_key</code>, retournant les
+    éléments de corpus attestés avec leurs traductions humaines. Pas de la recherche plein texte, pour la
+    raison expliquée au §13.5.</li>
+    <li><b>Filtrage par région</b> — une jointure <code>lexicon_variant_regions</code>. Déjà dans le
+    schéma.</li>
+  </ul>
+  <p>Pas d'embeddings, pas de clé d'API, pas de coût, rien dans le chemin de requête qui puisse tomber en
+  panne.</p>
+
+  <h3><span class="n">14.3</span>Pourquoi ça s'améliore tout seul</h3>
+  <div class="note">
+    <span class="label">La propriété qui fait que c'est la bonne forme</span>
+    <p>Chaque annotation acceptée améliore le traducteur au moment même où elle est écrite. Pas de
+    réentraînement, pas d'instantané à promouvoir, pas de risque de régression. Un modèle entraîné
+    s'améliore par sauts versionnés et peut empirer ; un traducteur par recherche ne peut que s'améliorer,
+    et il s'améliore le jour même où quelqu'un contribue. Ça vaut plus ici que la fluidité — ça fait de
+    l'outil une raison vivante de contribuer au lieu d'une chose qui consomme des contributions.</p>
+  </div>
+  <p>La page le dit, avec un compteur en direct : <em>ce traducteur connaît N mots et M phrases à travers
+  quatre régions, en hausse depuis X le mois dernier.</em> Le premier jour, ce compteur affiche quelque
+  chose d'embarrassamment petit, et je le laisse visible quand même, parce que « 12 mots, en croissance »
+  est un argumentaire plus honnête qu'une page d'accueil qui fait semblant d'être terminée.</p>
+
+  <h3><span class="n">14.4</span>Échouer honnêtement, et la boucle qui en sort</h3>
+  <p>Quand il n'y a pas d'attestation, le traducteur ne devine pas. Il montre quels mots il a trouvés et
+  lesquels non, les voisins attestés les plus proches marqués comme approximatifs, ce qui manque par
+  région — <em>« attesté au nord et au sahel. Aucune attestation du sud. »</em> — et une invitation à
+  contribuer en un clic pour exactement cette lacune.</p>
+  <div class="note">
+    <span class="label">Chaque recherche infructueuse est une invitation à contribuer</span>
+    <p>Les lacunes du traducteur <em>sont</em> la page <code>/gaps</code>, générée par la demande réelle
+    plutôt que devinée. Quelqu'un du sud qui cherche un mot et voit « personne n'a enregistré comment le
+    sud dit ça » est la meilleure invitation à contribuer de tout le système, et ça ne coûte rien à
+    produire.</p>
+  </div>
+
+  <h3><span class="n">14.5</span>Montée en puissance</h3>
+  <table>
+    <thead><tr><th style="width:14mm">Phase</th><th>Capacité</th><th style="width:48mm">Besoins</th></tr></thead>
+    <tbody>
+      <tr><td class="k">2</td><td>Recherche de mot et de phrase, exacte + normalisée + trigramme, filtrée par région</td><td>lexique + pg_trgm</td></tr>
+      <tr><td class="k">2</td><td>Récupération de phrases par similarité de trigrammes</td><td>match_key + index GIN</td></tr>
+      <tr><td class="k">3</td><td>Direction inverse avec sélecteur de région</td><td>couverture du lexique dans les quatre régions</td></tr>
+      <tr><td class="k">4</td><td>Appariement sémantique flou</td><td>embeddings hébergés + pgvector</td></tr>
+      <tr><td class="k">5</td><td>Génération ancrée pour les entrées non attestées</td><td>corpus + API, étiquetée comme générée</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="n">14.6</span>Ce que ce n'est pas</h3>
+  <p>La page dit ce qu'elle est : une recherche dans un corpus, pas de la traduction automatique. Elle
+  retourne ce que les Tunisiens ont vraiment écrit, ou elle ne retourne rien. C'est un produit plus
+  faible qu'un modèle fluide, et plus honnête, et c'est cette honnêteté qui permet à un chercheur de le
+  citer.</p>
+  <p>La même prudence couvre tout ce qui est généré. Un modèle entraîné seulement sur ce corpus sera
+  mauvais pendant longtemps, et en mettre un devant les gens trop tôt brûle la crédibilité auprès
+  exactement du public dont j'ai besoin. La génération, c'est la phase 5, étiquetée, jamais mélangée aux
+  résultats attestés. Quand des modèles arriveront, ils s'entraîneront contre des instantanés figés et ne
+  seront promus que sur une amélioration mesurée contre un ensemble de test qui n'entre jamais dans
+  l'entraînement — pas de réentraînement continu, parce que ça ne donne aucune reproductibilité, aucun
+  moyen de repérer une régression, et absorbe discrètement les mauvaises annotations.</p>
+  <div class="note">
+    <span class="label">Ce que ça coûte : le lexique atterrit en phase 2</span>
+    <p><code>lexicon_entries</code>, <code>lexicon_variants</code>, <code>lexicon_variant_regions</code>,
+    <code>lexicon_forms</code> et le lien de lemmes sont ce sur quoi tourne le traducteur, donc ils
+    appartiennent à la phase 2 plutôt qu'au reste de la couche de service. Le lien de lemmes est un travail
+    d'annotation central ici, pas une gentillesse tardive.</p>
+  </div>
+</div>
+
+<!-- 15 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">15</span>
+    <h2>Frontend et système de design</h2>
+    <p class="kicker">C'est un projet de langue. L'interface a intérêt à être bonne en matière de langue.</p>
+  </div>
+
+  <h3><span class="n">15.1</span>Stack</h3>
+  <table>
+    <thead><tr><th style="width:26mm">Aspect</th><th style="width:50mm">Choix</th><th>Pourquoi</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Framework</td><td>Next.js App Router</td><td>Les pages publiques ont besoin de SSR pour la recherche et la citation ; les tableaux de bord sont lourds côté client. Un seul framework couvre les deux.</td></tr>
+      <tr><td class="k">Style</td><td>Tailwind + variables CSS pour les tokens</td><td>RTL via des propriétés logiques, pas des bricolages de direction.</td></tr>
+      <tr><td class="k">Récupération de données</td><td>Composants serveur en public, TanStack Query pour les tableaux de bord</td><td>Les tableaux de bord ont besoin de mises à jour optimistes et de refetch en arrière-plan. Pas les pages publiques.</td></tr>
+      <tr><td class="k">Formulaires</td><td>react-hook-form + zod (schémas partagés)</td><td>Même validation des deux côtés, une seule définition.</td></tr>
+      <tr><td class="k">Tableaux</td><td>TanStack Table</td><td>Les files de relecture ont besoin de virtualisation, de tri, de contrôle des colonnes.</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="n">15.2</span>Bilingue et bidirectionnel dès le départ</h3>
+  <p>Le contenu arabe se trouve constamment à l'intérieur d'une interface anglaise ou française. La
+  direction mixte est le cas normal ici, et l'ajouter après coup coûte bien plus cher que de le faire dès
+  le début.</p>
+  <ul>
+    <li>Propriétés CSS logiques partout — <code>margin-inline-start</code>, jamais <code>margin-left</code>.</li>
+    <li>Chaque nœud de texte en derja reçoit <code>dir="rtl"</code> et <code>lang="ar-TN"</code>, quoi que fasse l'interface autour.</li>
+    <li>Marques LRM/RLM autour du contenu inline à scripts mélangés, sinon l'algorithme bidi le réordonne en charabia.</li>
+    <li>Une police avec une vraie couverture arabe. Les polices système par défaut rendent mal le texte tunisien.</li>
+    <li>L'arabizi est en script latin mais c'est une langue tunisienne : <code>lang="aeb-Latn"</code>, LTR. Ni l'un ni l'autre des deux autres cas.</li>
+  </ul>
+  <p>Trois locales d'interface : anglais, français, arabe. Le français compte plus qu'il n'y paraît —
+  beaucoup d'utilisateurs tunisiens lisent le texte d'interface plus confortablement en français qu'en
+  arabe standard. La locale est indépendante de la direction du contenu.</p>
+
+  <h3><span class="n">15.3</span>Composants d'annotation</h3>
+  <p>Les tableaux de bord partagent un petit ensemble de composants. Bien les construire une fois, c'est
+  l'essentiel du travail frontend.</p>
+  <table>
+    <thead><tr><th style="width:34mm">Composant</th><th>Ce qu'il fait</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">&lt;CorpusItemText&gt;</td><td>Bon dir/lang, surligne les intervalles tagués/liés, sélection pour en créer de nouveaux</td></tr>
+      <tr><td class="mono">&lt;SpanSelector&gt;</td><td>Sélection souris et tactile retournant des offsets de caractères, accroche aux frontières de tokens</td></tr>
+      <tr><td class="mono">&lt;TagChip&gt;</td><td>Genre + valeur, coloré par catégorie, supprimable, annotateur au survol</td></tr>
+      <tr><td class="mono">&lt;RegionPicker&gt;</td><td>Quatre régions, sélection multiple (§6.4), plus pan-tunisien et incertain. Touches 1–5.</td></tr>
+      <tr><td class="mono">&lt;TaskCard&gt;</td><td>Enveloppe n'importe quel type de tâche, gère réclamer/compléter/passer de la même façon pour toutes</td></tr>
+      <tr><td class="mono">&lt;ScriptToggle&gt;</td><td>Bascule un élément de corpus entre vues arabe et arabizi</td></tr>
+      <tr><td class="mono">&lt;DiffView&gt;</td><td>Original contre standardisé, surlignage au niveau caractère</td></tr>
+    </tbody>
+  </table>
+  <div class="aside">
+    <p><b>Construit jusqu'ici :</b> aucun de ces sept composants n'existe encore. Les 31 routes frontend du
+    §16 sont de purs squelettes — un titre et une ligne de description chacune, juste assez pour que
+    <code>next build</code> compile et que chaque route retourne 200, rien de branché à de vraies données.
+    Tout cet ensemble de composants reste à faire.</p>
+  </div>
+
+  <h3><span class="n">15.4</span>Clavier d'abord pour les relecteurs</h3>
+  <p>Quelqu'un qui traite des centaines d'entrées d'une traite est limité par les déplacements de souris.
+  Le fonctionnement complet au clavier est une fonctionnalité de débit, pas une case d'accessibilité à
+  cocher, et c'est conçu comme tel dès le départ.</p>
+<pre>1-5      régler la région     a   approuver
+j / k    suivant / précédent  r   rejeter
+entrée   soumettre + suivant  s   passer
+t        focus traduction     e   éditer la forme standardisée
+?        aide raccourcis      f   marquer pour adjudication</pre>
+</div>
+<!-- 16 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">16</span>
+    <h2>Chaque page, spécifiée</h2>
+    <p class="kicker">Avec la phase associée, pour que rien ne soit construit trop tôt.</p>
+  </div>
+
+  <p class="lede">Voici les écrans de base tels que j'en comprends le besoin en ce moment. Je m'attends à
+  trouver des pages à ajouter, séparer, fusionner ou abandonner une fois que je serai vraiment en train de
+  construire et de les utiliser — cette liste est un point de départ, pas une spec figée.</p>
+
+  <h3><span class="n">16.1</span>Pages publiques</h3>
+  <table>
+    <thead><tr><th style="width:28mm">Page</th><th style="width:24mm">Route</th><th>Ce qu'il y a dessus</th><th style="width:12mm">Phase</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Accueil</td><td class="mono">/</td><td>Ce que c'est, compteurs en direct par région, un exemple de comparaison, appel à contribuer</td><td class="num">2</td></tr>
+      <tr><td class="k">Traduire</td><td class="mono">/translate</td><td>Traducteur en direct, les deux directions, conscient de la région, honnête sur ce qu'il n'a pas (§14)</td><td class="num">2</td></tr>
+      <tr><td class="k">Explorer</td><td class="mono">/explore</td><td>Recherche et filtres : région, portée, époque, cadre, registre, unité, script, a-une-traduction</td><td class="num">2</td></tr>
+      <tr><td class="k">Comparer</td><td class="mono">/compare</td><td>Une entrée de lexique, quatre colonnes régionales. La page que les gens partagent.</td><td class="num">2</td></tr>
+      <tr><td class="k">Permalien d'entrée</td><td class="mono">/s/:id</td><td>Texte, tags, traductions, attestations, source, historique des révisions, bouton citer, lien de signalement (§16.4)</td><td class="num">2</td></tr>
+      <tr><td class="k">Lexique</td><td class="mono">/lexicon</td><td>Liste des entrées de lexique, variantes régionales, comptes d'attestations</td><td class="num">2</td></tr>
+      <tr><td class="k">Entrée de lexique</td><td class="mono">/lexicon/:id</td><td>Une entrée de lexique, chaque variante et forme, exemples d'attestations, origine avec note de dérivation (§7.6)</td><td class="num">2</td></tr>
+      <tr><td class="k">Origines</td><td class="mono">/origins</td><td>Parcourir par strate — chaque mot d'origine amazighe, chaque emprunt italien, la note sur le suffixe <code>-ji</code> — et ajouter une origine soi-même si on en connaît une non enregistrée (§7.6)</td><td class="num">2</td></tr>
+      <tr><td class="k">Recherche</td><td class="mono">/research</td><td>Bibliographie des travaux sur le derja tunisien. Soumise par la communauté, amorcée avant le lancement (§7.10)</td><td class="num">2</td></tr>
+      <tr><td class="k">Téléchargement</td><td class="mono">/data</td><td>Versions publiées, formats, checksums, licence par palier, journal des changements</td><td class="num">2</td></tr>
+      <tr><td class="k">Méthodologie</td><td class="mono">/methodology</td><td>Sourcing, adoption de CODA, processus d'annotation, taux d'accord, biais connus</td><td class="num">2</td></tr>
+      <tr><td class="k">Couverture</td><td class="mono">/coverage</td><td>Équilibre régional, distribution par unité, complétude des traductions, lacunes</td><td class="num">2</td></tr>
+      <tr><td class="k">Guide de style</td><td class="mono">/style</td><td>Conventions orthographiques, le tableau de correspondance arabizi, exemples travaillés</td><td class="num">2</td></tr>
+      <tr><td class="k">Citation</td><td class="mono">/cite</td><td>BibTeX, DOI Zenodo, chaînes de citation par version</td><td class="num">2</td></tr>
+      <tr><td class="k">Licence</td><td class="mono">/license</td><td>Droits par source, quels paliers sont utilisables commercialement</td><td class="num">2</td></tr>
+      <tr><td class="k">Lacunes</td><td class="mono">/gaps</td><td>Les plus demandés, guidés par les échecs du traducteur et les déficits de couverture</td><td class="num">3</td></tr>
+      <tr><td class="k">Classement</td><td class="mono">/contributors</td><td>Par nombre approuvé, et par région</td><td class="num">3</td></tr>
+      <tr><td class="k">Soutien</td><td class="mono">/support</td><td>Dons et parrainage seulement — rien à vendre, rien de bloqué derrière. À quoi servirait l'argent.</td><td class="num">3</td></tr>
+      <tr><td class="k">Docs API</td><td class="mono">/docs/api</td><td>Points d'accès, authentification, limites de débit, exemples</td><td class="num">4</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="n">16.2</span>Pages contributeur — une question, trois secondes</h3>
+  <p>Chacune de ces pages est construite contre le §9.6 : aucune n'expose les niveaux de confiance, les
+  types de tâches, ou quoi que ce soit de la mécanique derrière.</p>
+
+  <table>
+    <thead><tr><th style="width:32mm">Page</th><th style="width:30mm">Route</th><th>Ce qu'il y a dessus</th><th style="width:12mm">Phase</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Contribuer</td><td class="mono">/contribute</td><td>Une case : écrire un mot, une phrase, ou un paragraphe. Région comme quatre boutons cliquables, consentement comme une case à cocher, pas de compte. Traduction, script et détail de région sont des extras optionnels sous le pli — les sauter et la file de tâches de quelqu'un d'autre rattrape exactement ce qui manque (§8).</td><td class="num">3</td></tr>
+      <tr><td class="k">Confirmer</td><td class="mono">/confirm</td><td>Un élément, une question, trois boutons, rien d'autre sur la page. La surface la moins coûteuse en effort qui existe — c'est ce qui transforme un visiteur en contributeur.</td><td class="num">3</td></tr>
+      <tr><td class="k">Boîte de tâches</td><td class="mono">/tasks</td><td>Les tâches ouvertes que cette personne peut faire. Ne montre jamais un état vide ou verrouillé — s'il n'y a rien, ça redirige vers <code>/contribute</code>.</td><td class="num">3</td></tr>
+      <tr><td class="k">Tâche de traduction</td><td class="mono">/tasks/translate</td><td>Élément de corpus plus brouillon, corriger et soumettre</td><td class="num">3</td></tr>
+      <tr><td class="k">Translittérer</td><td class="mono">/tasks/transliterate</td><td>Élément de corpus plus suggestion générée par règle, intervalles incertains surlignés</td><td class="num">3</td></tr>
+      <tr><td class="k">Proposer une correction</td><td class="mono">/s/:id/correct</td><td>Suggérer une correction sans accès en écriture</td><td class="num">3</td></tr>
+      <tr><td class="k">Mes contributions</td><td class="mono">/me</td><td>Ce qu'ils ont contribué et si c'est accepté. Pas un niveau, pas un palier, pas un parcours.</td><td class="num">3</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="n">16.3</span>Pages relecteur — connecté</h3>
+  <table>
+    <thead><tr><th style="width:32mm">Page</th><th style="width:34mm">Route</th><th>Ce qu'il y a dessus</th><th style="width:12mm">Phase</th></tr></thead>
+    <tbody>
+      <tr><td class="k">File de relecture</td><td class="mono">/review</td><td>Triage : approuver, rejeter, tag de région, tag de qualité. Piloté au clavier.</td><td class="num">1</td></tr>
+      <tr><td class="k">Lien de lemmes</td><td class="mono">/review/lemma</td><td>Rattacher des tokens à des variantes de lexique. Travail d'annotation central — le traducteur tourne dessus.</td><td class="num">2</td></tr>
+      <tr><td class="k">Adjudication</td><td class="mono">/review/adjudicate</td><td>Tags en conflit côte à côte avec qui les a faits ; choisir ou passer outre. Routée par région (§8.5).</td><td class="num">3</td></tr>
+      <tr><td class="k">Corrections</td><td class="mono">/review/corrections</td><td>Corrections communautaires, propositions d'origine, soumissions de publications, signalements</td><td class="num">3</td></tr>
+      <tr><td class="k">Standardisation</td><td class="mono">/review/standardise</td><td>Suggestion contre original, intervalles incertains, accepter ou éditer</td><td class="num">4</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="n">16.4</span>Deux choses que les pages publiques doivent trancher</h3>
+
+  <h4>Signalement</h4>
+  <p>Le §4.4 promet que les demandes de retrait sont honorées rapidement, ce qui est difficile sans moyen
+  d'en faire une. Chaque permalien porte un lien de signalement qui écrit dans <code>flags</code> (§7.8),
+  alimentant la file des corrections. Je vais recevoir des insultes, des propos offensants, le numéro de
+  téléphone de quelqu'un, et du contenu qu'une personne veut voir disparaître — ce n'est pas du
+  pessimisme, c'est ce qui arrive à tout site qui accepte du texte public. Un bouton coûte moins cher
+  qu'une boîte de réception.</p>
+
+  <h4>Registre vulgaire</h4>
+  <p><code>register: vulgar</code> existe parce que le derja en est plein et l'exclure falsifierait le
+  corpus. Mais <code>/explore</code> et <code>/translate</code> sont publics et non authentifiés, donc la
+  politique doit être énoncée plutôt que laissée à qui écrit la requête :</p>
+  <ul>
+    <li><b>Filtré par défaut, avec un interrupteur opt-in visible.</b> L'interrupteur est honnête sur ce
+    qu'il fait — il ne dit pas « mode sûr », il dit « inclure le registre vulgaire ». La préférence vit
+    dans un cookie, même idée que le cookie de session au §9.3 — pas besoin de compte pour garder le choix
+    entre deux visites.</li>
+    <li><b>L'API porte le même interrupteur, pas une politique séparée.</b> <code>/v1/search</code> et
+    <code>/v1/lookup</code> prennent tous les deux un paramètre <code>include_vulgar</code> (§18.1) qui
+    fait exactement ce que fait l'interrupteur de l'interface. Sans lui, les deux sont filtrés par
+    défaut — l'API n'a pas une règle plus discrète ou plus laxiste que la page.</li>
+    <li><b>Toujours présent dans les exports</b>, toujours étiqueté. Un corpus qui laisse discrètement
+    tomber la moitié de la façon dont les gens parlent vraiment n'est pas un corpus de la façon dont les
+    gens parlent.</li>
+    <li><b>Jamais filtré dans la file de relecture.</b> Les relecteurs voient tout ; c'est le travail.</li>
+  </ul>
+</div>
+
+<!-- 17 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">17</span>
+    <h2>Le tableau de bord admin</h2>
+    <p class="kicker">Cette page décide si une seule personne peut vraiment faire tourner ce projet.</p>
+  </div>
+
+  <p class="lede">Le public entier de cette page, c'est moi, à des heures indues, probablement un peu
+  paniqué. Tout ce qui y figure mérite sa place selon ce critère.</p>
+
+  <h3><span class="n">17.1</span>Aperçu — le seul écran qui répond à « est-ce que ça va »</h3>
+  <table>
+    <thead><tr><th style="width:32mm">Widget</th><th>Montre</th><th style="width:48mm">Alerte quand</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Débit du pipeline</td><td>ingéré / relu / publié, 24h et 7j</td><td>taux de relecture sous le taux d'ingestion pendant 3 jours</td></tr>
+      <tr><td class="k">Santé de la file de tâches</td><td>ouvertes par type, la plus ancienne ouverte, temps moyen pour compléter</td><td>quoi que ce soit de plus vieux que 14 jours</td></tr>
+      <tr><td class="k">Équilibre régional</td><td>part en direct par région contre l'objectif</td><td>une région sous 15 % du total</td></tr>
+      <tr><td class="k">Accord des annotateurs</td><td>taux d'accord glissant, retard d'adjudication</td><td>accord sous 0,7</td></tr>
+      <tr><td class="k">Adjudication hors région</td><td>part décidée par un relecteur d'ailleurs (§8.5)</td><td>plus de 20 % pour une région — un problème de recrutement, pas un seuil à relâcher</td></tr>
+      <tr><td class="k">Couverture du traducteur</td><td>taux de succès des recherches, taux d'échec par région</td><td>le taux d'échec d'une région dépasse 60 % — la lacune où le corpus échoue, mesurée par la demande réelle</td></tr>
+      <tr><td class="k">Activité des contributeurs</td><td>contributeurs actifs sur 7j, nouveaux contre récurrents</td><td>aucun nouveau contributeur en 7 jours</td></tr>
+      <tr><td class="k">Statut des scrapers</td><td>dernière exécution par source, rendement, taux d'erreur</td><td>une source qui échoue deux fois de suite</td></tr>
+      <tr><td class="k">Santé des services</td><td>statut des conteneurs nlp et media, disponibilité (le backend lui-même tourne sous pm2, §10.0)</td><td>l'un des deux en panne plus de 5 minutes</td></tr>
+      <tr><td class="k">Système</td><td>taille de la base, disque, mémoire, profondeur de la file, taux d'erreur, dernière sauvegarde</td><td>disque au-dessus de 80 %, profondeur de file au-dessus de 1000, sauvegarde de plus de 48h</td></tr>
+    </tbody>
+  </table>
+  <p>Chaque « taux d'erreur » sur cet écran est adossé à Sentry (§10.0) — DSN configuré, échantillonnage
+  de traces par défaut — pas un chiffre inventé pour le tableau de bord.</p>
+  <p>Cet écran porte chaque chiffre que le §9.6 tient à l'écart des contributeurs. C'est le but — la
+  complexité est réelle et entièrement instrumentée, elle fait juste face à moi au lieu d'eux.</p>
+
+  <h3><span class="n">17.2</span>Sections</h3>
+
+  <h4>Gestion des données</h4>
+  <ul>
+    <li>Parcourir chaque table avec des filtres — une vue en lecture seule sûre</li>
+    <li>Opérations en masse : relancer la standardisation sur une sélection, réattribuer une région, rejeter en masse un mauvais lot de scraping</li>
+    <li>Fusionner des entrées de lexique en double ; scinder une entrée de lexique qui mélangeait deux sens</li>
+    <li>Chaque opération en masse écrit une ligne <code>audit_log</code> avec un diff réversible</li>
+    <li>Journal des échecs du traducteur — les termes non attestés les plus recherchés, classés, exportables comme invitations à contribuer</li>
+  </ul>
+
+  <h4>Files de relecture</h4>
+  <ul>
+    <li>Les corrections communautaires, les propositions d'origine, les publications soumises et les
+    signalements empruntent tous la même file <code>corrections</code> plutôt que d'avoir chacun leur
+    propre file — les signalements ont une simple vue en liste dès la phase 2 (§20), pliés proprement dans
+    cette file unifiée une fois que le reste existe en phase 3</li>
+    <li>Les commentaires de publication en attente d'approbation, et l'interrupteur qui désactive
+    entièrement les commentaires (§7.10)</li>
+  </ul>
+
+  <h4>Administration des tâches</h4>
+  <ul>
+    <li>Reprioriser les files — pousser les tâches des régions du sud quand l'équilibre glisse</li>
+    <li>Libérer de force les réclamations bloquées, réattribuer, générer manuellement des tâches pour une sélection</li>
+    <li>Mettre entièrement en pause un type de tâche — suspendre la traduction pendant que la standardisation rattrape son retard</li>
+    <li>Routage d'adjudication : revoir les cas hors région, ajuster la fenêtre de 7 jours, voir le taux par région</li>
+    <li>Régulation de la file : intervalle de sondage, concurrence, taille des lots, en direct (§10.3)</li>
+  </ul>
+
+  <h4>Sources</h4>
+  <ul>
+    <li>Ajouter, éditer, désactiver ; licence par défaut et statut de consentement par source</li>
+    <li>Planification, limite de débit, pool de proxys, historique de rendement</li>
+    <li>Exécution manuelle ; dernière erreur avec sa stack trace</li>
+    <li>Mettre une source en quarantaine et signaler en masse tout ce qu'elle a produit, si les droits s'avèrent troubles</li>
+    <li>Les échecs de source et les health-checks nlp/media (la ligne Santé des services du §17.1) alertent via le même chemin Sentry — un seul mécanisme de notification, pas deux</li>
+  </ul>
+
+  <h4>Utilisateurs et contributeurs</h4>
+  <ul>
+    <li>Promouvoir en relecteur ; ajuster la confiance manuellement avec une raison enregistrée</li>
+    <li>Qualité par contributeur : taux d'approbation, taux de désaccord, régions d'où ils soumettent</li>
+    <li>Bannir par session ou ip_hash ; annuler en masse tout ce qu'un mauvais acteur a soumis</li>
+    <li>Inviter des relecteurs par email avec des tokens expirants, en capturant leur région</li>
+  </ul>
+
+  <h4>Règles de standardisation</h4>
+  <ul>
+    <li>CRUD complet, avec un aperçu montrant combien d'éléments de corpus un changement toucherait <em>avant</em> de l'appliquer</li>
+    <li>Incrémenter <code>rule_version</code>, puis régénérer les formes canoniques et les cartes d'offsets comme tâche de fond</li>
+    <li>Rapport de corrections manuelles fréquentes : ce que les relecteurs corrigent constamment à la main — les règles candidates</li>
+  </ul>
+  <div class="note">
+    <span class="label">Un mauvais changement de règle a besoin d'un chemin de retour</span>
+    <p>Régénérer chaque forme canonique à partir de nouvelles règles est exactement l'opération dont on
+    découvre après coup qu'elle était fausse. Donc : <b>instantané avant de régénérer</b>, garder les
+    lignes <code>rule_version</code> précédentes actives plutôt que de les supprimer, et rendre la
+    régénération rejouable à n'importe quelle version antérieure. Faire marche arrière devient alors
+    rejouer une ancienne version, pas restaurer une sauvegarde à 3h du matin.</p>
+  </div>
+
+  <h4>Instantanés et publications</h4>
+  <ul>
+    <li>Créer : geler, calculer le checksum, compter, notes de version</li>
+    <li>Choisir les paliers d'export — complet, propre commercialement, étymologie, par région</li>
+    <li>Pousser vers Hugging Face et le stockage objet via des URLs présignées, jamais à travers le processus NestJS — le même mécanisme dont le stockage média du §7.11 aura besoin plus tard</li>
+    <li>Comparer deux instantanés : éléments de corpus ajoutés, changés, retirés ; delta de version de règle</li>
+    <li>Déprécier avec une raison, affichée publiquement sur la page de téléchargement</li>
+
+  </ul>
+
+  <h4>Opérations de confidentialité</h4>
+  <ul>
+    <li>Traiter une révocation de consentement avec confirmation tapée (§4.3)</li>
+    <li>Prévisualiser quels champs de quelles tables une révocation va nettoyer, avant de l'exécuter</li>
+    <li>Demande d'accès aux données personnelles : exporter tout ce qui est détenu sur une session ou un compte</li>
+    <li>Journal des révocations — action, horodatage, décompte, et aucun identifiant dedans</li>
+  </ul>
+
+  <h4>Système</h4>
+  <ul>
+    <li>Statut des tâches, journal des échecs, nouvel essai manuel</li>
+    <li>Statut des sauvegardes : dernier dump réussi, taille, destination, chiffrement confirmé, dernier test de restauration — alimenté par <code>verify-backup-restore.yml</code> (§2.3), pas un rappel dans mon agenda à vérifier manuellement</li>
+    <li>Feature flags — activer une page pour les relecteurs avant qu'elle ne soit publique</li>
+    <li>Mode maintenance avec une bannière publique</li>
+    <li>Journal d'audit complet, cherchable par acteur, entité, action, date</li>
+  </ul>
+
+  <h4>Gestion de modèles <span style="font-weight:400;color:var(--ink-faint)">— phase 4 seulement</span></h4>
+  <p style="font-size:8.8pt;color:var(--ink-faint)">Enregistrer un modèle contre un instantané avec ses
+  métriques ; comparer un candidat contre la production sur l'ensemble de test réservé ; promouvoir ou
+  revenir en arrière. Vide jusqu'à ce que le §11 arrive — spécifié maintenant pour que la discipline de
+  split figé soit conçue dès le départ plutôt que greffée après coup.</p>
+
+  <div class="note">
+    <span class="label">Règles pour tout ce qui est destructeur</span>
+    <p>Rien n'est jamais supprimé pour de vrai. Chaque action destructrice est une suppression douce plus
+    une entrée d'audit. Les opérations en masse au-dessus d'un seuil demandent de taper le nombre
+    d'éléments affectés pour confirmer. Ce jeu de données est tout l'actif du projet — le panneau admin
+    devrait rendre difficile de l'abîmer même quand je suis fatigué et que je vais vite.</p>
+  </div>
+</div>
+
+<!-- 18 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">18</span>
+    <h2>L'API publique</h2>
+    <p class="kicker">Commodité et recherche, gratuit à tous les paliers. Rien ici n'est jamais vendu.</p>
+  </div>
+
+  <h3><span class="n">18.1</span>Points d'accès</h3>
+  <p>Toute l'API est en phase 4. Dedans, les points d'accès basés sur des règles fonctionnent dès qu'elle
+  existe ; les deux qui ont besoin d'un modèle attendent le §11.</p>
+<pre>GET  /v1/search              q, region, scope, unit, script, limit, include_vulgar
+GET  /v1/corpus-items/:id    enregistrement complet avec tags, tokens, liens, et traductions
+POST /v1/normalise           { text } -&gt; { canonical, script, rule_version }
+POST /v1/transliterate       { text, from, to } -&gt; { text, ambiguous[] }
+POST /v1/lookup              { text, region?, include_vulgar? } -&gt; formes attestées + traductions
+                             exact / normalisé / trigramme. Pas de ML. (§14.2)
+GET  /v1/lexicon/:entry_id   toutes les variantes régionales
+GET  /v1/origins/:entry_id   étymologie, là où elle est enregistrée
+GET  /v1/coverage            statistiques publiques
+
+  en attente du travail de modèle reporté (§11.3) :
+POST /v1/classify          { text } -&gt; { regions[], confidence, alternatives[] }
+POST /v1/memory            { text } -&gt; correspondances sémantiques floues ; a besoin d'embeddings</pre>
+
+  <h3><span class="n">18.2</span>Paliers d'accès</h3>
+  <p>Tout est gratuit. Les paliers existent pour garder l'API utilisable sous un trafic réel, pas pour la
+  faire payer.</p>
+  <table>
+    <thead><tr><th style="width:26mm">Palier</th><th style="width:58mm">Limites</th><th>Pour</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Anonyme</td><td>60 requêtes/heure, recherche et lecture d'éléments de corpus seulement</td><td>jeter un œil</td></tr>
+      <tr><td class="k">Clé gratuite</td><td>1000 requêtes/jour, tous les points de lecture</td><td>chercheurs, projets personnels, créateurs d'outils</td></tr>
+      <tr><td class="k">Recherche / usage intensif</td><td>illimité, sur demande</td><td>usage académique, partenaires institutionnels, quiconque a une vraie raison de demander plus que ce que donne le palier gratuit — accordé à la main, toujours gratuit</td></tr>
+    </tbody>
+  </table>
+  <p>Les chiffres ci-dessus sont une estimation de départ, pas une limite mesurée. Les vraies limites de
+  débit et les plafonds de téléchargement dépendent de ce que le VPS peut vraiment encaisser, et je ne
+  peux pas le dire honnêtement avant que l'hébergement ne soit tranché (§2.1). Ils seront ajustés contre
+  la vraie machine une fois qu'elle existera.</p>
+
+  <h3><span class="n">18.3</span>Règles</h3>
+  <ul>
+    <li><b>Il n'y a pas de palier payant et il n'y en aura jamais.</b> L'API n'est pas un plan de revenus
+    déguisé en limiteur de débit. C'est un effort à but non lucratif — les paliers existent pour protéger
+    le serveur d'être martelé, pas pour monétiser l'accès. Une entreprise qui veut construire un produit
+    payant par-dessus ces données est libre de le faire ; je ne suis pas celui qui la fait payer pour ce
+    privilège.</li>
+    <li><b>Le corpus en masse n'est jamais verrouillé.</b> Cette ouverture gagne la bonne volonté dont tout
+    le reste dépend.</li>
+    <li>Chaque réponse porte le <code>snapshot_version</code> et le <code>rule_version</code> contre
+    lesquels elle a été calculée.</li>
+    <li>Limitation de débit au niveau du reverse proxy, pas dans le code applicatif.</li>
+  </ul>
+</div>
+
+<!-- 19 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">19</span>
+    <h2>Export et publication</h2>
+    <p class="kicker">Les formats que chaque public utilise déjà, et ce qui accompagne chaque publication.</p>
+  </div>
+
+  <h3><span class="n">19.1</span>Formats</h3>
+  <table>
+    <thead><tr><th style="width:24mm">Format</th><th style="width:40mm">Pour</th><th>Remarque</th></tr></thead>
+    <tbody>
+      <tr><td class="k">JSONL</td><td>général, entraînement de modèle</td><td>un élément de corpus par ligne, tags imbriqués</td></tr>
+      <tr><td class="k">CoNLL-U</td><td>outillage linguistique</td><td>au niveau token, le standard que tout le monde en TAL lit déjà</td></tr>
+      <tr><td class="k">TMX</td><td>industrie de la localisation</td><td>Choisi exprès — c'est ce que les outils de mémoire de traduction consomment déjà, donc aucune friction d'adoption pour le public commercial.</td></tr>
+      <tr><td class="k">CSV</td><td>enseignants, journalistes, utilisateurs non techniques</td><td>aplati et avec perte, et étiqueté comme tel</td></tr>
+      <tr><td class="k">HF Datasets</td><td>l'écosystème ML</td><td>versionné, avec une fiche de jeu de données</td></tr>
+    </tbody>
+  </table>
+
+  <h3><span class="n">19.2</span>Paliers d'export par droits</h3>
+<pre>full            tout, usage recherche, non commercial
+clean           contributions consenties seulement, utilisable commercialement
+regional-*      tranches par région
+lexicon         entrée de lexique / variante / forme seulement, pas de texte source
+etymology       entrée de lexique, origine, forme source — petit, autonome,
+                et probablement la tranche la plus citable disponible tôt</pre>
+
+  <h3><span class="n">19.3</span>Chaque publication est livrée avec</h3>
+  <p>Un numéro de version, un checksum, les comptes d'éléments de corpus par région et par unité. La
+  version de règle utilisée pour les formes canoniques. Des statistiques d'accord, rapportées
+  honnêtement. Un journal des changements contre la version précédente. Une fiche de jeu de données
+  couvrant la méthode de collecte, les biais connus, les usages prévus et non prévus. Un DOI Zenodo.</p>
+</div>
+
+<!-- 20 -->
+<div class="section">
+  <div class="section-head">
+    <span class="num">20</span>
+    <h2>Séquence de construction</h2>
+    <p class="kicker">Cinq phases, et une règle sur là où ce projet a le droit de s'arrêter.</p>
+  </div>
+
+  <div class="note">
+    <span class="label">Où en est vraiment la phase 1, à cette révision</span>
+    <p>Le schéma, le moteur de tâches, le consensus, et le pipeline d'ingestion des éléments de corpus
+    sont construits et testés contre une base de données en fonctionnement. Rien de ce qui fait face à
+    l'utilisateur ne l'est — pas d'interface de file de relecture, pas encore de scraper contre une
+    vraie source. La checklist ci-dessous marque chaque ligne plutôt que de reformuler ce partage en
+    prose.</p>
+  </div>
+
+  <h3>Phase 1 — Pipeline central <span style="font-weight:400;color:var(--ink-faint)">· but : une boucle d'annotation qui fonctionne</span></h3>
+  <ul class="checklist">
+    <li>Squelette du monorepo : <code>control-plane/</code> (backend + core sous backend/core, worker,
+    scrapers), <code>data-plane/</code>, <code>intelligence-plane/nlp</code>, frontend, shared, db
+    <b>— fait</b>. <code>worker/</code> est un vrai paquet avec pg-boss branché et une
+    tâche en fonctionnement ; <code>scrapers/</code> est amorcé comme paquet mais ses dossiers
+    <code>pipeline/</code> et <code>sources/</code> sont encore vides (§10.0)</li>
+    <li>Schéma Prisma : documents, corpus_items, tokens, links, tags, tasks, users, sources, audit_log
+    <b>— fait</b>, et il couvre maintenant aussi chaque table des phases 2/3/5 (lexique, traductions,
+    corrections, signalements, instantanés, publications, outbox, objets stockés) — moins cher de
+    déclarer une table vide maintenant que d'en migrer une plus tard</li>
+    <li><code>lexicon_origins</code> et <code>origin_enum</code> dans le schéma dès la première migration, même si rien n'y écrit avant la phase 2 (§7.6) <b>— fait</b></li>
+    <li>Migrations <b>— fait</b> ; données de seed écrites à la main pour les quatre régions <b>— pas commencé</b> (<code>db/seeds/</code> est encore un squelette vide)</li>
+    <li>Auth : connexion relecteur, cookies de session, chaîne de guards — <b>partiellement fait</b>. Email/mot de passe avec argon2id, JWT access+refresh avec rotation et détection de réutilisation, double-soumission CSRF, et la chaîne complète <code>ThrottlerGuard → AuthGuard → RolesGuard → TrustGuard</code> sont construits et vérifiés en fonctionnement (§9.5). GitHub OAuth n'est pas encore branché.</li>
+    <li>Moteur de tâches : réclamer, compléter, rejeter, reprendre ; règles de génération ; clés d'idempotence dès le départ <b>— fait</b>, et les complétions <code>review</code>/<code>region_tag</code>/<code>confirm</code> sont vérifiées de bout en bout en fonctionnement (§8.1). Les complétions <code>translate_*</code>, <code>transliterate_*</code>, <code>standardise</code>, <code>adjudicate</code>, <code>link_lemma</code> ont encore besoin des modules lexique/traduction.</li>
+    <li>Routage d'adjudication et <code>target_regions</code> — dès la phase 1, pas plus tard. La règle de routage protège le corpus, et l'ajouter après coup une fois que les relecteurs ont pris leurs habitudes est pire qu'inutile. <b>La logique de routage elle-même est construite</b> (§8.5) et se déclenche automatiquement sous le seuil d'accord ; l'<em>interface</em> de la phase 1 est le panneau admin, qui n'existe pas encore — l'écran d'adjudication dédié arrive en phase 3.</li>
+    <li>Interface de file de relecture, entièrement pilotée au clavier <b>— pas commencé</b></li>
+    <li>CorpusItemText, RegionPicker, TaskCard, TagChip <b>— pas commencé</b> (§15.3)</li>
+    <li>Un scraper contre une source forum, de bout en bout — pas YouTube (§12.1) <b>— pas commencé</b> ; les fonctions du pipeline d'ingestion qu'il traversera (nettoyage, filtre de longueur, filtre de marqueurs, quasi-doublons, découpage en éléments de corpus, calcul du match_key) sont déjà écrites dans <code>control-plane/backend/core/src/ingestion/</code> et <code>text/</code>, juste pas encore pilotées par un vrai scraper</li>
+    <li>Calcul du consensus + marquage pour adjudication <b>— fait</b>, vérifié en fonctionnement</li>
+    <li>pg-boss avec intervalle de sondage et concurrence plafonnés dès le premier commit (§10.3) — <b>partiellement fait</b> : pg-boss est branché dans <code>worker/</code> contre <code>DIRECT_URL</code>, une tâche en fonctionnement (<code>expire_claims</code>, 5 min) ; le reste de la liste de tâches du §9.3 et les plafonds de sondage/concurrence eux-mêmes restent à faire</li>
+    <li><code>intelligence-plane/nlp</code> — FastAPI, endpoint health seulement, conteneurisé, dans compose <b>— fait</b> (§11)</li>
+    <li><code>data-plane</code> — Actix, endpoint health seulement, conteneurisé, dans compose <b>— fait</b> (§7.11)</li>
+    <li>Les deux joignables depuis le backend, conteneurisés et avec health-check <b>— fait</b> ; affichés sur un widget de l'aperçu admin <b>— pas commencé</b>, puisque l'aperçu admin lui-même n'existe pas encore (§17.1)</li>
+    <li>Docker Compose faisant tourner tout ça en local <b>— fait</b> (<code>docker-compose.local.yml</code> pour l'infra de dev, <code>docker-compose.prod.yml</code> pour la pile complète)</li>
+  </ul>
+
+  <div class="note">
+    <span class="label">La phase 2 ne se termine pas avec un jeu de données</span>
+    <p>L'objectif évident de la phase 2 serait « quelque chose de citable existe » — une page de
+    téléchargement et un DOI. Le bon artefact pour un chercheur, le mauvais pour tous les autres, et ce
+    sont tous les autres dont ce projet a besoin. Personne qui arrive sur ce site ne télécharge un JSONL.
+    Il tape un mot dans le traducteur. S'il répond, il pourrait contribuer. Si la page d'accueil est un
+    lien de téléchargement et un essai de méthodologie, il part.</p>
+    <p>Chaque problème difficile du §5 — recrutement de relecteurs, équilibre régional, rester en vie —
+    est un problème de faire venir les gens et de les faire revenir. Un jeu de données ne peut pas faire
+    ça. Un outil qui répond à une question qu'ils avaient vraiment le peut. Donc la phase 2 livre le
+    traducteur, la vue de comparaison et la page de couverture comme un site qui fonctionne. L'instantané
+    publié est un sous-produit, pas le but.</p>
+  </div>
+
+  <h3>Phase 2 — Un site qui fonctionne <span style="font-weight:400;color:var(--ink-faint)">· but : quelque chose qu'un Tunisien peut vraiment utiliser</span></h3>
+  <p style="font-size:8.8pt;color:var(--ink-faint)">La phase 2 à proprement parler n'a pas commencé — les
+  lignes ci-dessous sont encore le plan, sauf trois morceaux d'infrastructure construits tôt parce que la
+  séquence de construction de la phase 1 en avait besoin de toute façon.</p>
+  <ul class="checklist">
+    <li>Lexique : lexicon_entries, lexicon_variants, lexicon_variant_regions, lexicon_forms — le traducteur tourne dessus. Schéma fait (§7.5) ; aucun module, aucun point d'accès encore.</li>
+    <li>Interface d'origine des mots sur la page de l'entrée de lexique, plus la page <code>/origins</code> de navigation par strate</li>
+    <li>Page publications, amorcée avec les travaux déjà cités aux §1.2 et §13.1</li>
+    <li>Flux de liaison de lemmes et écran de relecture — travail d'annotation central</li>
+    <li><b>Page traducteur</b> : recherche de mots et de phrases, filtrée par région, honnête sur la couverture (§14)</li>
+    <li>pg_trgm + normalisation match_key en fonctionnement (§13.5) — le traducteur n'a rien sur quoi tourner sans ça. <code>match_key</code> est déjà calculé sur chaque élément de corpus contribué (module corpus-items du §8.1) ; le côté lexique n'est pas encore construit.</li>
+    <li>Journal des échecs du traducteur alimentant les données de lacunes</li>
+    <li>Navigation et recherche publiques sur tous les axes de filtrage</li>
+    <li>Pages permalien d'entrée avec historique des révisions et bouton de signalement (§16.4) — plus une
+    simple vue en liste pour que je voie et résolve les signalements, puisqu'un bouton de signalement que
+    personne ne regarde n'est pas un plan de modération. La file unifiée complète fusionnant les
+    signalements avec les corrections, origines et publications (§17.2) est une gentillesse de phase 3,
+    pas le minimum de la phase 2.</li>
+    <li>Vue de comparaison à travers les quatre régions</li>
+    <li>Tableau de bord de couverture, public</li>
+    <li>Pages méthodologie, guide de style, licence, citation</li>
+    <li>Interface de stockage de fichiers branchée : URLs présignées contre R2, dev utilise le disque local (§9.5) <b>— construit tôt</b> comme interface plus les deux adaptateurs (<code>control-plane/backend/core/src/storage/</code>) ; pas encore appelé depuis une route</li>
+    <li>Pipeline d'export : JSONL + HF Datasets, avec checksum et versionné, servi via des URLs présignées sans passer par le backend</li>
+    <li>Premier instantané publié avec une fiche de jeu de données et un DOI Zenodo</li>
+    <li>Révocation de consentement + routine d'anonymisation, testée (§4.3)</li>
+    <li>Chiffrement des sauvegardes branché avant que la première vraie sauvegarde ne tourne, pas après (§2.3) <b>— construit tôt</b> : <code>devops/backup/pg-backup.sh</code> chiffre en gpg avant que quoi que ce soit ne quitte la machine</li>
+    <li>CI : <code>master.yml</code> (lint/typecheck/test/dérive de migration/CodeQL) et <code>verify-backup-restore.yml</code> <b>— construits tôt</b>, puisque la CI doit exister avant qu'il n'y ait quoi que ce soit qui vaille la peine d'être protégé avec elle ; <code>infra-watch.yml</code> toujours pas construit</li>
+    <li><b>Trancher l'hébergement et le stockage objet ici, pas avant</b> (§2.1, §2.5) — dimensionner contre l'usage mesuré, déployer, TLS, sauvegardes en fonctionnement et testées en restauration</li>
+  </ul>
+
+  <h3>Phase 3 — Communauté <span style="font-weight:400;color:var(--ink-faint)">· but : de la contribution qui n'a plus besoin de moi</span></h3>
+  <ul class="checklist">
+    <li>Flux de contribution anonyme avec capture de consentement</li>
+    <li>Page confirmer / voter — celle à friction minimale qui convertit les visiteurs</li>
+    <li>Boîte de tâches pour les contributeurs, filtrée par niveau de confiance</li>
+    <li>Interfaces de tâches de traduction et de translittération</li>
+    <li>Propositions de correction + flux de relecture, partageant la file avec les propositions d'origine et de publication</li>
+    <li>Classement par contributions approuvées et par région</li>
+    <li>Page des lacunes guidée par les vrais déficits de couverture et les échecs du traducteur</li>
+    <li>Tâche de calcul des niveaux de confiance</li>
+    <li>Tableau de bord admin : aperçu, utilisateurs, sources, tâches, instantanés, opérations de confidentialité</li>
+  </ul>
+
+  <h3>Phase 4 — Couche de service et assistance automatique <span style="font-weight:400;color:var(--ink-faint)">· seulement une fois que le corpus le mérite</span></h3>
+  <ul class="checklist">
+    <li>Moteur de règles de standardisation + régénération versionnée, avec retour arrière via un rule_version antérieur (§17.2)</li>
+    <li>Embeddings via API hébergée + pgvector ; récupération floue en mémoire de traduction</li>
+    <li>API publique, clés, limitation de débit, tableau de bord d'usage</li>
+    <li>Documentation de l'API</li>
+    <li>Formats d'export TMX et CoNLL-U</li>
+    <li><b>Pré-filtre de dialecte</b> — inférence par lots sur GPU serverless, hors machine (§11.3)</li>
+    <li><b>Classificateur régional</b> entraîné sur le corpus lui-même — la contribution de recherche</li>
+    <li>Registre de modèles et évaluation contre des splits figés</li>
+    <li>PostHog (palier gratuit, §10.0) — je ne peux pas savoir si le traducteur est utilisé sans ça, et réutiliser un outil que je connais déjà bat réévaluer les plateformes d'analytics depuis zéro</li>
+  </ul>
+
+  <h3>Phase 5 — Voix et génération <span style="font-weight:400;color:var(--ink-faint)">· le plus lointain, et vraiment optionnel</span></h3>
+  <ul class="checklist">
+    <li>Audio d'attestation : enregistrer un extrait d'une variante, le rejouer sur l'entrée de lexique (§7.11)</li>
+    <li>Tables <code>speakers</code> et <code>media</code> peuplées pour la première fois</li>
+    <li>Stockage objet re-choisi sur le coût d'egress, pas le coût de sauvegarde (§2.5)</li>
+    <li>Application du consentement voix et chemin de suppression (§4.3)</li>
+    <li>Génération ancrée pour les entrées non attestées du traducteur, clairement étiquetée comme générée (§14.6)</li>
+  </ul>
+
+  <h3>Ce que je ne construis pas</h3>
+  <p class="tags">
+    <span>audio au-delà des extraits d'attestation de la phase 5 — pas de reconnaissance vocale, pas de synthèse vocale, pas de modèles de parole</span><span>annotation morphologique</span><span>tout modèle avant la phase 4</span><span>inférence sur serveur</span><span>applis mobiles</span><span>paliers payants</span><span>sous-régions</span>
+  </p>
+  <p>Tout est prévu dans le schéma — colonnes nullables, tables squelettes, les structures
+  <code>is_machine</code> et <code>model_versions</code> déjà en place — donc ajouter n'importe lequel de
+  ces éléments plus tard est une migration, pas une réécriture.</p>
+
+  <div class="note">
+    <span class="label">La règle à laquelle je me tiens</span>
+    <p>Les phases 1 et 2 sont dimensionnées pour produire, à elles seules, quelque chose de complet,
+    publiable, citable. <b>Si ça s'arrête après la phase 2, ça aura quand même produit quelque chose qui
+    n'existait pas avant.</b> Tout ce qui vient après, c'est du bonus, pas une condition pour que le
+    travail en ait valu la peine.</p>
+  </div>
+
+  <p class="end">
+    OpenDerja_TN · Firas Lamouchi · planification commencée le 14 avril 2026, développement commencé
+    le 28 mai 2026, mis à jour le 25 août 2026 après le transfert du dépôt vers un hébergement GitHub distant<br>
+    Documents compagnons : <em>Architecture &amp; Engineering Blueprint</em> · <em>VOICE.md</em>
+  </p>
+</div>
+
+</body>
+</html>

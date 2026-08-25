@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
@@ -21,7 +22,10 @@ import { HealthController } from './health-check';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: join(process.cwd(), '../../.env'),
+    }),
     ThrottlerModule.forRootAsync({
       useFactory: () => {
         const redisUrl = process.env.REDIS_URL;

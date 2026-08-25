@@ -47,8 +47,8 @@ services:
 
   nlp:
     build:
-      context: ../../nlp
-      dockerfile: ../devops/docker/nlp.Dockerfile
+      context: ../../intelligence-plane/nlp
+      dockerfile: ../../devops/docker/nlp.Dockerfile
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
@@ -59,7 +59,7 @@ services:
 
   processing:
     build:
-      context: ../../processing
+      context: ../../data-plane
       dockerfile: ../devops/docker/processing.Dockerfile
     restart: unless-stopped
     healthcheck:

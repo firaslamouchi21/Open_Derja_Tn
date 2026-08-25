@@ -1,8 +1,8 @@
 packages:
-  - backend
-  - backend/core
+  - control-plane/backend
+  - control-plane/backend/core
+  - control-plane/worker
+  - control-plane/scrapers
   - db
   - frontend
   - shared
-  - scrapers
-  - worker

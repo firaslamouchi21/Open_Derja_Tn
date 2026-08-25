@@ -1,6 +1,6 @@
-import { createStorageProvider } from '../../../../../backend/core/src/storage/create-storage-provider';
-import { LocalStorageProvider } from '../../../../../backend/core/src/storage/local.provider';
-import { R2StorageProvider } from '../../../../../backend/core/src/storage/r2.provider';
+import { createStorageProvider } from '../../../../../../control-plane/backend/core/src/storage/create-storage-provider';
+import { LocalStorageProvider } from '../../../../../../control-plane/backend/core/src/storage/local.provider';
+import { R2StorageProvider } from '../../../../../../control-plane/backend/core/src/storage/r2.provider';
 
 describe('createStorageProvider', () => {
   it('returns a LocalStorageProvider when STORAGE_PROVIDER=local and required config is present', () => {

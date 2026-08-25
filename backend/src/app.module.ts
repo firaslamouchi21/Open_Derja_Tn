@@ -11,6 +11,12 @@ import { TrustGuard } from './common/guards/trust.guard';
 import { AuthModule } from './infra/auth/auth.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { CorpusItemsModule } from './modules/corpus-items/corpus-items.module';
+import { LexiconModule } from './modules/lexicon/lexicon.module';
+import { TranslateModule } from './modules/translate/translate.module';
+import { SourcesModule } from './modules/sources/sources.module';
+import { CorrectionsModule } from './modules/corrections/corrections.module';
+import { FlagsModule } from './modules/flags/flags.module';
+import { UsersModule } from './modules/users/users.module';
 import { HealthController } from './health-check';
 
 @Module({
@@ -33,6 +39,12 @@ import { HealthController } from './health-check';
     AuthModule,
     TasksModule,
     CorpusItemsModule,
+    LexiconModule,
+    TranslateModule,
+    SourcesModule,
+    CorrectionsModule,
+    FlagsModule,
+    UsersModule,
   ],
   controllers: [HealthController],
   providers: [

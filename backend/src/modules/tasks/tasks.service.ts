@@ -5,26 +5,50 @@ import {
   getClaimableTaskRole,
   getEligibleTaskTypes,
   onConsensusLowAgreement,
+  onCorpusItemStandardised,
   onRegionTagDone,
   onReviewApproved,
+  onTranslationAdded,
+  parseSpanSlot,
   refreshConsensus,
   rejectTask,
   requestRework,
   spawnTasks,
+  tokenize,
 } from '@open-derja/core';
-import type { Region, TagKind, Task } from '@open-derja/db';
+import type { Region, Script, TagKind, TargetLang, Task, TaskType } from '@open-derja/db';
 import { PrismaService } from '../../infra/database/prisma.service';
 import { AnnotationsService } from '../annotations/annotations.service';
+import { LexiconService } from '../lexicon/lexicon.service';
+import { TranslateService } from '../translate/translate.service';
 import type { RequestUser } from '../../common/guards/request-user.interface';
 import { ReviewTaskDto } from './dto/review-task.dto';
 import { RegionTagTaskDto } from './dto/region-tag-task.dto';
 import { ConfirmTaskDto } from './dto/confirm-task.dto';
+import { TranslateTaskDto } from './dto/translate-task.dto';
+import { StandardiseTaskDto } from './dto/standardise-task.dto';
+import { LinkLemmaTaskDto } from './dto/link-lemma-task.dto';
+import { AdjudicateTaskDto } from './dto/adjudicate-task.dto';
+import { TransliterateTaskDto } from './dto/transliterate-task.dto';
+
+const TRANSLATE_TASK_LANGS: Partial<Record<TaskType, TargetLang>> = {
+  translate_msa: 'msa',
+  translate_fr: 'fr',
+  translate_en: 'en',
+};
+
+const TRANSLITERATE_TASK_SCRIPTS: Partial<Record<TaskType, Script>> = {
+  transliterate_to_arabic: 'arabic',
+  transliterate_to_arabizi: 'arabizi',
+};
 
 @Injectable()
 export class TasksService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly annotations: AnnotationsService,
+    private readonly lexicon: LexiconService,
+    private readonly translateService: TranslateService,
   ) {}
 
   async claim(user: RequestUser): Promise<Task | undefined> {
@@ -165,6 +189,171 @@ export class TasksService {
     if (regionsToWrite && regionsToWrite.length > 0) {
       await this.refreshConsensusAndMaybeAdjudicate(task.corpusItemId, corpusItem.version, 'region', 0, corpusItem.text.length);
     }
+
+    return completedTask;
+  }
+
+  async translate(user: RequestUser, taskId: string, dto: TranslateTaskDto): Promise<Task> {
+    const task = await this.assertClaimedByUser(user, taskId);
+    const targetLang = TRANSLATE_TASK_LANGS[task.type];
+    if (!targetLang) {
+      throw new BadRequestException('This task is not a translation task');
+    }
+
+    const corpusItem = await this.prisma.corpusItem.findUniqueOrThrow({ where: { id: task.corpusItemId } });
+
+    const [translation, completedTask] = await this.prisma.$transaction(async (tx) => {
+      const created = await this.translateService.createTranslation(
+        {
+          corpusItemId: task.corpusItemId,
+          targetLang,
+          text: dto.text,
+          translatorId: user.id,
+          isMachine: false,
+        },
+        tx,
+      );
+      const done = await completeTask(tx, taskId, user.id, created.id);
+      return [created, done];
+    });
+
+    await spawnTasks(this.prisma, onTranslationAdded(task.corpusItemId, corpusItem.version, corpusItem.script));
+
+    return completedTask;
+  }
+
+  async transliterate(user: RequestUser, taskId: string, dto: TransliterateTaskDto): Promise<Task> {
+    const task = await this.assertClaimedByUser(user, taskId);
+    const script = TRANSLITERATE_TASK_SCRIPTS[task.type];
+    if (!script) {
+      throw new BadRequestException('This task is not a transliteration task');
+    }
+
+    const [form, completedTask] = await this.prisma.$transaction(async (tx) => {
+      const created = await this.lexicon.createForm(
+        dto.lexiconVariantId,
+        { text: dto.text, script },
+        { isMachine: false },
+        tx,
+      );
+      const done = await completeTask(tx, taskId, user.id, created.id);
+      return [created, done];
+    });
+
+    return completedTask;
+  }
+
+  async standardise(user: RequestUser, taskId: string, dto: StandardiseTaskDto): Promise<Task> {
+    const task = await this.assertClaimedByUser(user, taskId);
+    if (task.type !== 'standardise') {
+      throw new BadRequestException('This task is not a standardise task');
+    }
+
+    const corpusItem = await this.prisma.corpusItem.findUniqueOrThrow({ where: { id: task.corpusItemId } });
+    const tokenSpans = tokenize(corpusItem.text);
+
+    const [updatedItem, completedTask] = await this.prisma.$transaction(async (tx) => {
+      const item = await tx.corpusItem.update({
+        where: { id: task.corpusItemId },
+        data: {
+          canonicalForm: dto.canonicalForm,
+          canonicalMap: { text: corpusItem.text, canonicalForm: dto.canonicalForm },
+          ruleVersion: corpusItem.ruleVersion ?? 0,
+          version: { increment: 1 },
+        },
+      });
+      for (const span of tokenSpans) {
+        await this.annotations.addToken(
+          {
+            corpusItemId: task.corpusItemId,
+            charStart: span.charStart,
+            charEnd: span.charEnd,
+            surfaceText: span.surfaceText,
+            annotatorId: user.id,
+            isMachine: false,
+          },
+          tx,
+        );
+      }
+      const done = await completeTask(tx, taskId, user.id);
+      return [item, done];
+    });
+
+    await spawnTasks(this.prisma, onCorpusItemStandardised(task.corpusItemId, updatedItem.version, tokenSpans));
+
+    return completedTask;
+  }
+
+  async linkLemma(user: RequestUser, taskId: string, dto: LinkLemmaTaskDto): Promise<Task> {
+    const task = await this.assertClaimedByUser(user, taskId);
+    if (task.type !== 'link_lemma') {
+      throw new BadRequestException('This task is not a link_lemma task');
+    }
+
+    const { charStart, charEnd } = parseSpanSlot(task.idempotencySlot);
+    const token = await this.prisma.token.findFirst({
+      where: { corpusItemId: task.corpusItemId, charStart, charEnd },
+    });
+    if (!token) {
+      throw new NotFoundException('No token found at this task’s span — has this item been standardised?');
+    }
+
+    const [link, completedTask] = await this.prisma.$transaction(async (tx) => {
+      const created = await this.annotations.addLink(
+        {
+          tokenId: token.id,
+          lexiconEntryId: dto.lexiconEntryId,
+          lexiconVariantId: dto.lexiconVariantId,
+          annotatorId: user.id,
+          isMachine: false,
+        },
+        tx,
+      );
+      const done = await completeTask(tx, taskId, user.id, created.id);
+      return [created, done];
+    });
+
+    if (dto.lexiconVariantId) {
+      const corpusItem = await this.prisma.corpusItem.findUnique({
+        where: { id: task.corpusItemId },
+        include: { tags: { where: { kind: 'region', charStart: 0 } } },
+      });
+      const regions = new Set((corpusItem?.tags ?? []).map((t) => t.value as Region));
+      for (const region of regions) {
+        await this.lexicon.attestRegion(dto.lexiconVariantId, region);
+      }
+    }
+
+    return completedTask;
+  }
+
+  async adjudicate(user: RequestUser, taskId: string, dto: AdjudicateTaskDto): Promise<Task> {
+    const task = await this.assertClaimedByUser(user, taskId);
+    if (task.type !== 'adjudicate') {
+      throw new BadRequestException('This task is not an adjudicate task');
+    }
+
+    const { charStart, charEnd } = parseSpanSlot(task.idempotencySlot);
+
+    const completedTask = await this.prisma.$transaction(async (tx) => {
+      for (const value of dto.values) {
+        await this.annotations.addTag(
+          {
+            corpusItemId: task.corpusItemId,
+            kind: dto.kind,
+            value,
+            charStart,
+            charEnd,
+            annotatorId: user.id,
+            isMachine: false,
+          },
+          tx,
+        );
+      }
+      return completeTask(tx, taskId, user.id);
+    });
+
+    await refreshConsensus(this.prisma, { corpusItemId: task.corpusItemId, kind: dto.kind, charStart, charEnd });
 
     return completedTask;
   }

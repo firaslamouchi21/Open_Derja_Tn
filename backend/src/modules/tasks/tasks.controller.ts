@@ -8,6 +8,11 @@ import { CompleteTaskDto } from './dto/complete-task.dto';
 import { ReviewTaskDto } from './dto/review-task.dto';
 import { RegionTagTaskDto } from './dto/region-tag-task.dto';
 import { ConfirmTaskDto } from './dto/confirm-task.dto';
+import { TranslateTaskDto } from './dto/translate-task.dto';
+import { StandardiseTaskDto } from './dto/standardise-task.dto';
+import { LinkLemmaTaskDto } from './dto/link-lemma-task.dto';
+import { AdjudicateTaskDto } from './dto/adjudicate-task.dto';
+import { TransliterateTaskDto } from './dto/transliterate-task.dto';
 
 const ALL_HUMAN_ROLES = ['contributor', 'trusted_contributor', 'reviewer', 'admin', 'superadmin'] as const;
 
@@ -51,6 +56,42 @@ export class TasksController {
   @AllowUnverifiedEmail()
   confirm(@CurrentUser() user: RequestUser, @Param('id', ParseUUIDPipe) id: string, @Body() dto: ConfirmTaskDto) {
     return this.tasksService.confirm(user, id, dto);
+  }
+
+  @Post(':id/translate')
+  @Roles(...ALL_HUMAN_ROLES)
+  @AllowUnverifiedEmail()
+  translate(@CurrentUser() user: RequestUser, @Param('id', ParseUUIDPipe) id: string, @Body() dto: TranslateTaskDto) {
+    return this.tasksService.translate(user, id, dto);
+  }
+
+  @Post(':id/transliterate')
+  @Roles(...ALL_HUMAN_ROLES)
+  @AllowUnverifiedEmail()
+  transliterate(
+    @CurrentUser() user: RequestUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: TransliterateTaskDto,
+  ) {
+    return this.tasksService.transliterate(user, id, dto);
+  }
+
+  @Post(':id/standardise')
+  @Roles('reviewer', 'admin', 'superadmin')
+  standardise(@CurrentUser() user: RequestUser, @Param('id', ParseUUIDPipe) id: string, @Body() dto: StandardiseTaskDto) {
+    return this.tasksService.standardise(user, id, dto);
+  }
+
+  @Post(':id/link-lemma')
+  @Roles('reviewer', 'admin', 'superadmin')
+  linkLemma(@CurrentUser() user: RequestUser, @Param('id', ParseUUIDPipe) id: string, @Body() dto: LinkLemmaTaskDto) {
+    return this.tasksService.linkLemma(user, id, dto);
+  }
+
+  @Post(':id/adjudicate')
+  @Roles('reviewer', 'admin', 'superadmin')
+  adjudicate(@CurrentUser() user: RequestUser, @Param('id', ParseUUIDPipe) id: string, @Body() dto: AdjudicateTaskDto) {
+    return this.tasksService.adjudicate(user, id, dto);
   }
 
   @Post(':id/rework')

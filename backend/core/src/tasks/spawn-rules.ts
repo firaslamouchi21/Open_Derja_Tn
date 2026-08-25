@@ -10,6 +10,7 @@ export function onReviewApproved(corpusItemId: string, itemVersion: number): Tas
   return [
     { corpusItemId, itemVersion, type: 'region_tag', slot: emptySlot, requiresRole: 'contributor' },
     { corpusItemId, itemVersion, type: 'translate_msa', slot: emptySlot, requiresRole: 'contributor' },
+    { corpusItemId, itemVersion, type: 'standardise', slot: emptySlot, requiresRole: 'reviewer' },
   ];
 }
 

@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "dotenv -e ../.env -- next dev -p ${FRONTEND_PORT:-3001}",
+    "build": "dotenv -e ../.env -- next build",
+    "start": "dotenv -e ../.env -- next start -p ${FRONTEND_PORT:-3001}",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -24,6 +24,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.20",
+    "dotenv-cli": "^7.4.2",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
     "typescript": "^5.5.4"

@@ -9,5 +9,5 @@
     "isolatedModules": true,
     "types": ["jest", "node"]
   },
-  "include": ["**/*.ts", "../../backend/core/src/**/*.ts"]
+  "include": ["**/*.ts", "../../control-plane/backend/core/src/**/*.ts"]
 }

@@ -1,0 +1,40 @@
+{
+  "name": "@open-derja/backend",
+  "private": true,
+  "version": "0.0.0",
+  "files": ["dist"],
+  "scripts": {
+    "build": "nest build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo tsconfig.build.tsbuildinfo",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit --incremental false"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^4.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "@nest-lab/throttler-storage-redis": "^1.1.0",
+    "@nestjs/throttler": "^6.2.1",
+    "@open-derja/core": "workspace:*",
+    "@open-derja/db": "workspace:*",
+    "argon2": "^0.31.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "cookie-parser": "^1.4.7",
+    "helmet": "^7.1.0",
+    "ioredis": "^5.4.1",
+    "jose": "^5.9.6",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.7.5",
+    "typescript": "^5.6.3"
+  }
+}

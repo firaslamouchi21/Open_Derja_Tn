@@ -121,7 +121,7 @@
   </p>
   <hr class="rule">
   <div class="meta">
-    <b>Firas Lamouchi</b> · projet solo, open-source et ouvert à la contribution publique une fois le MVP livré<br>
+    <b>Firas Lamouchi</b> · initialement projet solo, open-source et ouvert à la contribution publique une fois le MVP livré<br>
     Planification commencée le <b>14 avril 2026</b> · développement commencé le <b>28 mai 2026</b> · mis à jour le <b>25 août 2026</b>
   </div>
 </div>
@@ -279,6 +279,10 @@
     (§20). Rien dans les phases 1 à 3 n'en dépend.</p>
   </div>
 
+  <p>Si ce projet trouve un peu de soutien en cours de route, ça veut simplement dire de meilleures
+  specs — une machine plus grosse, du Postgres géré, ce genre de chose. Sinon, le tableau ci-dessous
+  fonctionne très bien tel quel. Rien dans l'architecture ne dépend d'un financement qui arriverait.</p>
+
   <h3><span class="n">2.1</span>Hébergement</h3>
   <p>Fournisseur indécis — sera mis à jour ici une fois choisi. Pas de local physique permanent, donc
   l'auto-hébergement matériel n'est une option dans aucune version de ce projet ; la décision se joue
@@ -334,9 +338,28 @@
   </ul>
 
   <h3><span class="n">2.4</span>Coût</h3>
-  <p>Pas encore chiffré. Ça ne sert à rien de chiffrer une machine avant de savoir ce qui va vraiment
-  tourner dessus — le coût se réglera au lancement, une fois l'hébergement et le reste de cette forme
-  vraiment décidés, pas devinés maintenant.</p>
+  <table>
+    <thead><tr><th>Poste</th><th style="width:30mm">€/mois</th></tr></thead>
+    <tbody>
+      <tr><td>VPS — fournisseur à définir <em>(possiblement 0 € sur un palier gratuit)</em></td><td class="num">0 – 8</td></tr>
+      <tr><td>Domaine (.com, amorti)</td><td class="num">~1,00</td></tr>
+      <tr><td>Stockage objet (sauvegardes)</td><td class="num">0–3</td></tr>
+      <tr><td>Instantanés fournisseur</td><td class="num">~1,20</td></tr>
+      <tr><td>Pool de proxys pour le scraping (§12.5)</td><td class="num">5–15</td></tr>
+      <tr><td>Envoi d'emails — Resend, repli SMTP (§2.6)</td><td class="num">0–10</td></tr>
+      <tr><td>Suivi d'erreurs — Sentry, analytics — PostHog (§10.0)</td><td class="num">0</td></tr>
+      <tr><td>API d'embeddings / LLM (phase 4, à l'usage)</td><td class="num">plus tard</td></tr>
+      <tr><td>Inférence GPU serverless par lots (phase 4)</td><td class="num">plus tard</td></tr>
+      <tr><td>Stockage objet + egress (si voix, phase 5)</td><td class="num">plus tard</td></tr>
+      <tr><td><b>Total au lancement</b></td><td class="num"><b>~7–37</b></td></tr>
+    </tbody>
+  </table>
+  <p>La fourchette est large parce qu'elle l'est honnêtement : le plancher est un VPS sur palier gratuit
+  avec du scraping léger, le plafond est un VPS payant avec un vrai pool de proxys et un envoi d'emails
+  payant.</p>
+  <p>Pas de ligne séparée pour Cloudflare Tunnel, pgBouncer ou Redis (§10.0) — les trois sont des
+  conteneurs auto-hébergés sur la même machine, pas des services facturés. Ce qu'ils coûtent, c'est de la
+  mémoire, pas des euros, et c'est suivi en §2.2, pas ici.</p>
 
   <h3><span class="n">2.5</span>Stockage objet — encore indécis</h3>
   <p>Les sauvegardes et les exports d'instantanés ont besoin d'un endroit qui ne soit pas le serveur
@@ -1050,7 +1073,7 @@ media      id, lexicon_variant_id fk, lexicon_form_id fk null, speaker_id fk,
     propre test de restauration (§2.5). La ligne <code>stored_objects</code> se résout via une URL
     présignée — l'extrait lui-même ne passe jamais par l'API. Le fournisseur derrière est interchangeable
     (disque local en dev, R2 ou S3 en production, une seule interface, §10.0) — <b>construit</b> comme
-    <code>control-plane/backend/core/src/storage/</code>, avec un adaptateur local et un adaptateur R2 déjà écrits, juste
+    <code>backend/core/src/storage/</code>, avec un adaptateur local et un adaptateur R2 déjà écrits, juste
     pas encore branchés sur une route — donc cette décision n'est pas à reprendre deux fois.</li>
     <li><b><code>speakers</code> n'a pas d'équivalent texte.</b> Un enregistrement atteste une variante
     <em>telle que parlée par une personne</em> dont l'origine peut ne pas correspondre à la région de la
@@ -1151,7 +1174,7 @@ media      id, lexicon_variant_id fk, lexicon_form_id fk null, speaker_id fk,
   <div class="aside">
     <p><b>Construit.</b> Le schéma, la réclamation atomique, le cycle de vie complet/rejet/reprise, la
     clé d'idempotence exactement comme ci-dessus, et les règles de génération pour chaque ligne du §8.3 —
-    tout ça vit dans <code>control-plane/backend/core/src/tasks/</code>, un paquet sans dépendance à un framework que la
+    tout ça vit dans <code>backend/core/src/tasks/</code>, un paquet sans dépendance à un framework que la
     couche NestJS appelle. Les complétions <code>review</code>, <code>region_tag</code> et
     <code>confirm</code> sont branchées de bout en bout et ont été testées contre une base de données en
     fonctionnement. Les complétions <code>translate_*</code>, <code>transliterate_*</code>,
@@ -1189,7 +1212,7 @@ si correction acceptée           -&gt; incrémenter corpus_item.version
                                  -&gt; régénérer seulement ce que ce changement invalide</pre>
   <p style="font-size:8.8pt;color:var(--ink-faint)"><b>Construit, pas encore branché.</b> Chaque règle
   ci-dessus existe aujourd'hui comme une fonction pure dans
-  <code>control-plane/backend/core/src/tasks/spawn-rules.ts</code>. <code>si review approuvée</code>, <code>si
+  <code>backend/core/src/tasks/spawn-rules.ts</code>. <code>si review approuvée</code>, <code>si
   region_tag terminée</code>, et la règle d'adjudication déclenchée par le consensus sont vraiment
   appelées depuis le code de complétion de tâches en fonctionnement. <code>si traduction ajoutée</code> et
   <code>si élément de corpus standardisé</code> sont écrites et testées mais rien ne les appelle encore,
@@ -1439,57 +1462,48 @@ confiance 3   10+ approuvées sur 2+ types de tâches, &lt;5 % rejetées
       <tr><td class="k">Edge / tunnel</td><td>Cloudflare Tunnel (cloudflared)</td><td>Aucun port entrant ouvert sur le VPS</td></tr>
       <tr><td class="k">Email</td><td>Resend, repli SMTP</td><td>Motif outbox (§9.11)</td></tr>
       <tr><td class="k">Système de design</td><td>shadcn/ui + Tailwind</td><td>Écarts RTL vérifiés, pas supposés résolus (§15.2)</td></tr>
-      <tr><td class="k">Gestionnaire de processus</td><td>pm2</td><td>Fait tourner le conteneur NestJS en mode cluster, 2 instances, seuil de redémarrage par instance — <b>construit</b>, <code>control-plane/backend/ecosystem.config.js</code></td></tr>
+      <tr><td class="k">Gestionnaire de processus</td><td>pm2</td><td>Fait tourner le conteneur NestJS en mode cluster, 2 instances, seuil de redémarrage par instance — <b>construit</b>, <code>backend/ecosystem.config.js</code></td></tr>
       <tr><td class="k">Suivi d'erreurs</td><td>Sentry (@sentry/node, @sentry/react)</td><td>Gratuit à cette échelle — c'est comme ça que le « taux d'erreur » de l'aperçu admin (§17.1) aura une vraie source au lieu d'être un chiffre sans rien derrière. Pas encore branché dans le backend.</td></tr>
       <tr><td class="k">Observabilité</td><td>OpenTelemetry + logs structurés</td><td>Une machine gérée en solo sans logs structurés est indéboguable au moment où quelque chose casse sans personne autour pour demander. Pas encore branché.</td></tr>
       <tr><td class="k">Analytics</td><td>PostHog (palier gratuit)</td><td>Remplace une hypothèse antérieure d'un Umami/Plausible auto-hébergé (§20) — réutiliser un outil déjà connu bat réévaluer les plateformes d'analytics depuis zéro. Pas encore branché.</td></tr>
-      <tr><td class="k">Stockage objet</td><td>Interchangeable : disque local (dev) | R2 | S3</td><td>Une interface, fournisseur changé par variable d'environnement. Uploads et téléchargements passent par des URLs présignées — les fichiers ne traversent jamais l'API (§7.11). <b>Construit</b> comme interface plus les deux adaptateurs (<code>control-plane/backend/core/src/storage/</code>) ; pas encore appelé depuis une route.</td></tr>
+      <tr><td class="k">Stockage objet</td><td>Interchangeable : disque local (dev) | R2 | S3</td><td>Une interface, fournisseur changé par variable d'environnement. Uploads et téléchargements passent par des URLs présignées — les fichiers ne traversent jamais l'API (§7.11). <b>Construit</b> comme interface plus les deux adaptateurs (<code>backend/core/src/storage/</code>) ; pas encore appelé depuis une route.</td></tr>
       <tr><td class="k">Temps réel</td><td>Pas par défaut — sondage</td><td>socket.io + un adaptateur Redis est le chemin de mise à niveau si l'aperçu admin ou la file de relecture ont vraiment besoin de push plutôt que de sondage un jour (§17.1). Pas coupé par réflexe ; juste pas encore nécessaire.</td></tr>
       <tr><td class="k">CI/CD</td><td>GitHub Actions</td><td><code>master.yml</code> (lint/typecheck/test/dérive de migration/CodeQL, <b>construit</b>) et <code>verify-backup-restore.yml</code> (§2.3, <b>construit</b>) — <code>infra-watch.yml</code> pas encore construit</td></tr>
       <tr><td class="k">Gestionnaire de paquets</td><td>pnpm, un workspace, un lockfile</td><td></td></tr>
     </tbody>
   </table>
-<pre>open_derja/            -- UN dépôt, UN workspace pnpm, UN lockfile
-├── control-plane/     -- tout ce qui est TypeScript : E/S, orchestration, machines à états
-│   ├── backend/           -- NestJS : chaîne de guards, logique métier, accès aux données
-│   │   └── core/           -- logique de domaine : tâches, consensus, confiance, standardisation,
-│   │                          stockage. Sans framework, son propre paquet workspace,
-│   │                          importé par backend, worker et scrapers
-│   ├── worker/             -- tâches planifiées pg-boss ; expire_claims en fonctionnement,
-│   │                          dispatcher d'outbox pas encore construit
-│   └── scrapers/           -- runners d'ingestion (amorcé comme paquet,
-│                              pipeline/ et sources/ encore vides)
-├── data-plane/         -- Rust, Actix — travail par lots déterministe, gourmand en CPU.
-│                           Health-check seulement jusqu'à ce qu'une étape se révèle être
-│                           un goulot d'étranglement à l'échelle réelle du corpus
-├── intelligence-plane/ -- Python, FastAPI — health-check seulement, phase 1
-│   └── nlp/
-├── frontend/           -- Next.js : site public + tableaux de bord
-├── shared/              -- types, enums, schémas zod. Zéro dépendance, zéro logique.
-├── db/                  -- schéma prisma, migrations, seeds
-├── devops/              -- Dockerfiles, compose, Caddy/cloudflared, sauvegardes
-├── docs/                -- ce grand livre, le blueprint, VOICE.md, CONTRIBUTORS.md,
-│                            journal de vérification
-└── testing/             -- e2e, organisé par surface</pre>
-  <p>Les trois groupes de premier niveau — <code>control-plane</code>, <code>data-plane</code>,
-  <code>intelligence-plane</code> — correspondent à ce qui varie vraiment dans la façon dont chaque
-  brique tourne : TypeScript pour tout ce qui dépend d'E/S ou d'une machine à états, Rust pour le travail
-  par lots gourmand en CPU une fois qu'il s'avère nécessaire plutôt que supposé, Python pour l'inférence
-  et l'entraînement tenus à l'écart du chemin de requête. <code>frontend</code>, <code>shared</code>,
-  <code>db</code> et <code>devops</code> restent hors de ce découpage exprès — ils ne sont pas propres à
-  une plateforme. <code>shared</code> en particulier est le vocabulaire que chaque plateforme doit
-  partager, et comme rien d'écrit en Rust ou en Python ne peut importer un paquet TypeScript de toute
-  façon, le nicher dans <code>control-plane</code> dénaturerait ce qu'il est vraiment. <code>core</code>
-  vit sous <code>control-plane/backend/</code> plutôt qu'à la racine de <code>control-plane/</code> —
-  ça reste son propre paquet workspace sans framework, juste imbriqué un niveau sous l'application qui
-  s'en sert le plus. La direction des dépendances n'a pas changé : backend → core → db/shared, frontend ne
-  parle jamais qu'à backend via le client typé, rien n'importe vers le haut. C'est un seul monorepo de
-  bout en bout, pas cinq dépôts séparés — toute la raison d'être de <code>shared</code>, c'est qu'une
-  région, un rôle ou un type de tâche ne puisse pas signifier deux choses différentes à deux endroits
-  différents, et ça ne tient que si tout est dans un seul workspace avec un seul lockfile.</p>
+<pre>open_derja/          -- UN dépôt, UN workspace pnpm, UN lockfile
+├── backend/         -- NestJS : chaîne de guards, logique métier, accès aux données
+│   └── core/        -- logique de domaine : tâches, consensus, confiance, standardisation,
+│                       stockage. Sans framework, son propre paquet workspace,
+│                       importé par backend et (un jour) worker/scrapers
+├── frontend/        -- Next.js : site public + tableaux de bord
+├── nlp/             -- Python, FastAPI — health-check seulement, phase 1
+├── processing/      -- Rust, Actix — health-check seulement, phase 1
+├── shared/          -- types, enums, schémas zod. Zéro dépendance, zéro logique.
+├── db/              -- schéma prisma, migrations, seeds
+├── worker/          -- tâches planifiées pg-boss ; expire_claims en fonctionnement,
+│                       dispatcher d'outbox pas encore construit
+├── scrapers/        -- runners d'ingestion (amorcé comme paquet,
+│                       pipeline/ et sources/ encore vides)
+├── devops/          -- Dockerfiles, compose, Caddy/cloudflared, sauvegardes
+├── docs/            -- ce grand livre, le blueprint, VOICE.md, CONTRIBUTORS.md,
+│                       journal de vérification
+└── testing/         -- e2e, organisé par surface</pre>
+  <p>Même découpage qu'avant, aplati d'un niveau et renommé pour coller à la façon dont on parle vraiment
+  des morceaux — <code>backend</code>/<code>frontend</code> au lieu de
+  <code>apps/web</code>/<code>apps/api</code>, <code>shared</code>/<code>db</code> promus à la racine au
+  lieu d'être nichés sous <code>packages/</code>. <code>core</code> a fini par vivre sous
+  <code>backend/</code> plutôt qu'à la racine, un choix d'organisation fait pendant la construction réelle
+  plutôt qu'une révision délibérée du plan — ça reste son propre paquet workspace sans framework, juste
+  imbriqué. La direction des dépendances n'a pas changé : backend → core → db/shared, frontend ne parle
+  jamais qu'à backend via le client typé, rien n'importe vers le haut. C'est un seul monorepo de bout en
+  bout, pas cinq dépôts séparés — toute la raison d'être de <code>shared</code>, c'est qu'une région, un
+  rôle ou un type de tâche ne puisse pas signifier deux choses différentes à deux endroits différents, et
+  ça ne tient que si tout est dans un seul workspace avec un seul lockfile.</p>
   <div class="aside">
     <p><code>nlp/</code> est en Python et ne peut pas importer <code>shared</code> directement. Ce n'est
-    pas un problème pour l'instant : ni <code>nlp/</code> ni le service Rust ne portent de
+    pas un problème pour l'instant : ni <code>nlp/</code> ni <code>processing/</code> ne portent de
     logique sensible aux enums dans leur forme phase-1 health-check-seulement — rien là-dedans ne décide
     une région, un rôle, ou un type de tâche. À revoir avec un contrat OpenAPI/JSON généré depuis
     <code>shared</code> seulement si un service Python commence à prendre des décisions qui doivent
@@ -1792,9 +1806,9 @@ GET    /api/stats/coverage            statistiques publiques de couverture</pre>
     vérifié. Ce sont deux documents différents répondant à des questions différentes, et un site peut
     autoriser les robots dans l'un tout en interdisant le stockage dans l'autre.</li>
     <li><b>Un serveur veut dire une seule IPv4</b>, donc scraper en volume depuis une seule adresse risque
-    un bannissement même sur une source pleinement autorisée. Prévoir la rotation de proxys pour
-    tout ce qui est parsé en HTML dès le départ, plutôt que
-    la découvrir la semaine après le premier bannissement.</li>
+    un bannissement même sur une source pleinement autorisée. Prévoir un budget de rotation de proxys pour
+    tout ce qui est parsé en HTML — 5–15 €/mois à ce volume, dans le tableau de coûts (§2.4) plutôt que
+    découvert la semaine après le premier bannissement.</li>
     <li><b>Les limites de débit et le backoff sont une config par source</b>, sur la ligne de la source,
     modifiable depuis le panneau admin, backoff exponentiel sur les erreurs 429 et 403.</li>
     <li><b>Deux exécutions ratées désactivent la source</b> et lèvent une alerte (§17.1), au lieu de
@@ -2445,9 +2459,8 @@ etymology       entrée de lexique, origine, forme source — petit, autonome,
 
   <h3>Phase 1 — Pipeline central <span style="font-weight:400;color:var(--ink-faint)">· but : une boucle d'annotation qui fonctionne</span></h3>
   <ul class="checklist">
-    <li>Squelette du monorepo : <code>control-plane/</code> (backend + core sous backend/core, worker,
-    scrapers), <code>data-plane/</code>, <code>intelligence-plane/nlp</code>, frontend, shared, db
-    <b>— fait</b>. <code>worker/</code> est un vrai paquet avec pg-boss branché et une
+    <li>Squelette du monorepo : backend (+ core sous backend/core), frontend, nlp, processing, shared, db,
+    worker, scrapers <b>— fait</b>. <code>worker/</code> est un vrai paquet avec pg-boss branché et une
     tâche en fonctionnement ; <code>scrapers/</code> est amorcé comme paquet mais ses dossiers
     <code>pipeline/</code> et <code>sources/</code> sont encore vides (§10.0)</li>
     <li>Schéma Prisma : documents, corpus_items, tokens, links, tags, tasks, users, sources, audit_log
@@ -2461,11 +2474,11 @@ etymology       entrée de lexique, origine, forme source — petit, autonome,
     <li>Routage d'adjudication et <code>target_regions</code> — dès la phase 1, pas plus tard. La règle de routage protège le corpus, et l'ajouter après coup une fois que les relecteurs ont pris leurs habitudes est pire qu'inutile. <b>La logique de routage elle-même est construite</b> (§8.5) et se déclenche automatiquement sous le seuil d'accord ; l'<em>interface</em> de la phase 1 est le panneau admin, qui n'existe pas encore — l'écran d'adjudication dédié arrive en phase 3.</li>
     <li>Interface de file de relecture, entièrement pilotée au clavier <b>— pas commencé</b></li>
     <li>CorpusItemText, RegionPicker, TaskCard, TagChip <b>— pas commencé</b> (§15.3)</li>
-    <li>Un scraper contre une source forum, de bout en bout — pas YouTube (§12.1) <b>— pas commencé</b> ; les fonctions du pipeline d'ingestion qu'il traversera (nettoyage, filtre de longueur, filtre de marqueurs, quasi-doublons, découpage en éléments de corpus, calcul du match_key) sont déjà écrites dans <code>control-plane/backend/core/src/ingestion/</code> et <code>text/</code>, juste pas encore pilotées par un vrai scraper</li>
+    <li>Un scraper contre une source forum, de bout en bout — pas YouTube (§12.1) <b>— pas commencé</b> ; les fonctions du pipeline d'ingestion qu'il traversera (nettoyage, filtre de longueur, filtre de marqueurs, quasi-doublons, découpage en éléments de corpus, calcul du match_key) sont déjà écrites dans <code>backend/core/src/ingestion/</code> et <code>text/</code>, juste pas encore pilotées par un vrai scraper</li>
     <li>Calcul du consensus + marquage pour adjudication <b>— fait</b>, vérifié en fonctionnement</li>
     <li>pg-boss avec intervalle de sondage et concurrence plafonnés dès le premier commit (§10.3) — <b>partiellement fait</b> : pg-boss est branché dans <code>worker/</code> contre <code>DIRECT_URL</code>, une tâche en fonctionnement (<code>expire_claims</code>, 5 min) ; le reste de la liste de tâches du §9.3 et les plafonds de sondage/concurrence eux-mêmes restent à faire</li>
-    <li><code>intelligence-plane/nlp</code> — FastAPI, endpoint health seulement, conteneurisé, dans compose <b>— fait</b> (§11)</li>
-    <li><code>data-plane</code> — Actix, endpoint health seulement, conteneurisé, dans compose <b>— fait</b> (§7.11)</li>
+    <li><code>nlp/</code> — FastAPI, endpoint health seulement, conteneurisé, dans compose <b>— fait</b> (§11)</li>
+    <li><code>processing/</code> — Actix, endpoint health seulement, conteneurisé, dans compose <b>— fait</b> (§7.11)</li>
     <li>Les deux joignables depuis le backend, conteneurisés et avec health-check <b>— fait</b> ; affichés sur un widget de l'aperçu admin <b>— pas commencé</b>, puisque l'aperçu admin lui-même n'existe pas encore (§17.1)</li>
     <li>Docker Compose faisant tourner tout ça en local <b>— fait</b> (<code>docker-compose.local.yml</code> pour l'infra de dev, <code>docker-compose.prod.yml</code> pour la pile complète)</li>
   </ul>
@@ -2505,7 +2518,7 @@ etymology       entrée de lexique, origine, forme source — petit, autonome,
     <li>Vue de comparaison à travers les quatre régions</li>
     <li>Tableau de bord de couverture, public</li>
     <li>Pages méthodologie, guide de style, licence, citation</li>
-    <li>Interface de stockage de fichiers branchée : URLs présignées contre R2, dev utilise le disque local (§9.5) <b>— construit tôt</b> comme interface plus les deux adaptateurs (<code>control-plane/backend/core/src/storage/</code>) ; pas encore appelé depuis une route</li>
+    <li>Interface de stockage de fichiers branchée : URLs présignées contre R2, dev utilise le disque local (§9.5) <b>— construit tôt</b> comme interface plus les deux adaptateurs (<code>backend/core/src/storage/</code>) ; pas encore appelé depuis une route</li>
     <li>Pipeline d'export : JSONL + HF Datasets, avec checksum et versionné, servi via des URLs présignées sans passer par le backend</li>
     <li>Premier instantané publié avec une fiche de jeu de données et un DOI Zenodo</li>
     <li>Révocation de consentement + routine d'anonymisation, testée (§4.3)</li>

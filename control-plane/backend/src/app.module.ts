@@ -1,9 +1,10 @@
 import { join } from 'node:path';
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
+import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
 import { PrismaModule } from './infra/database/prisma.module';
 import { TokenModule } from './infra/auth/token.module';
 import { AuthGuard } from './common/guards/auth.guard';
@@ -22,6 +23,7 @@ import { HealthController } from './health-check';
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: join(process.cwd(), '../../.env'),
@@ -52,6 +54,7 @@ import { HealthController } from './health-check';
   ],
   controllers: [HealthController],
   providers: [
+    { provide: APP_FILTER, useClass: SentryGlobalFilter },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },

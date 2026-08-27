@@ -4,6 +4,7 @@ module.exports = {
   testMatch: ['<rootDir>/testing/unit/**/*.spec.ts'],
   preset: 'ts-jest',
   testEnvironment: 'node',
+  setupFiles: ['<rootDir>/node_modules/reflect-metadata/Reflect.js'],
   transform: {
     '^.+\\.ts$': [
       'ts-jest',

@@ -39,3 +39,30 @@ System User: Create a bot/system row in users (annotatorId cannot be null, even 
 Contribution Source: Add a contribution kind row in sources for user submissions.
 
 Rules: Seed baseline CODA-TUN standardisation_rules.
+
+---
+
+Migrations added 2026-08-30 (all generated offline with `prisma migrate diff
+--from-schema-datamodel <old> --to-schema-datamodel <new> --script` so they are purely
+additive and never touched the raw-SQL blocks above; each was applied with `prisma
+migrate deploy`, and the four raw guards + `*_trgm` indexes were verified still present
+afterwards):
+
+- `20260830000000_admin_and_auth_tables` — `email_otps`, `reviewer_invites`,
+  `consent_revocations`, `feature_flags`, `system_settings`.
+- `20260830010000_auth_identities` — `auth_identities` (`user_id · provider ·
+  provider_user_id · email`, unique `(provider, provider_user_id)`). **`users.github_id`
+  was migrated INTO this table then dropped** — the migration file hand-orders the
+  backfill INSERT before the DROP COLUMN, don't reorder it. GitHub/Google/password logins
+  all resolve through this table now (see technical guide §7.7).
+- `20260830020000_translator_lookups` — `translator_lookups` (one row per `/translate`
+  query: `query_text`, `match_key`, `region?`, `hit`). Feeds `translator_stats`,
+  `translator_region_miss`, and the admin translator-miss log via the nightly
+  `recompute-stats` worker job.
+
+`system_settings` is a plain key/value (`key` PK, `value` jsonb). Known keys:
+`maintenance_mode`, `paused_task_types`, `publication_comments_open`,
+`adjudication_window_days`.
+
+pg-boss creates its own `pgboss` schema on first `boss.start()` in `control-plane/worker`
+— it is not a Prisma-managed schema and won't show up in `migrate status`.

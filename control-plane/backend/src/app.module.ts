@@ -7,6 +7,9 @@ import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
 import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
 import { PrismaModule } from './infra/database/prisma.module';
 import { TokenModule } from './infra/auth/token.module';
+import { SystemSettingsModule } from './infra/system/system-settings.module';
+import { StorageModule } from './infra/storage/storage.module';
+import { MaintenanceGuard } from './common/guards/maintenance.guard';
 import { AuthGuard } from './common/guards/auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { TrustGuard } from './common/guards/trust.guard';
@@ -19,6 +22,7 @@ import { SourcesModule } from './modules/sources/sources.module';
 import { CorrectionsModule } from './modules/corrections/corrections.module';
 import { FlagsModule } from './modules/flags/flags.module';
 import { UsersModule } from './modules/users/users.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { HealthController } from './health-check';
 
 @Module({
@@ -42,6 +46,8 @@ import { HealthController } from './health-check';
     }),
     PrismaModule,
     TokenModule,
+    SystemSettingsModule,
+    StorageModule,
     AuthModule,
     TasksModule,
     CorpusItemsModule,
@@ -51,10 +57,12 @@ import { HealthController } from './health-check';
     CorrectionsModule,
     FlagsModule,
     UsersModule,
+    AdminModule,
   ],
   controllers: [HealthController],
   providers: [
     { provide: APP_FILTER, useClass: SentryGlobalFilter },
+    { provide: APP_GUARD, useClass: MaintenanceGuard },
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },

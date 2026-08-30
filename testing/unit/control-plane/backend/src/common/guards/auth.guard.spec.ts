@@ -47,7 +47,14 @@ describe('AuthGuard', () => {
 
     const request: Record<string, any> = { headers: { authorization: 'Bearer good-token' } };
     await expect(guard.canActivate(makeContext(request))).resolves.toBe(true);
-    expect(request.user).toEqual({ id: 'u1', role: 'contributor', trustLevel: 0, emailConfirmed: true, sessionId: 's1' });
+    expect(request.user).toEqual({
+      id: 'u1',
+      role: 'contributor',
+      trustLevel: 0,
+      emailConfirmed: true,
+      sessionId: 's1',
+      twofaPending: false,
+    });
   });
 
   it('swallows a bad bearer token on a public route rather than failing the request', async () => {

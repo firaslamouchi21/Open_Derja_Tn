@@ -23,56 +23,71 @@ function makeTokenService() {
   };
 }
 
+function makeEmailOtp() {
+  return { issue: jest.fn().mockResolvedValue(undefined), consume: jest.fn().mockResolvedValue(undefined) };
+}
+
+function makeTotp() {
+  return { assertCode: jest.fn().mockResolvedValue(undefined) };
+}
+
+function mkService(prisma: unknown, tokenService: unknown = makeTokenService()) {
+  return new AuthService(prisma as any, tokenService as any, makeEmailOtp() as any, makeTotp() as any);
+}
+
 describe('AuthService.register', () => {
   it('rejects registration when the email is already taken', async () => {
-    const prisma = { user: { findUnique: jest.fn().mockResolvedValue({ id: 'existing' }), create: jest.fn() } };
-    const service = new AuthService(prisma as any, makeTokenService() as any);
+    const prisma = { user: { findUnique: jest.fn().mockResolvedValue({ id: 'existing' }) }, $transaction: jest.fn() };
+    const service = mkService(prisma);
 
     await expect(
       service.register({ email: 'taken@example.com', password: 'password1234', displayName: 'x' }),
     ).rejects.toThrow(ConflictException);
-    expect(prisma.user.create).not.toHaveBeenCalled();
+    expect(prisma.$transaction).not.toHaveBeenCalled();
   });
 
   it('creates a contributor with a hashed password, never the plaintext', async () => {
+    const userCreate = jest.fn().mockImplementation(({ data }) => Promise.resolve({ id: 'new-user', ...data }));
+    const tx = { user: { create: userCreate }, authIdentity: { create: jest.fn() } };
     const prisma = {
-      user: {
-        findUnique: jest.fn().mockResolvedValue(null),
-        create: jest.fn().mockImplementation(({ data }) => Promise.resolve({ id: 'new-user', ...data })),
-      },
+      user: { findUnique: jest.fn().mockResolvedValue(null) },
+      $transaction: jest.fn().mockImplementation((cb) => cb(tx)),
     };
-    const service = new AuthService(prisma as any, makeTokenService() as any);
+    const service = mkService(prisma);
 
     const result = await service.register({ email: 'new@example.com', password: 'password1234', displayName: 'x' });
 
     expect(result).toEqual({ id: 'new-user', email: 'new@example.com', role: 'contributor' });
-    const createCall = prisma.user.create.mock.calls[0][0];
+    const createCall = userCreate.mock.calls[0][0];
     expect(createCall.data.passwordHash).not.toBe('password1234');
     expect(createCall.data.role).toBe('contributor');
     expect(createCall.data.emailConfirmed).toBe(false);
+    expect(tx.authIdentity.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ provider: 'password' }) }),
+    );
   });
 });
 
 describe('AuthService.refresh (CSRF check)', () => {
   it('rejects when the CSRF header is missing', async () => {
-    const service = new AuthService({} as any, makeTokenService() as any);
+    const service = mkService({});
     await expect(service.refresh('rt', undefined, 'cookie-value')).rejects.toThrow(/CSRF/);
   });
 
   it('rejects when the CSRF cookie is missing', async () => {
-    const service = new AuthService({} as any, makeTokenService() as any);
+    const service = mkService({});
     await expect(service.refresh('rt', 'header-value', undefined)).rejects.toThrow(/CSRF/);
   });
 
   it('rejects when the CSRF header and cookie do not match', async () => {
-    const service = new AuthService({} as any, makeTokenService() as any);
+    const service = mkService({});
     await expect(service.refresh('rt', 'aaaaaaaaaaaaaaaa', 'bbbbbbbbbbbbbbbb')).rejects.toThrow(/CSRF token mismatch/);
   });
 
   it('proceeds past the CSRF check when header and cookie match, failing later on an invalid refresh token', async () => {
     const tokenService = makeTokenService();
     tokenService.verifyRefreshToken.mockRejectedValue(new Error('bad token'));
-    const service = new AuthService({} as any, tokenService as any);
+    const service = mkService({}, tokenService);
 
     await expect(service.refresh('rt', 'same-value', 'same-value')).rejects.toThrow(UnauthorizedException);
     expect(tokenService.verifyRefreshToken).toHaveBeenCalledWith('rt');

@@ -25,7 +25,7 @@ describe('AuthController.login', () => {
   it('sets the refresh and csrf cookies and returns only the access token in the body', async () => {
     const authService = makeAuthService();
     authService.login.mockResolvedValue({ accessToken: 'access-1', refreshToken: 'refresh-1' });
-    const controller = new AuthController(authService);
+    const controller = new AuthController(authService, {} as any);
     const { req, res } = makeReqRes();
 
     const result = await controller.login({ email: 'a@b.com', password: 'x' } as any, req, res);
@@ -39,7 +39,7 @@ describe('AuthController.login', () => {
 describe('AuthController.refresh', () => {
   it('rejects immediately when there is no refresh_token cookie, without calling the service', async () => {
     const authService = makeAuthService();
-    const controller = new AuthController(authService);
+    const controller = new AuthController(authService, {} as any);
     const { req, res } = makeReqRes();
 
     await expect(controller.refresh(req, res)).rejects.toThrow(UnauthorizedException);
@@ -49,7 +49,7 @@ describe('AuthController.refresh', () => {
   it('forwards the refresh cookie and the csrf header/cookie pair to the service', async () => {
     const authService = makeAuthService();
     authService.refresh.mockResolvedValue({ accessToken: 'access-2', refreshToken: 'refresh-2' });
-    const controller = new AuthController(authService);
+    const controller = new AuthController(authService, {} as any);
     const { req, res } = makeReqRes({
       cookies: { refresh_token: 'old-refresh', csrf_token: 'csrf-cookie-value' },
       headers: { 'x-csrf-token': 'csrf-header-value' },
@@ -67,14 +67,14 @@ describe('AuthController.logout', () => {
   it('revokes the session and clears both auth cookies', async () => {
     const authService = makeAuthService();
     authService.logout.mockResolvedValue(undefined);
-    const controller = new AuthController(authService);
+    const controller = new AuthController(authService, {} as any);
     const { res } = makeReqRes();
     const user = { id: 'u1', role: 'contributor', trustLevel: 0, emailConfirmed: true, sessionId: 'session-1' };
 
     const result = await controller.logout(user as any, res);
 
     expect(authService.logout).toHaveBeenCalledWith('session-1');
-    expect(res.clearCookie).toHaveBeenCalledWith('refresh_token');
+    expect(res.clearCookie).toHaveBeenCalledWith('refresh_token', { path: '/auth' });
     expect(res.clearCookie).toHaveBeenCalledWith('csrf_token');
     expect(result).toEqual({ loggedOut: true });
   });

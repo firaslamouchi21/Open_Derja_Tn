@@ -55,6 +55,22 @@ describe('claimNextTask', () => {
     const callWithoutTypes = prisma.$queryRawUnsafe.mock.calls[0];
     expect(callWithoutTypes).toEqual([expect.any(String), 'u1', 'contributor']);
   });
+
+  it('adds a "<> ALL" exclusion clause and parameter for paused (excluded) types', async () => {
+    const prisma = makePrisma();
+    prisma.task.count.mockResolvedValue(0);
+    prisma.$queryRawUnsafe.mockResolvedValue([]);
+
+    await claimNextTask(prisma, {
+      userId: 'u1',
+      role: 'contributor',
+      types: ['confirm', 'region_tag'],
+      excludeTypes: ['region_tag'],
+    });
+    const call = prisma.$queryRawUnsafe.mock.calls[0];
+    expect(call[0]).toContain('<> ALL($4');
+    expect(call).toEqual([expect.any(String), 'u1', 'contributor', ['confirm', 'region_tag'], ['region_tag']]);
+  });
 });
 
 describe('releaseExpiredClaims', () => {

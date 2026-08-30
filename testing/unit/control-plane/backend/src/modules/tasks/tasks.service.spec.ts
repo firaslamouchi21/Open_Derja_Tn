@@ -51,6 +51,14 @@ function makePrisma() {
   return prisma;
 }
 
+function makeSettings(paused: string[] = []) {
+  return { get: jest.fn().mockResolvedValue(paused), getPausedTaskTypes: jest.fn().mockResolvedValue(paused) };
+}
+
+function mkTasks(prisma: unknown, settings: unknown = makeSettings()) {
+  return new TasksService(prisma as never, settings as never);
+}
+
 function claimedTask(overrides: Record<string, unknown> = {}) {
   return {
     id: 'task-1',
@@ -74,7 +82,7 @@ describe('TasksService claim', () => {
     mockedCore.getClaimableTaskRole.mockReturnValue('contributor' as any);
     mockedCore.claimNextTask.mockResolvedValue({ id: 'task-9' } as any);
 
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     const result = await service.claim(USER);
 
     expect(mockedCore.getEligibleTaskTypes).toHaveBeenCalledWith(USER);
@@ -83,8 +91,24 @@ describe('TasksService claim', () => {
       userId: USER.id,
       role: 'contributor',
       types: ['confirm', 'region_tag'],
+      excludeTypes: [],
     });
     expect(result).toEqual({ id: 'task-9' });
+  });
+
+  it('passes paused task types through as excludeTypes so a paused type is never claimed', async () => {
+    const prisma = makePrisma();
+    mockedCore.getEligibleTaskTypes.mockReturnValue(['confirm', 'region_tag'] as any);
+    mockedCore.getClaimableTaskRole.mockReturnValue('contributor' as any);
+    mockedCore.claimNextTask.mockResolvedValue(undefined as any);
+
+    const service = mkTasks(prisma, makeSettings(['region_tag']));
+    await service.claim(USER);
+
+    expect(mockedCore.claimNextTask).toHaveBeenCalledWith(
+      prisma,
+      expect.objectContaining({ excludeTypes: ['region_tag'] }),
+    );
   });
 });
 
@@ -92,7 +116,7 @@ describe('TasksService claim guard (assertClaimedByUser / assertExists)', () => 
   it('throws NotFoundException when the task does not exist', async () => {
     const prisma = makePrisma();
     prisma.task.findUnique.mockResolvedValue(null);
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
 
     await expect(service.complete(USER, 'ghost-task')).rejects.toThrow(NotFoundException);
   });
@@ -100,7 +124,7 @@ describe('TasksService claim guard (assertClaimedByUser / assertExists)', () => 
   it('throws ForbiddenException when the task is not claimed by this user', async () => {
     const prisma = makePrisma();
     prisma.task.findUnique.mockResolvedValue(claimedTask({ claimedBy: 'someone-else' }));
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
 
     await expect(service.complete(USER, 'task-1')).rejects.toThrow(ForbiddenException);
   });
@@ -108,7 +132,7 @@ describe('TasksService claim guard (assertClaimedByUser / assertExists)', () => 
   it('throws ForbiddenException when the task is not in claimed status', async () => {
     const prisma = makePrisma();
     prisma.task.findUnique.mockResolvedValue(claimedTask({ status: 'open' }));
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
 
     await expect(service.complete(USER, 'task-1')).rejects.toThrow(ForbiddenException);
   });
@@ -117,7 +141,7 @@ describe('TasksService claim guard (assertClaimedByUser / assertExists)', () => 
     const prisma = makePrisma();
     prisma.task.findUnique.mockResolvedValue(claimedTask());
     mockedCore.completeTask.mockResolvedValue({ id: 'task-1', status: 'done' } as any);
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
 
     const result = await service.complete(USER, 'task-1', 'record-1');
 
@@ -130,7 +154,7 @@ describe('TasksService.review', () => {
   it('rejects when the claimed task is not a review task', async () => {
     const prisma = makePrisma();
     prisma.task.findUnique.mockResolvedValue(claimedTask({ type: 'confirm' }));
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
 
     await expect(service.review(USER, 'task-1', { approved: true } as any)).rejects.toThrow(BadRequestException);
   });
@@ -139,7 +163,7 @@ describe('TasksService.review', () => {
     const prisma = makePrisma();
     prisma.task.findUnique.mockResolvedValue(claimedTask());
     mockedCore.rejectTask.mockResolvedValue({ id: 'task-1', status: 'rejected' } as any);
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
 
     const result = await service.review(USER, 'task-1', { approved: false } as any);
 
@@ -156,7 +180,7 @@ describe('TasksService.review', () => {
     mockedCore.onReviewApproved.mockReturnValue(['spec-1'] as any);
     mockedCore.refreshConsensus.mockResolvedValue({ needsAdjudication: false, allValues: [] } as any);
 
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     const dto = { approved: true, qualityValue: 'high', regions: ['sahel', 'north'] } as any;
     const result = await service.review(USER, 'task-1', dto);
 
@@ -178,7 +202,7 @@ describe('TasksService.review', () => {
     mockedCore.completeTask.mockResolvedValue({ id: 'task-1', status: 'done' } as any);
     mockedCore.onReviewApproved.mockReturnValue([] as any);
 
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     await service.review(USER, 'task-1', { approved: true } as any);
 
     expect(mockedCore.addFullSpanTag).not.toHaveBeenCalled();
@@ -195,7 +219,7 @@ describe('TasksService.review', () => {
     mockedCore.refreshConsensus.mockResolvedValue({ needsAdjudication: true, allValues: ['sahel', 'north'] } as any);
     mockedCore.onConsensusLowAgreement.mockReturnValue(['adjudicate-spec'] as any);
 
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     await service.review(USER, 'task-1', { approved: true, regions: ['sahel', 'north'] } as any);
 
     expect(mockedCore.onConsensusLowAgreement).toHaveBeenCalledWith('item-1', 2, 0, 8, ['sahel', 'north']);
@@ -212,7 +236,7 @@ describe('TasksService.confirm', () => {
     mockedCore.completeTask.mockResolvedValue({ id: 'task-1' } as any);
     mockedCore.refreshConsensus.mockResolvedValue({ needsAdjudication: false, allValues: [] } as any);
 
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     await service.confirm(USER, 'task-1', { agrees: true } as any);
 
     expect(prisma.tag.findMany).toHaveBeenCalledWith(
@@ -228,7 +252,7 @@ describe('TasksService.confirm', () => {
     mockedCore.completeTask.mockResolvedValue({ id: 'task-1' } as any);
     mockedCore.refreshConsensus.mockResolvedValue({ needsAdjudication: false, allValues: [] } as any);
 
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     await service.confirm(USER, 'task-1', { agrees: false, regions: ['south'] } as any);
 
     expect(prisma.tag.findMany).not.toHaveBeenCalled();
@@ -242,7 +266,7 @@ describe('TasksService.confirm', () => {
     prisma.tag.findMany.mockResolvedValue([]);
     mockedCore.completeTask.mockResolvedValue({ id: 'task-1' } as any);
 
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     await service.confirm(USER, 'task-1', { agrees: true } as any);
 
     expect(mockedCore.addRegionTags).not.toHaveBeenCalled();
@@ -263,7 +287,7 @@ describe('TasksService.standardise', () => {
     mockedCore.completeTask.mockResolvedValue({ id: 'task-1', status: 'done' } as any);
     mockedCore.onCorpusItemStandardised.mockReturnValue(['link-spec'] as any);
 
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     const result = await service.standardise(USER, 'task-1', { canonicalForm: 'شنوة' } as any);
 
     expect(mockedCore.computeCanonicalMap).toHaveBeenCalledWith('chnowa', 'شنوة', 3);
@@ -289,7 +313,7 @@ describe('TasksService.linkLemma', () => {
     mockedCore.parseSpanSlot.mockReturnValue({ charStart: 0, charEnd: 5 });
     prisma.token.findFirst.mockResolvedValue(null);
 
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     await expect(service.linkLemma(USER, 'task-1', { lexiconEntryId: 'entry-1' } as any)).rejects.toThrow(NotFoundException);
   });
 
@@ -304,7 +328,7 @@ describe('TasksService.linkLemma', () => {
       tags: [{ value: 'sahel' }, { value: 'sahel' }, { value: 'north' }],
     });
 
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     await service.linkLemma(USER, 'task-1', { lexiconEntryId: 'entry-1', lexiconVariantId: 'variant-1' } as any);
 
     expect(mockedCore.attestLexiconVariantRegion).toHaveBeenCalledTimes(2);
@@ -320,7 +344,7 @@ describe('TasksService.linkLemma', () => {
     mockedCore.addLink.mockResolvedValue({ id: 'link-1' } as any);
     mockedCore.completeTask.mockResolvedValue({ id: 'task-1' } as any);
 
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     await service.linkLemma(USER, 'task-1', { lexiconEntryId: 'entry-1' } as any);
 
     expect(prisma.corpusItem.findUnique).not.toHaveBeenCalled();
@@ -335,7 +359,7 @@ describe('TasksService.adjudicate', () => {
     mockedCore.parseSpanSlot.mockReturnValue({ charStart: 2, charEnd: 9 });
     mockedCore.completeTask.mockResolvedValue({ id: 'task-1' } as any);
 
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     await service.adjudicate(USER, 'task-1', { kind: 'region', values: ['sahel', 'north'] } as any);
 
     expect(mockedCore.addTag).toHaveBeenCalledTimes(2);
@@ -349,7 +373,7 @@ describe('TasksService.translate / transliterate task-type guards', () => {
   it('rejects translate() when the claimed task is not a translation task', async () => {
     const prisma = makePrisma();
     prisma.task.findUnique.mockResolvedValue(claimedTask({ type: 'confirm' }));
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
 
     await expect(service.translate(USER, 'task-1', { text: 'x' } as any)).rejects.toThrow(BadRequestException);
   });
@@ -357,7 +381,7 @@ describe('TasksService.translate / transliterate task-type guards', () => {
   it('rejects transliterate() when the claimed task is not a transliteration task', async () => {
     const prisma = makePrisma();
     prisma.task.findUnique.mockResolvedValue(claimedTask({ type: 'confirm' }));
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
 
     await expect(service.transliterate(USER, 'task-1', { text: 'x' } as any)).rejects.toThrow(BadRequestException);
   });
@@ -367,7 +391,7 @@ describe('TasksService.translate / transliterate task-type guards', () => {
     prisma.task.findUnique.mockResolvedValue(claimedTask({ type: 'transliterate_to_arabic' }));
     mockedCore.createLexiconForm.mockResolvedValue(null as any);
 
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     await expect(
       service.transliterate(USER, 'task-1', { lexiconVariantId: 'ghost', text: 'x' } as any),
     ).rejects.toThrow(NotFoundException);
@@ -378,7 +402,7 @@ describe('TasksService.rework / reject', () => {
   it('rework() throws NotFoundException for a missing task and otherwise delegates to requestRework', async () => {
     const prisma = makePrisma();
     prisma.task.findUnique.mockResolvedValueOnce(null);
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     await expect(service.rework('ghost')).rejects.toThrow(NotFoundException);
 
     prisma.task.findUnique.mockResolvedValueOnce(claimedTask());
@@ -391,7 +415,7 @@ describe('TasksService.rework / reject', () => {
   it('reject() throws NotFoundException for a missing task and otherwise delegates to rejectTask', async () => {
     const prisma = makePrisma();
     prisma.task.findUnique.mockResolvedValueOnce(null);
-    const service = new TasksService(prisma);
+    const service = mkTasks(prisma);
     await expect(service.reject('ghost')).rejects.toThrow(NotFoundException);
 
     prisma.task.findUnique.mockResolvedValueOnce(claimedTask());

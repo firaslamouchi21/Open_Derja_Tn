@@ -4,6 +4,7 @@ import { PrismaService } from '../../infra/database/prisma.service';
 import { TokenService } from '../../infra/auth/token.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { ALLOW_UNVERIFIED_EMAIL_KEY } from '../decorators/allow-unverified-email.decorator';
+import { ALLOW_2FA_ENROLLMENT_KEY } from '../decorators/allow-2fa-enrollment.decorator';
 import type { RequestUser } from './request-user.interface';
 
 @Injectable()
@@ -39,6 +40,17 @@ export class AuthGuard implements CanActivate {
 
     const user = await this.resolveUser(bearerToken);
     request.user = user;
+
+    if (user.twofaPending) {
+      const allow2faEnrollment = this.reflector.getAllAndOverride<boolean>(ALLOW_2FA_ENROLLMENT_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]);
+      if (!allow2faEnrollment) {
+        throw new ForbiddenException('Two-factor enrollment required before this account can be used');
+      }
+      return true;
+    }
 
     if (user.role !== 'admin' && user.role !== 'superadmin') {
       const allowUnverifiedEmail = this.reflector.getAllAndOverride<boolean>(ALLOW_UNVERIFIED_EMAIL_KEY, [
@@ -78,6 +90,7 @@ export class AuthGuard implements CanActivate {
       trustLevel: user.trustLevel,
       emailConfirmed: user.emailConfirmed,
       sessionId: payload.sid,
+      twofaPending: payload.twofa === 'pending',
     };
   }
 }

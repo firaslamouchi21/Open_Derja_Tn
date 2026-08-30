@@ -12,3 +12,7 @@ export * from './outbox';
 export * from './mail';
 export * from './policy';
 export * from './standardisation';
+export * from './privacy';
+export * from './auth';
+export * from './stats';
+export * from './export';

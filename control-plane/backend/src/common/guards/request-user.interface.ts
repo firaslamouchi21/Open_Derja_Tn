@@ -6,4 +6,5 @@ export interface RequestUser {
   trustLevel: number;
   emailConfirmed: boolean;
   sessionId?: string;
+  twofaPending?: boolean;
 }

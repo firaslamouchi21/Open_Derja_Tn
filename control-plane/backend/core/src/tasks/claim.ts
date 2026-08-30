@@ -7,6 +7,7 @@ export interface ClaimNextTaskParams {
   userId: string;
   role: TaskRole;
   types?: TaskType[];
+  excludeTypes?: TaskType[];
 }
 
 export async function claimNextTask(prisma: PrismaClient, params: ClaimNextTaskParams): Promise<Task | undefined> {
@@ -18,6 +19,18 @@ export async function claimNextTask(prisma: PrismaClient, params: ClaimNextTaskP
   }
 
   const typeFilter = params.types && params.types.length > 0 ? params.types : undefined;
+  const excludeFilter = params.excludeTypes && params.excludeTypes.length > 0 ? params.excludeTypes : undefined;
+
+  const args: unknown[] = [params.userId, params.role];
+  let typeClause = '';
+  if (typeFilter) {
+    args.push(typeFilter);
+    typeClause += ` AND type = ANY($${args.length}::"TaskType"[])`;
+  }
+  if (excludeFilter) {
+    args.push(excludeFilter);
+    typeClause += ` AND type <> ALL($${args.length}::"TaskType"[])`;
+  }
 
   const rows = await prisma.$queryRawUnsafe<Array<{ id: string }>>(
     `
@@ -27,16 +40,14 @@ export async function claimNextTask(prisma: PrismaClient, params: ClaimNextTaskP
       SELECT id FROM tasks
       WHERE status IN ('open', 'needs_rework')
         AND requires_role = $2::"TaskRole"
-        ${typeFilter ? 'AND type = ANY($3::"TaskType"[])' : ''}
+        ${typeClause}
       ORDER BY priority DESC, created_at ASC
       FOR UPDATE SKIP LOCKED
       LIMIT 1
     )
     RETURNING id
     `,
-    params.userId,
-    params.role,
-    ...(typeFilter ? [typeFilter] : []),
+    ...args,
   );
 
   const claimedId = rows[0]?.id;

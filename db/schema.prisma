@@ -239,6 +239,34 @@ enum ConsentScope {
   includes_voice
 }
 
+enum OtpPurpose {
+  email_verify
+  password_reset
+}
+
+enum RevocationScope {
+  text
+  voice
+  full
+}
+
+enum RevocationStatus {
+  pending
+  processed
+  failed
+}
+
+enum FeatureAudience {
+  public
+  reviewer
+}
+
+enum AuthProvider {
+  password
+  google
+  github
+}
+
 model Source {
   id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   kind           SourceKind
@@ -572,7 +600,6 @@ model User {
   active              Boolean   @default(true)
   emailConfirmed      Boolean   @default(false) @map("email_confirmed")
   tokenVersion        Int       @default(0) @map("token_version")
-  githubId            String?   @unique @map("github_id")
   totpSecret          String?   @map("totp_secret")
   totpEnabled         Boolean   @default(false) @map("totp_enabled")
   failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
@@ -580,20 +607,27 @@ model User {
   createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  tokens                Token[]
-  links                 Link[]
-  tags                  Tag[]
-  lexiconOrigins        LexiconOrigin[]
-  translations          Translation[]
-  correctionsProposed   Correction[]     @relation("CorrectionProposer")
-  correctionsReviewed   Correction[]     @relation("CorrectionReviewer")
-  flagsResolved         Flag[]
-  tasksClaimed          Task[]           @relation("TaskClaimedBy")
-  tasksCompleted        Task[]           @relation("TaskCompletedBy")
-  auditLogEntries       AuditLog[]
-  storedObjectsUploaded StoredObject[]
-  refreshSessions       RefreshSession[]
-  publicationsSubmitted Publication[]
+  tokens                      Token[]
+  links                       Link[]
+  tags                        Tag[]
+  lexiconOrigins              LexiconOrigin[]
+  translations                Translation[]
+  correctionsProposed         Correction[]        @relation("CorrectionProposer")
+  correctionsReviewed         Correction[]        @relation("CorrectionReviewer")
+  flagsResolved               Flag[]
+  tasksClaimed                Task[]              @relation("TaskClaimedBy")
+  tasksCompleted              Task[]              @relation("TaskCompletedBy")
+  auditLogEntries             AuditLog[]
+  storedObjectsUploaded       StoredObject[]
+  refreshSessions             RefreshSession[]
+  publicationsSubmitted       Publication[]
+  emailOtps                   EmailOtp[]
+  reviewerInvitesSent         ReviewerInvite[]    @relation("ReviewerInviteInvitedBy")
+  reviewerInviteAccepted      ReviewerInvite?     @relation("ReviewerInviteAcceptedUser")
+  consentRevocationsRequested ConsentRevocation[] @relation("ConsentRevocationRequestedBy")
+  consentRevocationsAsSubject ConsentRevocation[] @relation("ConsentRevocationSubject")
+  systemSettingsUpdated       SystemSetting[]
+  authIdentities              AuthIdentity[]
 
   @@index([role, regionSelfReported])
   @@map("users")
@@ -796,6 +830,20 @@ model TranslatorRegionMiss {
   @@map("translator_region_miss")
 }
 
+model TranslatorLookup {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  queryText  String   @map("query_text")
+  matchKey   String   @map("match_key")
+  region     Region?
+  hit        Boolean
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([createdAt])
+  @@index([hit, matchKey])
+  @@index([region, hit])
+  @@map("translator_lookups")
+}
+
 model Speaker {
   id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   sessionId       String?  @map("session_id") @db.Uuid
@@ -867,6 +915,95 @@ model StoredObject {
   @@index([kind, status])
   @@index([expiresAt])
   @@map("stored_objects")
+}
+
+model AuthIdentity {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String       @map("user_id") @db.Uuid
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider       AuthProvider
+  providerUserId String       @map("provider_user_id")
+  email          String?
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+  @@map("auth_identities")
+}
+
+model EmailOtp {
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String     @map("user_id") @db.Uuid
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose    OtpPurpose
+  codeHash   String     @map("code_hash")
+  expiresAt  DateTime   @map("expires_at") @db.Timestamptz(6)
+  attempts   Int        @default(0)
+  consumedAt DateTime?  @map("consumed_at") @db.Timestamptz(6)
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId, purpose])
+  @@map("email_otps")
+}
+
+model ReviewerInvite {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email          String
+  tokenHash      String    @unique @map("token_hash")
+  region         Region
+  invitedBy      String    @map("invited_by") @db.Uuid
+  inviter        User      @relation("ReviewerInviteInvitedBy", fields: [invitedBy], references: [id])
+  expiresAt      DateTime  @map("expires_at") @db.Timestamptz(6)
+  acceptedAt     DateTime? @map("accepted_at") @db.Timestamptz(6)
+  acceptedUserId String?   @unique @map("accepted_user_id") @db.Uuid
+  acceptedUser   User?     @relation("ReviewerInviteAcceptedUser", fields: [acceptedUserId], references: [id])
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([email])
+  @@map("reviewer_invites")
+}
+
+model ConsentRevocation {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subjectSessionId String?          @map("subject_session_id") @db.Uuid
+  subjectUserId    String?          @map("subject_user_id") @db.Uuid
+  subjectUser      User?            @relation("ConsentRevocationSubject", fields: [subjectUserId], references: [id], onDelete: SetNull)
+  scope            RevocationScope
+  status           RevocationStatus @default(pending)
+  requestedBy      String?          @map("requested_by") @db.Uuid
+  requester        User?            @relation("ConsentRevocationRequestedBy", fields: [requestedBy], references: [id], onDelete: SetNull)
+  processedAt      DateTime?        @map("processed_at") @db.Timestamptz(6)
+  scrubbedCount    Int?             @map("scrubbed_count")
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status])
+  @@map("consent_revocations")
+}
+
+model FeatureFlag {
+  key         String          @id
+  enabled     Boolean         @default(false)
+  audience    FeatureAudience @default(reviewer)
+  description String?
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("feature_flags")
+}
+
+model SystemSetting {
+  key       String   @id
+  value     Json
+  updatedBy String?  @map("updated_by") @db.Uuid
+  updater   User?    @relation(fields: [updatedBy], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("system_settings")
 }
 
 model DatabaseBackup {

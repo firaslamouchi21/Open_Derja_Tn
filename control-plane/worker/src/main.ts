@@ -1,6 +1,13 @@
 import 'dotenv/config';
 import { PrismaClient } from '@open-derja/db';
-import { getBoss, registerExpireClaimsJob } from './jobs';
+import {
+  getBoss,
+  registerAnonymiseRevokedJob,
+  registerDispatchOutboxJob,
+  registerExpireClaimsJob,
+  registerRecomputeStatsJob,
+  registerSweepPendingUploadsJob,
+} from './jobs';
 
 async function main() {
   const prisma = new PrismaClient();
@@ -8,6 +15,10 @@ async function main() {
 
   await boss.start();
   await registerExpireClaimsJob(boss, prisma);
+  await registerDispatchOutboxJob(boss, prisma);
+  await registerSweepPendingUploadsJob(boss, prisma);
+  await registerAnonymiseRevokedJob(boss, prisma);
+  await registerRecomputeStatsJob(boss, prisma);
 
   console.log('[worker] started, jobs registered');
 

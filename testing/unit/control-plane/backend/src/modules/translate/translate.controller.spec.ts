@@ -6,6 +6,8 @@ jest.mock(
   () => ({
     getTranslatorCoverage: jest.fn(),
     lookupTranslation: jest.fn(),
+    logTranslatorLookup: jest.fn().mockResolvedValue(undefined),
+    isLookupHit: jest.fn().mockReturnValue(false),
   }),
   { virtual: true },
 );
@@ -19,13 +21,25 @@ beforeEach(() => {
 describe('TranslateController.lookup', () => {
   it('passes the query params straight through to lookupTranslation', async () => {
     const prisma = {} as any;
-    mockedCore.lookupTranslation.mockResolvedValue({ query: 'chnowa' } as any);
+    mockedCore.lookupTranslation.mockResolvedValue({ query: 'chnowa', matchKey: 'chnwa' } as any);
     const controller = new TranslateController(prisma);
 
     const result = await controller.lookup({ text: 'chnowa', region: 'sahel', includeVulgar: true } as any);
 
     expect(mockedCore.lookupTranslation).toHaveBeenCalledWith(prisma, 'chnowa', 'sahel', true);
-    expect(result).toEqual({ query: 'chnowa' });
+    expect(result).toEqual({ query: 'chnowa', matchKey: 'chnwa' });
+  });
+
+  it('records every lookup as a demand signal but never lets a log failure break the response', async () => {
+    const prisma = {} as any;
+    mockedCore.lookupTranslation.mockResolvedValue({ query: 'x', matchKey: 'x', exact: [], fuzzy: [] } as any);
+    (mockedCore.logTranslatorLookup as jest.Mock).mockRejectedValueOnce(new Error('db down'));
+    const controller = new TranslateController(prisma);
+
+    await expect(controller.lookup({ text: 'x' } as any)).resolves.toEqual(
+      expect.objectContaining({ query: 'x' }),
+    );
+    expect(mockedCore.logTranslatorLookup).toHaveBeenCalled();
   });
 });
 

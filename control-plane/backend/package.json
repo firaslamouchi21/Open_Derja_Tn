@@ -22,6 +22,8 @@
     "@nestjs/throttler": "^6.2.1",
     "@open-derja/core": "workspace:*",
     "@open-derja/db": "workspace:*",
+    "@open-derja/scrapers": "workspace:*",
+    "@open-derja/shared": "workspace:*",
     "@sentry/nestjs": "^10.71.0",
     "argon2": "^0.31.2",
     "class-transformer": "^0.5.1",

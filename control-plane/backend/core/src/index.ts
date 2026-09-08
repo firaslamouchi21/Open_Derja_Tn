@@ -1,5 +1,6 @@
 export * from './tasks';
 export * from './trust';
+export * from './corpus-items';
 export * from './storage';
 export * from './text';
 export * from './ingestion';

@@ -132,6 +132,31 @@ export class AuthService {
     return this.startSession(user, ipHash, userAgent);
   }
 
+  async guestSession(sessionId: string, ipHash: string | undefined, userAgent: string | undefined): Promise<AuthTokens> {
+    let user = await this.prisma.user.findUnique({ where: { id: sessionId } });
+
+    if (user && user.role !== 'contributor') {
+      throw new UnauthorizedException('Invalid session');
+    }
+
+    if (!user) {
+      try {
+        user = await this.prisma.user.create({ data: { id: sessionId, role: 'contributor' } });
+      } catch {
+        user = await this.prisma.user.findUniqueOrThrow({ where: { id: sessionId } });
+        if (user.role !== 'contributor') {
+          throw new UnauthorizedException('Invalid session');
+        }
+      }
+    }
+
+    if (!user.active) {
+      throw new UnauthorizedException('This session has been disabled');
+    }
+
+    return this.startSession(user, ipHash, userAgent);
+  }
+
   async refresh(refreshToken: string, csrfHeader: string | undefined, csrfCookie: string | undefined): Promise<AuthTokens> {
     this.assertCsrfMatch(csrfHeader, csrfCookie);
 

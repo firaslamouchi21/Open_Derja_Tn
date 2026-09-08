@@ -35,10 +35,20 @@ Migrations: Always run against DIRECT_URL (direct to Postgres). Never migrate th
 Required Seeding Before Running Tasks
 
 System User: Create a bot/system row in users (annotatorId cannot be null, even for machine actions).
+`db/seeds/system-user.seed.ts` (`pnpm --filter @open-derja/db run seed:system-user`) upserts a fixed-id
+(`00000000-0000-0000-0000-000000000001`), passwordless, emailless `admin`-role row for this. Nothing in
+the request path currently creates machine annotations automatically (intelligence-plane is phase-gated),
+so this seed isn't blocking anything today — it exists so the id is stable and ready once it is needed.
 
-Contribution Source: Add a contribution kind row in sources for user submissions.
+Contribution Source: no longer a manual seeding step — `getOrCreateContributionSource()` in
+`corpus-items.service.ts` (and the equivalent in `control-plane/scrapers`) creates the `contribution`
+kind row in `sources` lazily on first use if it doesn't already exist.
 
-Rules: Seed baseline CODA-TUN standardisation_rules.
+Rules: Seed baseline CODA-TUN standardisation_rules. The seed script now exists
+(`db/seeds/standardisation-rules.seed.ts`, `pnpm --filter @open-derja/db run seed:standardisation-rules`)
+but `standardisation-rules.data.ts` ships with an empty rule list on purpose — writing real CODA-TUN
+pattern/replacement pairs is a linguistic decision, not a code one, and nobody should invent those rules
+without the background to get them right. This is a genuine remaining content gap, not a code gap.
 
 ---
 
@@ -66,3 +76,18 @@ afterwards):
 
 pg-boss creates its own `pgboss` schema on first `boss.start()` in `control-plane/worker`
 — it is not a Prisma-managed schema and won't show up in `migrate status`.
+
+Migration added 2026-09-06 (same offline `prisma migrate diff --from-schema-datamodel
+<old> --to-schema-datamodel <new> --script` flow, purely additive):
+
+- `20260906000000_marker_terms` — `marker_terms` (`list_version · term · active ·
+  notes`, unique on `(term, list_version)`). This is the §12.3 "Tunisian-specific
+  lexical markers" pre-filter list, mirroring `standardisation_rules`' version-bump
+  pattern instead of a flat code-level array — a new `list_version` can be seeded
+  and cut over without touching any deployed code. `loadActiveMarkerTerms` in
+  `control-plane/backend/core/src/ingestion/marker-list.ts` reads the highest
+  `list_version`'s active terms unless a specific version is pinned. Seed data lives
+  in `db/seeds/marker-terms.data.ts` (run via `pnpm --filter @open-derja/db run
+  seed:markers`) — a starting list per the technical ledger's own admission that
+  "the actual thresholds and markers to move" once real data starts coming through,
+  not an authoritative ruleset.

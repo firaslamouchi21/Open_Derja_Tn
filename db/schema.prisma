@@ -708,6 +708,20 @@ model StandardisationRule {
   @@map("standardisation_rules")
 }
 
+model MarkerTerm {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  listVersion Int      @map("list_version")
+  term        String
+  active      Boolean  @default(true)
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([term, listVersion])
+  @@index([listVersion])
+  @@map("marker_terms")
+}
+
 model DatasetSnapshot {
   id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   version         String

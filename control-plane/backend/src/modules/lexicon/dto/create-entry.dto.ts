@@ -1,9 +1,6 @@
 import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import { DOMAINS, GRANULARITIES, PARTS_OF_SPEECH } from '@open-derja/shared';
 import type { Domain, Granularity, PartOfSpeech } from '@open-derja/db';
-
-const DOMAIN_VALUES: Domain[] = ['everyday', 'food', 'admin', 'agriculture', 'kinship', 'other'];
-const GRANULARITY_VALUES: Granularity[] = ['word', 'phrase', 'sentence'];
-const POS_VALUES: PartOfSpeech[] = ['noun', 'verb', 'adj', 'particle'];
 
 export class CreateLexiconEntryDto {
   @IsOptional()
@@ -22,14 +19,14 @@ export class CreateLexiconEntryDto {
   glossMsa?: string;
 
   @IsOptional()
-  @IsEnum(DOMAIN_VALUES)
+  @IsEnum(DOMAINS)
   domain?: Domain;
 
-  @IsEnum(GRANULARITY_VALUES)
+  @IsEnum(GRANULARITIES)
   granularity!: Granularity;
 
   @IsOptional()
-  @IsEnum(POS_VALUES)
+  @IsEnum(PARTS_OF_SPEECH)
   pos?: PartOfSpeech;
 
   @IsOptional()

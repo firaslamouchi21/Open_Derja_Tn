@@ -7,6 +7,7 @@ import { AllowUnverifiedEmail } from '../../common/decorators/allow-unverified-e
 import { Allow2faEnrollment } from '../../common/decorators/allow-2fa-enrollment.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { RequestUser } from '../../common/guards/request-user.interface';
+import { resolveContributorSessionId } from '../../common/utils/contributor-session';
 import { AuthService, hashIp, type AuthTokens } from './auth.service';
 import { TotpService } from './totp.service';
 import { LoginDto } from './dto/login.dto';
@@ -42,6 +43,14 @@ export class AuthController {
   @Public()
   async login(@Body() dto: LoginDto, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const tokens = await this.authService.login(dto, this.ipHash(req), req.headers['user-agent']);
+    return this.respondWithTokens(res, tokens);
+  }
+
+  @Post('guest-session')
+  @Public()
+  async guestSession(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const sessionId = resolveContributorSessionId(req, res);
+    const tokens = await this.authService.guestSession(sessionId, this.ipHash(req), req.headers['user-agent']);
     return this.respondWithTokens(res, tokens);
   }
 
@@ -137,7 +146,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    await this.totpService.assertCode(user.id, dto.code);
+    await this.totpService.requireEnrolledCode(user.id, dto.code);
     const tokens = await this.authService.completeSessionAfter2fa(user.id, this.ipHash(req), req.headers['user-agent']);
     return this.respondWithTokens(res, tokens);
   }

@@ -9,21 +9,10 @@ import {
   IsUUID,
   Min,
 } from 'class-validator';
+import { REGIONS, TASK_TYPES, USER_ROLES } from '@open-derja/shared';
 
-const REGION_VALUES = ['northwest', 'north', 'sahel', 'south'];
-const TASK_TYPE_VALUES = [
-  'review',
-  'region_tag',
-  'confirm',
-  'translate_msa',
-  'translate_fr',
-  'translate_en',
-  'transliterate_to_arabic',
-  'transliterate_to_arabizi',
-  'standardise',
-  'adjudicate',
-  'link_lemma',
-];
+const REGION_VALUES: readonly string[] = REGIONS;
+const TASK_TYPE_VALUES: readonly string[] = TASK_TYPES;
 
 export class BulkRejectScrapeBatchDto {
   @IsUUID()
@@ -108,7 +97,7 @@ export class BanUserWithRevertDto {
 }
 
 export class SetUserRoleDto {
-  @IsIn(['contributor', 'trusted_contributor', 'reviewer', 'admin', 'superadmin'])
+  @IsIn(USER_ROLES)
   role!: string;
 
   @IsString()

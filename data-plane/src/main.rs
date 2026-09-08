@@ -19,7 +19,7 @@ async fn health() -> HttpResponse {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().service(health))
+    HttpServer::new(|| App::new().service(health).service(dedup::routes::check))
         .bind(("0.0.0.0", 8002))?
         .run()
         .await

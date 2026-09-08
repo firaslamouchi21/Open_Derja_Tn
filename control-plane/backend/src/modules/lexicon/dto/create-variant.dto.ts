@@ -1,22 +1,18 @@
 import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import { ERAS, REGISTERS, SCOPES, SETTINGS } from '@open-derja/shared';
 import type { Era, Register, Scope, Setting } from '@open-derja/db';
 
-const SCOPE_VALUES: Scope[] = ['pan_tunisian', 'regional'];
-const ERA_VALUES: Era[] = ['contemporary', 'historical', 'unknown'];
-const SETTING_VALUES: Setting[] = ['urban', 'rural', 'unknown'];
-const REGISTER_VALUES: Register[] = ['neutral', 'formal', 'vulgar', 'archaic', 'unknown'];
-
 export class CreateLexiconVariantDto {
-  @IsEnum(SCOPE_VALUES)
+  @IsEnum(SCOPES)
   scope!: Scope;
 
-  @IsEnum(ERA_VALUES)
+  @IsEnum(ERAS)
   era!: Era;
 
-  @IsEnum(SETTING_VALUES)
+  @IsEnum(SETTINGS)
   setting!: Setting;
 
-  @IsEnum(REGISTER_VALUES)
+  @IsEnum(REGISTERS)
   register!: Register;
 
   @IsString()

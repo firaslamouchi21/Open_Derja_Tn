@@ -104,4 +104,23 @@ describe('ingestDocument', () => {
     expect(tx.task.create).toHaveBeenCalledTimes(1);
     expect(tx.task.create.mock.calls[0][0].data).toMatchObject({ corpusItemId: 'item-1', type: 'review', itemVersion: 1 });
   });
+
+  it('defers the near-duplicate decision to the data-plane url when one is given', async () => {
+    const originalFetch = global.fetch;
+    const tx = makeTx();
+    tx.$queryRaw.mockResolvedValue([{ id: 'existing-item', text: 'irrelevant to the mock' }]);
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({ is_near_duplicate: true, matches: [{ id: 'existing-item', similarity: 0.99 }] }),
+    });
+    const prisma = makePrisma(tx);
+
+    const result = await ingestDocument(prisma, SOURCE, fetchedItem('Hi there my old friend.'), [], 'http://data-plane:8002');
+
+    expect(global.fetch).toHaveBeenCalledWith('http://data-plane:8002/dedup/check', expect.anything());
+    expect(tx.corpusItem.create).not.toHaveBeenCalled();
+    expect(result.nearDuplicatesSkipped).toBe(1);
+
+    global.fetch = originalFetch;
+  });
 });

@@ -11,6 +11,8 @@ module.exports = {
   moduleNameMapper: {
     '^@open-derja/core$': '<rootDir>/control-plane/backend/core/src/index.ts',
     '^@open-derja/db$': '<rootDir>/db/index.ts',
+    '^@open-derja/scrapers$': '<rootDir>/control-plane/scrapers/src/index.ts',
+    '^@open-derja/shared$': '<rootDir>/shared/src/index.ts',
   },
   setupFiles: ['<rootDir>/node_modules/reflect-metadata/Reflect.js'],
   transform: {

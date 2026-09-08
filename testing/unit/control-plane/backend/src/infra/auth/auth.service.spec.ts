@@ -68,6 +68,102 @@ describe('AuthService.register', () => {
   });
 });
 
+describe('AuthService.guestSession', () => {
+  function makePrisma(overrides: Record<string, unknown> = {}) {
+    return {
+      user: {
+        findUnique: jest.fn().mockResolvedValue(null),
+        findUniqueOrThrow: jest.fn(),
+        create: jest.fn(),
+      },
+      refreshSession: { create: jest.fn().mockResolvedValue({ id: 'session-row-1', jti: 'jti-1' }) },
+      ...overrides,
+    };
+  }
+
+  it('creates a brand-new contributor for a session id never seen before', async () => {
+    const prisma: any = makePrisma();
+    prisma.user.create.mockResolvedValue({
+      id: 'sess-1',
+      role: 'contributor',
+      tokenVersion: 0,
+      active: true,
+    });
+    const service = mkService(prisma);
+
+    const tokens = await service.guestSession('sess-1', 'iphash', 'ua');
+
+    expect(prisma.user.create).toHaveBeenCalledWith({ data: { id: 'sess-1', role: 'contributor' } });
+    expect(tokens).toEqual({ accessToken: 'access-token', refreshToken: 'refresh-token' });
+    expect(prisma.refreshSession.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: 'sess-1' }) }),
+    );
+  });
+
+  it('reuses the existing contributor for a session id already seen', async () => {
+    const prisma: any = makePrisma({
+      user: {
+        findUnique: jest.fn().mockResolvedValue({ id: 'sess-1', role: 'contributor', tokenVersion: 0, active: true }),
+        findUniqueOrThrow: jest.fn(),
+        create: jest.fn(),
+      },
+    });
+    const service = mkService(prisma);
+
+    await service.guestSession('sess-1', 'iphash', 'ua');
+
+    expect(prisma.user.create).not.toHaveBeenCalled();
+  });
+
+  it('refuses to issue a session when the id already belongs to a non-contributor role', async () => {
+    const prisma: any = makePrisma({
+      user: {
+        findUnique: jest.fn().mockResolvedValue({ id: 'admin-id', role: 'admin', tokenVersion: 0, active: true }),
+        findUniqueOrThrow: jest.fn(),
+        create: jest.fn(),
+      },
+    });
+    const service = mkService(prisma);
+
+    await expect(service.guestSession('admin-id', 'iphash', 'ua')).rejects.toThrow(UnauthorizedException);
+    expect(prisma.user.create).not.toHaveBeenCalled();
+    expect(prisma.refreshSession.create).not.toHaveBeenCalled();
+  });
+
+  it('refuses to issue a session for a deactivated contributor', async () => {
+    const prisma: any = makePrisma({
+      user: {
+        findUnique: jest.fn().mockResolvedValue({ id: 'sess-1', role: 'contributor', tokenVersion: 0, active: false }),
+        findUniqueOrThrow: jest.fn(),
+        create: jest.fn(),
+      },
+    });
+    const service = mkService(prisma);
+
+    await expect(service.guestSession('sess-1', 'iphash', 'ua')).rejects.toThrow(UnauthorizedException);
+  });
+
+  it('re-fetches and re-checks the role when a concurrent create loses the race', async () => {
+    const prisma: any = makePrisma();
+    prisma.user.create.mockRejectedValue(new Error('unique constraint'));
+    prisma.user.findUniqueOrThrow.mockResolvedValue({ id: 'sess-1', role: 'contributor', tokenVersion: 0, active: true });
+    const service = mkService(prisma);
+
+    const tokens = await service.guestSession('sess-1', 'iphash', 'ua');
+
+    expect(tokens).toEqual({ accessToken: 'access-token', refreshToken: 'refresh-token' });
+  });
+
+  it('refuses even after losing the create race if the winning row is not a contributor', async () => {
+    const prisma: any = makePrisma();
+    prisma.user.create.mockRejectedValue(new Error('unique constraint'));
+    prisma.user.findUniqueOrThrow.mockResolvedValue({ id: 'sess-1', role: 'reviewer', tokenVersion: 0, active: true });
+    const service = mkService(prisma);
+
+    await expect(service.guestSession('sess-1', 'iphash', 'ua')).rejects.toThrow(UnauthorizedException);
+  });
+});
+
 describe('AuthService.refresh (CSRF check)', () => {
   it('rejects when the CSRF header is missing', async () => {
     const service = mkService({});

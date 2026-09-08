@@ -1,7 +1,6 @@
 import { Equals, IsBoolean, IsEmail, IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { REGIONS } from '@open-derja/shared';
 import type { Region } from '@open-derja/db';
-
-const REGION_VALUES: Region[] = ['northwest', 'north', 'sahel', 'south'];
 
 export class ContributeDto {
   @IsString()
@@ -10,7 +9,7 @@ export class ContributeDto {
   text!: string;
 
   @IsOptional()
-  @IsEnum(REGION_VALUES)
+  @IsEnum(REGIONS)
   selfReportedRegion?: Region;
 
   @IsOptional()

@@ -1,6 +1,5 @@
 import { Body, Controller, Get, NotFoundException, Param, ParseUUIDPipe, Post, Query, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
-import { randomUUID } from 'node:crypto';
 import {
   addLexiconOrigin,
   attestLexiconVariantRegion,
@@ -17,6 +16,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { RequestUser } from '../../common/guards/request-user.interface';
+import { resolveContributorSessionId } from '../../common/utils/contributor-session';
 import { hashIp } from '../../infra/auth/auth.service';
 import { PrismaService } from '../../infra/database/prisma.service';
 import { CreateLexiconEntryDto } from './dto/create-entry.dto';
@@ -24,9 +24,6 @@ import { CreateLexiconVariantDto } from './dto/create-variant.dto';
 import { CreateLexiconFormDto } from './dto/create-form.dto';
 import { AttestRegionDto } from './dto/attest-region.dto';
 import { AddOriginDto } from './dto/add-origin.dto';
-
-const SESSION_COOKIE = 'session_id';
-const SESSION_TTL_MS = 365 * 24 * 60 * 60 * 1000;
 
 @Controller('lexicon')
 export class LexiconController {
@@ -99,7 +96,7 @@ export class LexiconController {
     const ctx = user
       ? { proposedBy: user.id }
       : (() => {
-          const sessionId = this.resolveSessionId(req, res);
+          const sessionId = resolveContributorSessionId(req, res);
           const ip = req.ip ?? req.socket.remoteAddress ?? 'unknown';
           return { sessionId, ipHash: hashIp(ip) };
         })();
@@ -108,20 +105,5 @@ export class LexiconController {
       throw new NotFoundException('Lexicon entry not found');
     }
     return origin;
-  }
-
-  private resolveSessionId(req: Request, res: Response): string {
-    const existing = req.cookies?.[SESSION_COOKIE];
-    if (existing) {
-      return existing;
-    }
-    const sessionId = randomUUID();
-    res.cookie(SESSION_COOKIE, sessionId, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: SESSION_TTL_MS,
-    });
-    return sessionId;
   }
 }

@@ -39,4 +39,14 @@ export class TotpService {
       throw new BadRequestException('A valid two-factor code is required');
     }
   }
+
+  async requireEnrolledCode(userId: string, code: string | undefined): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.totpSecret || !user.totpEnabled) {
+      throw new BadRequestException('Two-factor authentication has not been enrolled for this account');
+    }
+    if (!code || !verifyTotp(user.totpSecret, code)) {
+      throw new BadRequestException('Incorrect code');
+    }
+  }
 }

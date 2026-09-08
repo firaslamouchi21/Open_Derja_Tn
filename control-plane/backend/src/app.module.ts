@@ -16,6 +16,8 @@ import { TrustGuard } from './common/guards/trust.guard';
 import { AuthModule } from './infra/auth/auth.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { CorpusItemsModule } from './modules/corpus-items/corpus-items.module';
+import { PublicStatsModule } from './modules/public-stats/public-stats.module';
+import { DataModule } from './modules/data/data.module';
 import { LexiconModule } from './modules/lexicon/lexicon.module';
 import { TranslateModule } from './modules/translate/translate.module';
 import { SourcesModule } from './modules/sources/sources.module';
@@ -51,6 +53,8 @@ import { HealthController } from './health-check';
     AuthModule,
     TasksModule,
     CorpusItemsModule,
+    PublicStatsModule,
+    DataModule,
     LexiconModule,
     TranslateModule,
     SourcesModule,

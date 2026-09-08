@@ -1,26 +1,80 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { assignDatasetSplit, computeMatchKey, detectScript, detectUnit, onCorpusItemIngested, spawnTasks } from '@open-derja/core';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  assignDatasetSplit,
+  checkNearDuplicates,
+  cleanText,
+  computeMatchKey,
+  detectScript,
+  detectUnit,
+  isWithinLengthBounds,
+  onCorpusItemIngested,
+  searchCorpusItems,
+  spawnTasks,
+  type ExploreResult,
+} from '@open-derja/core';
+import type { Region } from '@open-derja/db';
 import { PrismaService } from '../../infra/database/prisma.service';
 import { ContributeDto } from './dto/contribute.dto';
+import { ExploreQueryDto } from './dto/explore-query.dto';
+
+const NEAR_DUPLICATE_CANDIDATE_LIMIT = 20;
 
 export interface ContributeContext {
   sessionId: string;
   ipHash: string;
 }
 
+export type ContributeResult =
+  | { duplicate: true; existingCorpusItemId: string; knownRegions: Region[] }
+  | { duplicate: false; id: string; unit: string; script: string; datasetSplit: string };
+
 @Injectable()
 export class CorpusItemsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async contribute(dto: ContributeDto, ctx: ContributeContext) {
+  explore(query: ExploreQueryDto): Promise<ExploreResult> {
+    return searchCorpusItems(this.prisma, query);
+  }
+
+  async contribute(dto: ContributeDto, ctx: ContributeContext): Promise<ContributeResult> {
+    const cleaned = cleanText(dto.text);
+    if (!isWithinLengthBounds(cleaned)) {
+      throw new BadRequestException('Contribution is too short or too long');
+    }
+
+    const matchKey = computeMatchKey(cleaned);
+
+    const candidates = await this.prisma.$queryRaw<Array<{ id: string; text: string }>>`
+      SELECT id, text FROM corpus_items
+      WHERE match_key % ${matchKey}
+      ORDER BY similarity(match_key, ${matchKey}) DESC
+      LIMIT ${NEAR_DUPLICATE_CANDIDATE_LIMIT}
+    `;
+
+    if (candidates.length > 0) {
+      const { isNearDuplicate, matches } = await checkNearDuplicates(cleaned, candidates, process.env.DATA_PLANE_URL);
+      if (isNearDuplicate) {
+        const existingCorpusItemId = matches[0].id;
+        const regionTags = await this.prisma.tag.findMany({
+          where: { corpusItemId: existingCorpusItemId, kind: 'region' },
+          select: { value: true },
+          distinct: ['value'],
+        });
+        return {
+          duplicate: true,
+          existingCorpusItemId,
+          knownRegions: regionTags.map((tag) => tag.value as Region),
+        };
+      }
+    }
+
     const source = await this.getOrCreateContributionSource();
 
-    let script = detectScript(dto.text);
+    let script = detectScript(cleaned);
     if (script === 'latin') {
       script = 'arabizi';
     }
-    const unit = detectUnit(dto.text);
-    const matchKey = computeMatchKey(dto.text);
+    const unit = detectUnit(cleaned);
     const datasetSplit = assignDatasetSplit();
 
     const { corpusItem } = await this.prisma.$transaction(async (tx) => {
@@ -39,7 +93,7 @@ export class CorpusItemsService {
           documentId: document.id,
           unit,
           position: 0,
-          text: dto.text,
+          text: cleaned,
           script,
           matchKey,
           charOffset: 0,
@@ -67,6 +121,7 @@ export class CorpusItemsService {
     await spawnTasks(this.prisma, onCorpusItemIngested(corpusItem.id, corpusItem.version));
 
     return {
+      duplicate: false,
       id: corpusItem.id,
       unit: corpusItem.unit,
       script: corpusItem.script,
@@ -105,7 +160,7 @@ export class CorpusItemsService {
       data: {
         kind: 'contribution',
         name: 'Direct contribution',
-        licenseDefault: 'unknown',
+        licenseDefault: 'cc_by_sa',
         active: true,
       },
     });

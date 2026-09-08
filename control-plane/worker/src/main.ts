@@ -6,6 +6,7 @@ import {
   registerDispatchOutboxJob,
   registerExpireClaimsJob,
   registerRecomputeStatsJob,
+  registerRunScrapersJob,
   registerSweepPendingUploadsJob,
 } from './jobs';
 
@@ -19,6 +20,7 @@ async function main() {
   await registerSweepPendingUploadsJob(boss, prisma);
   await registerAnonymiseRevokedJob(boss, prisma);
   await registerRecomputeStatsJob(boss, prisma);
+  await registerRunScrapersJob(boss, prisma);
 
   console.log('[worker] started, jobs registered');
 

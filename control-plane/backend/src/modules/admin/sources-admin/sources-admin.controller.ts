@@ -1,5 +1,6 @@
-import { Body, Controller, Get, NotImplementedException, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 import { writeAuditLog } from '@open-derja/core';
+import { createSourceRunner, runSource } from '@open-derja/scrapers';
 import { AdminArea } from '../../../common/decorators/admin-area.decorator';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { RequestUser } from '../../../common/guards/request-user.interface';
@@ -63,9 +64,17 @@ export class SourcesAdminController {
   }
 
   @Post(':id/run')
-  run(@Param('id', ParseUUIDPipe) id: string) {
-    throw new NotImplementedException(
-      `Manual scraper runs are not available yet — control-plane/scrapers is a later phase. Source ${id} not run.`,
-    );
+  async run(@Param('id', ParseUUIDPipe) id: string) {
+    const source = await this.sources.findOne(id);
+    if (!source.active) {
+      throw new BadRequestException(`Source ${id} is not active`);
+    }
+
+    try {
+      const runner = createSourceRunner(source);
+      return await runSource(this.prisma, source, runner);
+    } catch (error) {
+      throw new BadRequestException(error instanceof Error ? error.message : String(error));
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { AuthController } from '../../../../../../../control-plane/backend/src/infra/auth/auth.controller';
 
 function makeAuthService() {
@@ -7,6 +7,17 @@ function makeAuthService() {
     login: jest.fn(),
     refresh: jest.fn(),
     logout: jest.fn(),
+    guestSession: jest.fn(),
+    completeSessionAfter2fa: jest.fn(),
+  } as any;
+}
+
+function makeTotpService() {
+  return {
+    beginEnrollment: jest.fn(),
+    confirmEnrollment: jest.fn(),
+    assertCode: jest.fn(),
+    requireEnrolledCode: jest.fn(),
   } as any;
 }
 
@@ -33,6 +44,65 @@ describe('AuthController.login', () => {
     expect(result).toEqual({ accessToken: 'access-1' });
     expect(res.cookie).toHaveBeenCalledWith('refresh_token', 'refresh-1', expect.objectContaining({ httpOnly: true, path: '/auth' }));
     expect(res.cookie).toHaveBeenCalledWith('csrf_token', expect.any(String), expect.objectContaining({ httpOnly: false }));
+  });
+});
+
+describe('AuthController.guestSession', () => {
+  it('mints a session_id cookie for a first-time visitor and forwards it to the service', async () => {
+    const authService = makeAuthService();
+    authService.guestSession.mockResolvedValue({ accessToken: 'access-1', refreshToken: 'refresh-1' });
+    const controller = new AuthController(authService, {} as any);
+    const { req, res } = makeReqRes();
+
+    const result = await controller.guestSession(req, res);
+
+    expect(result).toEqual({ accessToken: 'access-1' });
+    expect(res.cookie).toHaveBeenCalledWith('session_id', expect.any(String), expect.objectContaining({ httpOnly: true }));
+    const sessionIdUsed = authService.guestSession.mock.calls[0][0];
+    expect(typeof sessionIdUsed).toBe('string');
+    expect(res.cookie).toHaveBeenCalledWith('refresh_token', 'refresh-1', expect.objectContaining({ httpOnly: true, path: '/auth' }));
+  });
+
+  it('reuses an existing session_id cookie instead of minting a new one', async () => {
+    const authService = makeAuthService();
+    authService.guestSession.mockResolvedValue({ accessToken: 'access-1', refreshToken: 'refresh-1' });
+    const controller = new AuthController(authService, {} as any);
+    const { req, res } = makeReqRes({ cookies: { session_id: 'existing-session' } });
+
+    await controller.guestSession(req, res);
+
+    expect(authService.guestSession).toHaveBeenCalledWith('existing-session', expect.any(String), undefined);
+    expect(res.cookie).not.toHaveBeenCalledWith('session_id', expect.any(String), expect.anything());
+  });
+});
+
+describe('AuthController.verify2fa', () => {
+  const USER = { id: 'admin-1', role: 'admin', trustLevel: 0, emailConfirmed: true, sessionId: 's1', twofaPending: true };
+
+  it('never enrolled: rejects rather than minting a token — regression test for the bypass', async () => {
+    const authService = makeAuthService();
+    const totpService = makeTotpService();
+    totpService.requireEnrolledCode.mockRejectedValue(new BadRequestException('Two-factor authentication has not been enrolled for this account'));
+    const controller = new AuthController(authService, totpService);
+    const { req, res } = makeReqRes();
+
+    await expect(controller.verify2fa(USER as any, { code: 'anything' } as any, req, res)).rejects.toThrow(BadRequestException);
+    expect(authService.completeSessionAfter2fa).not.toHaveBeenCalled();
+    expect(res.cookie).not.toHaveBeenCalled();
+  });
+
+  it('enrolled with a correct code: issues a full session', async () => {
+    const authService = makeAuthService();
+    authService.completeSessionAfter2fa.mockResolvedValue({ accessToken: 'access-2', refreshToken: 'refresh-2' });
+    const totpService = makeTotpService();
+    totpService.requireEnrolledCode.mockResolvedValue(undefined);
+    const controller = new AuthController(authService, totpService);
+    const { req, res } = makeReqRes();
+
+    const result = await controller.verify2fa(USER as any, { code: '123456' } as any, req, res);
+
+    expect(totpService.requireEnrolledCode).toHaveBeenCalledWith('admin-1', '123456');
+    expect(result).toEqual({ accessToken: 'access-2' });
   });
 });
 

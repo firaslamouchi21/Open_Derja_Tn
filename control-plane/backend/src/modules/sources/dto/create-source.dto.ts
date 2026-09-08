@@ -1,22 +1,9 @@
 import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUrl, MaxLength, Min } from 'class-validator';
+import { LICENSES, SOURCE_KINDS } from '@open-derja/shared';
 import type { License, SourceKind } from '@open-derja/db';
 
-const SOURCE_KIND_VALUES: SourceKind[] = [
-  'youtube',
-  'forum',
-  'book',
-  'subtitle',
-  'contribution',
-  'elicitation',
-  'wikipedia',
-  'commoncrawl',
-  'tatoeba',
-];
-
-const LICENSE_VALUES: License[] = ['cc_by_sa', 'cc_by_nc', 'research_use_only', 'public_domain', 'unknown'];
-
 export class CreateSourceDto {
-  @IsEnum(SOURCE_KIND_VALUES)
+  @IsEnum(SOURCE_KINDS)
   kind!: SourceKind;
 
   @IsString()
@@ -27,7 +14,7 @@ export class CreateSourceDto {
   @IsUrl()
   url?: string;
 
-  @IsEnum(LICENSE_VALUES)
+  @IsEnum(LICENSES)
   licenseDefault!: License;
 
   @IsOptional()

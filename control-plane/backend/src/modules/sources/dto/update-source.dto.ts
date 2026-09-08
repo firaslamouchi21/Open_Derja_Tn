@@ -1,7 +1,6 @@
 import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUrl, MaxLength, Min } from 'class-validator';
+import { LICENSES } from '@open-derja/shared';
 import type { License } from '@open-derja/db';
-
-const LICENSE_VALUES: License[] = ['cc_by_sa', 'cc_by_nc', 'research_use_only', 'public_domain', 'unknown'];
 
 export class UpdateSourceDto {
   @IsOptional()
@@ -14,7 +13,7 @@ export class UpdateSourceDto {
   url?: string;
 
   @IsOptional()
-  @IsEnum(LICENSE_VALUES)
+  @IsEnum(LICENSES)
   licenseDefault?: License;
 
   @IsOptional()

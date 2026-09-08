@@ -74,7 +74,7 @@ export class UsersAdminService {
       await tx.refreshSession.updateMany({ where: { userId, revokedAt: null }, data: { revokedAt: new Date() } });
       await tx.task.updateMany({
         where: { id: { in: openTasks.map((t) => t.id) } },
-        data: { status: 'needs_rework', completedBy: null, completedAt: null },
+        data: { status: 'needs_rework', completedBy: null, completedAt: null, claimedBy: null, claimedAt: null },
       });
       await writeAuditLog(tx, {
         actorId,

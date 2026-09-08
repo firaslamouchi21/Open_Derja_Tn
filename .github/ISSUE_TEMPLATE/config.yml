@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question or discussion
+    url: https://github.com/firaslamouchi21/Open_Derja_Tn/discussions
+    about: For questions or open-ended discussion rather than a specific bug or feature.

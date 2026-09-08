@@ -1,13 +1,12 @@
 import { IsEnum, IsString, MaxLength } from 'class-validator';
+import { SCRIPTS } from '@open-derja/shared';
 import type { Script } from '@open-derja/db';
-
-const SCRIPT_VALUES: Script[] = ['arabic', 'arabizi', 'mixed', 'latin'];
 
 export class CreateLexiconFormDto {
   @IsString()
   @MaxLength(500)
   text!: string;
 
-  @IsEnum(SCRIPT_VALUES)
+  @IsEnum(SCRIPTS)
   script!: Script;
 }

@@ -33,6 +33,7 @@ export class OverviewService {
       translatorStats,
       newContributors7d,
       sources,
+      disabledForFailure,
       queueDepth,
       lastBackup,
     ] = await Promise.all([
@@ -49,6 +50,11 @@ export class OverviewService {
       this.prisma.translatorStats.findUnique({ where: { id: 1 } }),
       this.prisma.contributorStats.count({ where: { lastContributedAt: { gte: since7d } } }),
       this.prisma.source.findMany({ select: { name: true, active: true, lastRunAt: true } }),
+      this.prisma.auditLog.findMany({
+        where: { entityType: 'source', action: 'scrape_source_disabled' },
+        distinct: ['entityId'],
+        select: { entityId: true },
+      }),
       this.prisma.outboxEvent.count({ where: { status: { in: ['pending', 'processing'] } } }),
       this.prisma.databaseBackup.findFirst({ orderBy: { createdAt: 'desc' }, select: { createdAt: true, restoreOk: true } }),
     ]);
@@ -60,7 +66,7 @@ export class OverviewService {
     const avgAgreement = consensusAgg._avg.agreement ? Number(consensusAgg._avg.agreement) : 1;
     const worstMiss = regionMiss.length ? Math.max(...regionMiss.map((m) => Number(m.missRate))) : 0;
     const oldestOpenDays = oldestOpen ? (now - oldestOpen.createdAt.getTime()) / DAY_MS : 0;
-    const failingSources = sources.filter((s) => s.active && !s.lastRunAt).length;
+    const failingSources = disabledForFailure.length;
     const backupAgeHours = lastBackup ? (now - lastBackup.createdAt.getTime()) / (60 * 60 * 1000) : Infinity;
 
     return {

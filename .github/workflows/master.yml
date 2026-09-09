@@ -41,8 +41,8 @@ jobs:
         run: |
           pnpm --filter @open-derja/db migrate:deploy
           pnpm exec prisma migrate diff \
-            --from-migrations db/migrations \
-            --to-schema-datamodel db/schema.prisma \
+            --from-migrations migrations \
+            --to-schema-datamodel schema.prisma \
             --shadow-database-url "$DIRECT_URL" \
             --exit-code
         working-directory: db
@@ -102,7 +102,7 @@ jobs:
           output: codeql-results
 
       - name: summarize
-        run: devops/monitoring/summarize-codeql.sh codeql-results/javascript-typescript.sarif
+        run: devops/monitoring/summarize-codeql.sh codeql-results/javascript.sarif
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}

@@ -2,7 +2,7 @@ name: master
 
 on:
   push:
-    branches: [main]
+    branches: [main, firas_sandbox]
   pull_request:
 
 jobs:
@@ -53,12 +53,34 @@ jobs:
 
       - run: pnpm test:shell
 
+      - run: pnpm test:ops
+
       - run: pnpm -r --if-present test
 
       - run: pnpm -r --if-present build
 
       - if: failure()
         run: devops/monitoring/notify.sh error "CI" "master workflow failed on ${{ github.ref_name }} (${{ github.sha }})"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+  data-plane:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: data-plane
+
+      - run: cargo test
+        working-directory: data-plane
+
+      - if: failure()
+        run: devops/monitoring/notify.sh error "CI" "data-plane tests failed on ${{ github.ref_name }} (${{ github.sha }})"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -86,8 +108,8 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
   deploy:
-    needs: [checks, codeql]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [checks, data-plane, codeql]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: deploy over SSH

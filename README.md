@@ -80,7 +80,8 @@ Open `.env` and replace every `change-me-to-a-random-string` / `placeholder-chan
 ```bash
 pnpm infra:up                                   # postgres, pgbouncer, redis, nlp/processing stubs
 pnpm --filter @open-derja/db run migrate:deploy # apply migrations (uses DIRECT_URL)
-pnpm --filter @open-derja/db run generate       # generate the Prisma client
+pnpm --filter @open-derja/db run generate       # generate the Prisma client — do this before the next line
+pnpm --filter @open-derja/core --filter @open-derja/scrapers run build # backend/worker import these as built packages, not source
 pnpm --filter @open-derja/backend run start:dev # backend on :3000
 pnpm --filter @open-derja/worker run start:dev  # background jobs (optional for API work)
 pnpm --filter @open-derja/frontend run dev      # frontend on :3001

@@ -47,6 +47,8 @@ jobs:
             --exit-code
         working-directory: db
 
+      - run: pnpm -r --if-present build
+
       - run: pnpm -r --if-present typecheck
 
       - run: pnpm test:unit
@@ -56,8 +58,6 @@ jobs:
       - run: pnpm test:ops
 
       - run: pnpm -r --if-present test
-
-      - run: pnpm -r --if-present build
 
       - if: failure()
         run: devops/monitoring/notify.sh error "CI" "master workflow failed on ${{ github.ref_name }} (${{ github.sha }})"

@@ -337,6 +337,7 @@ model CorpusItem {
 
   @@index([documentId, unit, position])
   @@index([parentId])
+  @@index([matchKey(ops: raw("gin_trgm_ops"))], map: "corpus_items_match_key_trgm", type: Gin)
   @@map("corpus_items")
 }
 
@@ -454,6 +455,7 @@ model LexiconVariant {
   media        Media[]
   links        Link[]
 
+  @@index([matchKey(ops: raw("gin_trgm_ops"))], map: "lexicon_variants_match_key_trgm", type: Gin)
   @@map("lexicon_variants")
 }
 
@@ -484,6 +486,7 @@ model LexiconForm {
   media Media[]
 
   @@index([lexiconVariantId, script])
+  @@index([matchKey(ops: raw("gin_trgm_ops"))], map: "lexicon_forms_match_key_trgm", type: Gin)
   @@map("lexicon_forms")
 }
 

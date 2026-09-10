@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/firaslamouchi21/Open_Derja_Tn/actions/workflows/master.yml/badge.svg)](https://github.com/firaslamouchi21/Open_Derja_Tn/actions/workflows/master.yml)
 
+note:Ahla if youre reading this now as of 10/09/2026 i only made the repo public i still have not made any announcements for the project anywhere ill will do that within the next few weeks to come 
+
 An open, regionally balanced written corpus of Tunisian Derja. Tunisians write, correct, and confirm
 their own regional Derja; what comes out is a citable dataset, a lexicon, and a translator built
 directly on top of it. Text first, voice by design in a later phase.

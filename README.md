@@ -1,5 +1,7 @@
 # OpenDerja_TN
 
+[![CI](https://github.com/firaslamouchi21/Open_Derja_Tn/actions/workflows/master.yml/badge.svg)](https://github.com/firaslamouchi21/Open_Derja_Tn/actions/workflows/master.yml)
+
 An open, regionally balanced written corpus of Tunisian Derja. Tunisians write, correct, and confirm
 their own regional Derja; what comes out is a citable dataset, a lexicon, and a translator built
 directly on top of it. Text first, voice by design in a later phase.
@@ -7,6 +9,14 @@ directly on top of it. Text first, voice by design in a later phase.
 This is a non-profit project, solo-maintained by [Firas Lamouchi](https://github.com/firaslamouchi21).
 It's aiming to go public and start taking outside contributions — this repo is being prepared for
 that now.
+
+> **📄 Start here:** the full technical ledger — what this is, what it deliberately isn't, the data
+> model, the task engine, the threat model, what's still unsolved.
+> [English (PDF)](Documentation/proposal%20docs/OpenDerja_TN_technical_ledger.pdf) ·
+> [English (HTML)](Documentation/proposal%20docs/OpenDerja_TN_technical_ledger.html) ·
+> [Français (PDF)](Documentation/proposal%20docs/OpenDerja_TN_technical_ledger.fr.pdf) ·
+> [Français (HTML)](Documentation/proposal%20docs/OpenDerja_TN_technical_ledger.fr.html)
+> Read it before proposing anything that touches the data model, the task system, or auth.
 
 ## Where things actually stand
 
@@ -36,11 +46,9 @@ region is tracked and published, not hoped for), built on CODA-TUN conventions r
 new spelling standard, and usable as a tool (a translator, a lexicon) rather than only downloadable as
 a file.
 
-The full reasoning — what this is, what it deliberately isn't, the data model, the task engine, the
-threat model, what's still unsolved — is written up in
-[`Documentation/proposal docs/OpenDerja_TN_technical_ledger.pdf`](Documentation/proposal%20docs/OpenDerja_TN_technical_ledger.pdf).
-Read that before proposing anything that touches the data model, the task system, or auth — a lot of
-decisions in there look arbitrary until you see the failure mode they're avoiding.
+The full reasoning lives in the technical ledger linked at the top of this file. A lot of the
+decisions in there look arbitrary until you see the failure mode they're avoiding — read it before
+proposing anything that touches the data model, the task system, or auth.
 
 ## Architecture, briefly
 
@@ -112,9 +120,9 @@ permission setting, not a bug in this repo: it doesn't happen in the Docker buil
 doesn't have this restriction), and it doesn't affect `pnpm dev` at all. If you want a clean
 `pnpm build` locally on Windows, turn on Developer Mode in Windows Settings first.
 
-CI exists but is currently disabled (`.github/workflows/*.yml.disabled`) pending the public launch —
-your PR won't get automatic test feedback from GitHub Actions yet. Run the test suite locally before
-opening one.
+CI runs on every push and pull request (`.github/workflows/master.yml`): typecheck, unit tests,
+shell/ops tests, migration-drift check, builds, CodeQL, and `cargo test` for the Rust crate. Run the
+test suite locally before opening a PR anyway — it's faster than waiting on the runner.
 
 ## Contributing
 

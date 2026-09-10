@@ -1,6 +1,6 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import type { HeadObjectResult, PresignedUrlOptions, StorageProvider } from './provider';
 
 export interface LocalStorageConfig {
@@ -30,6 +30,16 @@ export function verifyLocalStorageToken(
 export class LocalStorageProvider implements StorageProvider {
   constructor(private readonly config: LocalStorageConfig) {}
 
+  private safePathForKey(key: string): string {
+    const baseDir = resolve(this.config.baseDir);
+    const candidate = resolve(baseDir, key);
+    const rel = relative(baseDir, candidate);
+    if (rel.startsWith('..') || isAbsolute(rel)) {
+      throw new Error('Invalid storage key path');
+    }
+    return candidate;
+  }
+
   private buildUrl(action: 'upload' | 'download', key: string, options: PresignedUrlOptions): string {
     const expiresAt = Date.now() + (options.expiresInSeconds ?? DEFAULT_EXPIRY_SECONDS) * 1000;
     const signature = sign(key, expiresAt, this.config.secret);
@@ -46,7 +56,7 @@ export class LocalStorageProvider implements StorageProvider {
   }
 
   async headObject(key: string): Promise<HeadObjectResult> {
-    const path = join(this.config.baseDir, key);
+    const path = this.safePathForKey(key);
     try {
       const stats = await stat(path);
       const checksum = createHash('sha256').update(await readFile(path)).digest('hex');
@@ -57,16 +67,16 @@ export class LocalStorageProvider implements StorageProvider {
   }
 
   resolvePath(key: string): string {
-    return join(this.config.baseDir, key);
+    return this.safePathForKey(key);
   }
 
   async putObject(key: string, body: Buffer | string): Promise<void> {
-    const path = join(this.config.baseDir, key);
+    const path = this.safePathForKey(key);
     await mkdir(dirname(path), { recursive: true });
     await writeFile(path, body);
   }
 
   async delete(key: string): Promise<void> {
-    await rm(join(this.config.baseDir, key), { force: true });
+    await rm(this.safePathForKey(key), { force: true });
   }
 }

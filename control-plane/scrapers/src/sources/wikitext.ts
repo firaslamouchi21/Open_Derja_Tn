@@ -70,7 +70,7 @@ export function stripWikitext(wikitext: string): string {
   text = text.replace(/'''/g, '');
   text = text.replace(/''/g, '');
   text = text.replace(/^=+\s*(.*?)\s*=+$/gm, '$1');
-  text = text.replace(/<[^>]+>/g, '');
+  text = text.replace(/[<>]/g, '');
   text = text.replace(/^\s*[*#:;]+\s*/gm, '');
   text = text.replace(/\n{3,}/g, '\n\n');
 

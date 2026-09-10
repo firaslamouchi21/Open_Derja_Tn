@@ -44,10 +44,20 @@ function stripLeadingRedirect(text: string): string {
   return text.replace(/^\s*#\s*redirect\s*:?\s*\[\[[^[\]]*\]\]\s*/i, '');
 }
 
+function stripHtmlComments(text: string): string {
+  let previous: string;
+  let current = text;
+  do {
+    previous = current;
+    current = current.replace(/<!--[\s\S]*?-->/g, '');
+  } while (current !== previous);
+  return current;
+}
+
 export function stripWikitext(wikitext: string): string {
   let text = stripLeadingRedirect(wikitext);
 
-  text = text.replace(/<!--[\s\S]*?-->/g, '');
+  text = stripHtmlComments(text);
   text = text.replace(/<ref[^>]*\/>/gi, '');
   text = text.replace(/<ref[^>]*>[\s\S]*?<\/ref>/gi, '');
   text = stripBalanced(text, '{{', '}}');

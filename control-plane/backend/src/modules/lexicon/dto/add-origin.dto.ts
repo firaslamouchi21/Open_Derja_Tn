@@ -1,20 +1,9 @@
 import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import { ORIGIN_LAYERS } from '@open-derja/shared';
 import type { OriginLayer } from '@open-derja/db';
 
-const ORIGIN_VALUES: OriginLayer[] = [
-  'arabic',
-  'arabic_derived',
-  'french',
-  'amazigh',
-  'italian',
-  'turkish',
-  'spanish',
-  'other',
-  'unknown',
-];
-
 export class AddOriginDto {
-  @IsEnum(ORIGIN_VALUES)
+  @IsEnum(ORIGIN_LAYERS)
   origin!: OriginLayer;
 
   @IsOptional()

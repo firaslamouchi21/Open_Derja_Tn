@@ -7,13 +7,18 @@
   "scripts": {
     "generate": "dotenv -e ../.env -- prisma generate --schema=schema.prisma",
     "migrate:deploy": "dotenv -e ../.env -- prisma migrate deploy --schema=schema.prisma",
-    "migrate:diff": "dotenv -e ../.env -- prisma migrate diff --schema=schema.prisma"
+    "migrate:diff": "dotenv -e ../.env -- prisma migrate diff --schema=schema.prisma",
+    "seed:markers": "dotenv -e ../.env -- tsx seeds/marker-terms.seed.ts",
+    "seed:system-user": "dotenv -e ../.env -- tsx seeds/system-user.seed.ts",
+    "seed:standardisation-rules": "dotenv -e ../.env -- tsx seeds/standardisation-rules.seed.ts",
+    "seed:all": "pnpm run seed:markers && pnpm run seed:system-user && pnpm run seed:standardisation-rules"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0"
   },
   "devDependencies": {
     "dotenv-cli": "^7.4.2",
-    "prisma": "^5.22.0"
+    "prisma": "^5.22.0",
+    "tsx": "^4.19.1"
   }
 }

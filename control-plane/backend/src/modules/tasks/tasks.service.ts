@@ -29,6 +29,10 @@ import {
 } from '@open-derja/core';
 import type { Prisma, Region, Script, TagKind, TargetLang, Task, TaskType } from '@open-derja/db';
 import { PrismaService } from '../../infra/database/prisma.service';
+import {
+  SETTING_PAUSED_TASK_TYPES,
+  SystemSettingsService,
+} from '../../infra/system/system-settings.service';
 import type { RequestUser } from '../../common/guards/request-user.interface';
 import { ReviewTaskDto } from './dto/review-task.dto';
 import { RegionTagTaskDto } from './dto/region-tag-task.dto';
@@ -52,12 +56,21 @@ const TRANSLITERATE_TASK_SCRIPTS: Partial<Record<TaskType, Script>> = {
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly systemSettings: SystemSettingsService,
+  ) {}
 
   async claim(user: RequestUser): Promise<Task | undefined> {
     const eligibleTypes = getEligibleTaskTypes(user);
     const role = getClaimableTaskRole(user.role);
-    return claimNextTask(this.prisma, { userId: user.id, role, types: eligibleTypes });
+    const pausedTypes = await this.systemSettings.get<string[]>(SETTING_PAUSED_TASK_TYPES, []);
+    return claimNextTask(this.prisma, {
+      userId: user.id,
+      role,
+      types: eligibleTypes,
+      excludeTypes: pausedTypes as TaskType[],
+    });
   }
 
   async complete(user: RequestUser, taskId: string, outputRecordId?: string): Promise<Task> {

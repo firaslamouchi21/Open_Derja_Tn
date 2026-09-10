@@ -1,6 +1,12 @@
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import type { PresignedUrlOptions, StorageProvider } from './provider';
+import type { HeadObjectResult, PresignedUrlOptions, StorageProvider } from './provider';
 
 export interface R2Config {
   accountId: string;
@@ -43,6 +49,26 @@ export class R2StorageProvider implements StorageProvider {
     return getSignedUrl(this.client, command, {
       expiresIn: options.expiresInSeconds ?? DEFAULT_EXPIRY_SECONDS,
     });
+  }
+
+  async headObject(key: string): Promise<HeadObjectResult> {
+    try {
+      const response = await this.client.send(new HeadObjectCommand({ Bucket: this.bucket, Key: key }));
+      return {
+        exists: true,
+        size: response.ContentLength,
+        checksum: response.ETag?.replace(/"/g, ''),
+        contentType: response.ContentType,
+      };
+    } catch {
+      return { exists: false };
+    }
+  }
+
+  async putObject(key: string, body: Buffer | string, contentType?: string): Promise<void> {
+    await this.client.send(
+      new PutObjectCommand({ Bucket: this.bucket, Key: key, Body: body, ContentType: contentType }),
+    );
   }
 
   async delete(key: string): Promise<void> {

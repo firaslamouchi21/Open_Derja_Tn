@@ -12,8 +12,12 @@
   "dependencies": {
     "@open-derja/core": "workspace:*",
     "@open-derja/db": "workspace:*",
+    "@open-derja/scrapers": "workspace:*",
     "dotenv": "^16.4.5",
     "pg-boss": "^10.1.5"
+  },
+  "optionalDependencies": {
+    "nodemailer": "^6.9.15"
   },
   "devDependencies": {
     "@types/node": "^22.7.5",

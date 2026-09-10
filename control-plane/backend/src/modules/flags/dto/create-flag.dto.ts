@@ -1,7 +1,6 @@
 import { IsEnum, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { FLAG_REASONS } from '@open-derja/shared';
 import type { FlagReason } from '@open-derja/db';
-
-const FLAG_REASON_VALUES: FlagReason[] = ['offensive', 'personal_data', 'wrong', 'copyright', 'other'];
 
 export class CreateFlagDto {
   @IsString()
@@ -11,7 +10,7 @@ export class CreateFlagDto {
   @IsUUID()
   targetId!: string;
 
-  @IsEnum(FLAG_REASON_VALUES)
+  @IsEnum(FLAG_REASONS)
   reason!: FlagReason;
 
   @IsOptional()

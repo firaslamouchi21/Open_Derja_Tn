@@ -1,8 +1,7 @@
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+import { REGIONS } from '@open-derja/shared';
 import type { Region } from '@open-derja/db';
-
-const REGION_VALUES: Region[] = ['northwest', 'north', 'sahel', 'south'];
 
 export class TranslateQueryDto {
   @IsString()
@@ -10,7 +9,7 @@ export class TranslateQueryDto {
   text!: string;
 
   @IsOptional()
-  @IsEnum(REGION_VALUES)
+  @IsEnum(REGIONS)
   region?: Region;
 
   @IsOptional()

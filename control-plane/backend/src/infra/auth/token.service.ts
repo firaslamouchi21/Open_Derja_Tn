@@ -7,6 +7,7 @@ export interface AccessTokenPayload {
   typ: 'access';
   ver: number;
   sid?: string;
+  twofa?: 'pending';
 }
 
 export interface RefreshTokenPayload {
@@ -31,7 +32,11 @@ export class TokenService {
   }
 
   async signAccessToken(payload: Omit<AccessTokenPayload, 'typ'>): Promise<string> {
-    return new SignJWT({ ...payload, typ: 'access' })
+    const claims: Record<string, unknown> = { ...payload, typ: 'access' };
+    if (payload.twofa === undefined) {
+      delete claims.twofa;
+    }
+    return new SignJWT(claims)
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setExpirationTime('2h')

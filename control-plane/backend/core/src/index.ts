@@ -1,5 +1,6 @@
 export * from './tasks';
 export * from './trust';
+export * from './corpus-items';
 export * from './storage';
 export * from './text';
 export * from './ingestion';
@@ -12,3 +13,7 @@ export * from './outbox';
 export * from './mail';
 export * from './policy';
 export * from './standardisation';
+export * from './privacy';
+export * from './auth';
+export * from './stats';
+export * from './export';

@@ -1,19 +1,9 @@
 import { ArrayMinSize, IsArray, IsEnum, IsString } from 'class-validator';
+import { TAG_KINDS } from '@open-derja/shared';
 import type { TagKind } from '@open-derja/db';
 
-const TAG_KIND_VALUES: TagKind[] = [
-  'scope',
-  'region',
-  'era',
-  'setting',
-  'register',
-  'code_switch',
-  'sense',
-  'quality',
-];
-
 export class AdjudicateTaskDto {
-  @IsEnum(TAG_KIND_VALUES)
+  @IsEnum(TAG_KINDS)
   kind!: TagKind;
 
   @IsArray()

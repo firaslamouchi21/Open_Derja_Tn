@@ -8,5 +8,5 @@ name = "opendarja-processing"
 path = "src/main.rs"
 
 [dependencies]
-actix-web = "4"
+actix-web = { version = "4", default-features = false, features = ["macros"] }
 serde = { version = "1", features = ["derive"] }

@@ -2,9 +2,9 @@ import type { Prisma, PrismaClient, Source } from '@open-derja/db';
 import { assignDatasetSplit, computeMatchKey, detectScript, detectUnit } from '../text';
 import { onCorpusItemIngested, spawnTasks } from '../tasks';
 import { cleanText } from './clean';
+import { checkNearDuplicates } from './dedup-client';
 import { isWithinLengthBounds } from './length-filter';
 import { matchesAnyMarker } from './marker-filter';
-import { computeMinHashSignature, estimateJaccardSimilarity, NEAR_DUPLICATE_THRESHOLD } from './near-duplicate';
 import type { FetchedItem } from './runner';
 import { splitIntoParagraphs, splitIntoSentences } from './split-text';
 
@@ -29,6 +29,7 @@ async function insertLeafIfNotDuplicate(
   position: number,
   charOffset: number,
   text: string,
+  dataPlaneUrl: string | undefined,
 ): Promise<InsertLeafResult> {
   const matchKey = computeMatchKey(text);
 
@@ -40,11 +41,7 @@ async function insertLeafIfNotDuplicate(
   `;
 
   if (candidates.length > 0) {
-    const signature = computeMinHashSignature(text);
-    const isNearDuplicate = candidates.some(
-      (candidate) =>
-        estimateJaccardSimilarity(signature, computeMinHashSignature(candidate.text)) >= NEAR_DUPLICATE_THRESHOLD,
-    );
+    const { isNearDuplicate } = await checkNearDuplicates(text, candidates, dataPlaneUrl);
     if (isNearDuplicate) return { inserted: false };
   }
 
@@ -70,6 +67,7 @@ export async function ingestDocument(
   source: Source,
   item: FetchedItem,
   markers: string[] = [],
+  dataPlaneUrl?: string,
 ): Promise<IngestDocumentResult> {
   const cleaned = cleanText(item.rawBody);
 
@@ -99,7 +97,7 @@ export async function ingestDocument(
         const sentences = splitIntoSentences(paragraphText);
 
         if (sentences.length <= 1) {
-          const result = await insertLeafIfNotDuplicate(tx, document.id, null, paragraphPosition, paragraphOffset, paragraphText);
+          const result = await insertLeafIfNotDuplicate(tx, document.id, null, paragraphPosition, paragraphOffset, paragraphText, dataPlaneUrl);
           if (result.inserted) corpusItemIds.push(result.corpusItemId as string);
           else nearDuplicatesSkipped += 1;
           continue;
@@ -122,7 +120,7 @@ export async function ingestDocument(
           const sentenceOffset = paragraphText.indexOf(sentenceText, sentenceSearchFrom);
           sentenceSearchFrom = sentenceOffset + sentenceText.length;
 
-          const result = await insertLeafIfNotDuplicate(tx, document.id, parent.id, sentencePosition, sentenceOffset, sentenceText);
+          const result = await insertLeafIfNotDuplicate(tx, document.id, parent.id, sentencePosition, sentenceOffset, sentenceText, dataPlaneUrl);
           if (result.inserted) corpusItemIds.push(result.corpusItemId as string);
           else nearDuplicatesSkipped += 1;
         }

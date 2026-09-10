@@ -1,4 +1,5 @@
 import { Body, Controller, NotFoundException, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import { USER_ROLES } from '@open-derja/shared';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { AllowUnverifiedEmail } from '../../common/decorators/allow-unverified-email.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -14,7 +15,7 @@ import { LinkLemmaTaskDto } from './dto/link-lemma-task.dto';
 import { AdjudicateTaskDto } from './dto/adjudicate-task.dto';
 import { TransliterateTaskDto } from './dto/transliterate-task.dto';
 
-const ALL_HUMAN_ROLES = ['contributor', 'trusted_contributor', 'reviewer', 'admin', 'superadmin'] as const;
+const ALL_HUMAN_ROLES = USER_ROLES;
 
 @Controller('tasks')
 export class TasksController {

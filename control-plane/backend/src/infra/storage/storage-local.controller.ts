@@ -51,10 +51,10 @@ export class StorageLocalController {
   ) {
     this.assertLocalMode();
     this.verify(key, exp, sig);
-    const body = req.body;
-    if (!Buffer.isBuffer(body)) {
+    if (!Buffer.isBuffer(req.body)) {
       throw new BadRequestException('Upload body must be raw bytes');
     }
+    const body: Buffer = req.body;
     const target = this.path(key);
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, body);

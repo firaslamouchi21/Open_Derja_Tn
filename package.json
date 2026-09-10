@@ -18,5 +18,10 @@
     "@types/jest": "^29.5.13",
     "reflect-metadata": "^0.2.2",
     "typescript": "^5.6.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "tar": "^7.5.19"
+    }
   }
 }

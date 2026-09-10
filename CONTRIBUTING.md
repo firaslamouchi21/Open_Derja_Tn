@@ -37,13 +37,6 @@ CI is currently disabled while the project is pre-launch, so this won't happen f
 it's on you to check locally.
 
 ## Code style
-
-**No code comments, anywhere, no exceptions.** This is a deliberate, project-wide rule, not a
-lint default. If you genuinely believe a comment is needed — a non-obvious workaround, a constraint
-that isn't visible from the code itself — open an issue or say so in your PR description instead of
-adding one; let the maintainer decide the wording. A PR that adds comments will get asked to remove
-them, not silently merged.
-
 Beyond that: match the style of the surrounding code. This codebase doesn't use a single opinionated
 formatter/linter config to defer to — read the file you're editing and follow its conventions
 (naming, error handling, how services are structured) rather than introducing a new pattern in one PR.

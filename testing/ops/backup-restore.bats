@@ -23,7 +23,7 @@ setup() {
 
   docker run -d --name "$minio_container" \
     -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin \
-    -p "$minio_port:9000" minio/minio server /data >/dev/null
+    -p "$minio_port:9000" quay.io/minio/minio server /data >/dev/null
 
   export DIRECT_URL="postgres://test:test@localhost:$pg_port/test"
   export RESTORE_TARGET_URL="postgres://test:test@localhost:$pg_port/test"

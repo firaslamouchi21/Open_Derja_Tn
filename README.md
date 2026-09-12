@@ -20,6 +20,14 @@ that now.
 > [Français (HTML)](Documentation/proposal%20docs/OpenDerja_TN_technical_ledger.fr.html)
 > Read it before proposing anything that touches the data model, the task system, or auth.
 
+<p align="center">
+  <img src="docs/diagrams/architecture.svg" alt="Three-plane architecture: frontend, control-plane, data-plane, intelligence-plane" width="100%">
+</p>
+<p align="center">
+  <img src="docs/diagrams/roadmap.svg" alt="Roadmap: Phase 0 foundations done, Phase 1 backend live current, Phase 2 contributor pages next" width="49%">
+  <img src="docs/diagrams/api-surface.svg" alt="Backend API surface by access level: 16 public, 15 auth, 6 contributor, 16 reviewer, 4 admin routes" width="49%">
+</p>
+
 ## Where things actually stand
 
 Read this before assuming anything works. The project keeps its own honest ledger of what's been
@@ -74,34 +82,53 @@ and what it returns.
 
 ## Getting started
 
-You'll need Node 18+, [pnpm](https://pnpm.io/) 9, and Docker.
+You'll need [Docker](https://docs.docker.com/get-docker/) (with Compose v2) and nothing else — the
+whole stack, including Node itself, runs inside containers.
 
 ```bash
 git clone https://github.com/firaslamouchi21/Open_Derja_Tn.git
 cd Open_Derja_Tn
-pnpm install
 cp .env.example .env
+docker compose up --build
 ```
 
-Open `.env` and replace every `change-me-to-a-random-string` / `placeholder-change-me` value —
-`AUTH_SECRET` in particular should be a real random string
-(`openssl rand -base64 32` works), not the example text. Never commit `.env`.
+That one command builds and starts every service — Postgres, pgBouncer, Redis, the NLP/processing
+stubs, the backend API, the worker, and the frontend — and runs migrations plus the seed data
+(marker-term list, system/bot user, the standardisation-rules table) automatically before the
+backend starts. First run downloads and compiles everything, so it takes a few minutes; after that,
+`docker compose up` is fast. When it settles: backend on `http://localhost:3000` (`/health` should
+return `{"status":"ok"}`), frontend on `http://localhost:3001`. `docker compose down` stops it.
+
+The default `.env` values work out of the box for local development. Open `.env` before deploying
+anywhere real and replace every `change-me-to-a-random-string` / `placeholder-change-me` value —
+`AUTH_SECRET` in particular should be a real random string (`openssl rand -base64 32` works). Never
+commit `.env`.
+
+A ready-made [Postman collection](docs/postman/OpenDerja_TN.postman_collection.json) covers every
+endpoint in [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) — import it, point `baseUrl` at
+`http://localhost:3000`, and start calling routes without writing any requests by hand.
+
+### Running without Docker
+
+If you'd rather run each package natively (faster iteration on backend code, no rebuild-on-every-change
+Docker layer), you'll need Node 18+ and [pnpm](https://pnpm.io/) 9:
 
 ```bash
-pnpm infra:up                                   # postgres, pgbouncer, redis, nlp/processing stubs
+pnpm install
+pnpm infra:up                                   # postgres, pgbouncer, redis, nlp/processing stubs only
 pnpm --filter @open-derja/db run migrate:deploy # apply migrations (uses DIRECT_URL)
 pnpm --filter @open-derja/db run generate       # generate the Prisma client — do this before the next line
 pnpm --filter @open-derja/core --filter @open-derja/scrapers run build # backend/worker import these as built packages, not source
+pnpm --filter @open-derja/db run seed:all       # marker-term list, system/bot user, standardisation-rules table
 pnpm --filter @open-derja/backend run start:dev # backend on :3000
 pnpm --filter @open-derja/worker run start:dev  # background jobs (optional for API work)
 pnpm --filter @open-derja/frontend run dev      # frontend on :3001
 ```
 
-Run `pnpm --filter @open-derja/db run seed:all` to seed the marker-term list, the system/bot user,
-and the (currently empty) standardisation-rules table. The rules seed is real but has no rule
-content yet — writing actual CODA-TUN spelling rules is a linguistics decision, not a code one, and
-is documented as a known open gap in `db/DATABASE_NOTES.md` rather than guessed at. The contribution
-source seeds itself lazily on first use, so it needs no seed script at all.
+The standardisation-rules seed is real but has no rule content yet — writing actual CODA-TUN spelling
+rules is a linguistics decision, not a code one, and is documented as a known open gap in
+`db/DATABASE_NOTES.md` rather than guessed at. The contribution source seeds itself lazily on first
+use, so it needs no seed script at all.
 
 ### Running tests
 
@@ -125,6 +152,12 @@ doesn't have this restriction), and it doesn't affect `pnpm dev` at all. If you 
 CI runs on every push and pull request (`.github/workflows/master.yml`): typecheck, unit tests,
 shell/ops tests, migration-drift check, builds, CodeQL, and `cargo test` for the Rust crate. Run the
 test suite locally before opening a PR anyway — it's faster than waiting on the runner.
+
+## Roadmap
+
+See [`ROADMAP.md`](ROADMAP.md) for where this is headed — Phase 0 (backend foundations) is done,
+Phase 1 (backend live end-to-end) is current, and Phase 2 (turning the frontend's route scaffolding
+into real pages) is where outside contribution is currently most useful.
 
 ## Contributing
 

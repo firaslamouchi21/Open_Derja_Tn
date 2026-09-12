@@ -11,6 +11,8 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 COPY shared shared
 COPY frontend frontend
 
+RUN pnpm --filter @open-derja/shared build
+
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 RUN pnpm --filter @open-derja/frontend build

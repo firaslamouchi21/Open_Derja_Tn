@@ -1,0 +1,46 @@
+<svg viewBox="0 0 1000 340" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="1000" height="340" fill="#0f1115"/>
+  <text x="500" y="38" text-anchor="middle" fill="#f2f4f7" font-size="22" font-weight="600">Roadmap</text>
+  <text x="500" y="60" text-anchor="middle" fill="#9aa4b2" font-size="13">Each phase is a prerequisite for the next — see ROADMAP.md for the full checklist</text>
+
+  <line x1="90" y1="150" x2="910" y2="150" stroke="#3a4356" stroke-width="3"/>
+
+  <!-- Phase 0 -->
+  <circle cx="130" cy="150" r="14" fill="#3ddc84"/>
+  <text x="130" y="155" text-anchor="middle" fill="#0f1115" font-size="13" font-weight="700">0</text>
+  <text x="130" y="195" text-anchor="middle" fill="#e8ebf0" font-size="13" font-weight="600">Foundations</text>
+  <text x="130" y="213" text-anchor="middle" fill="#7dd6a3" font-size="11">done</text>
+  <text x="130" y="115" text-anchor="middle" fill="#9aa4b2" font-size="11">auth · tasks · consensus</text>
+  <text x="130" y="130" text-anchor="middle" fill="#9aa4b2" font-size="11">CI · dedup service</text>
+
+  <!-- Phase 1 -->
+  <circle cx="350" cy="150" r="14" fill="#ffd166" stroke="#0f1115" stroke-width="2"/>
+  <text x="350" y="155" text-anchor="middle" fill="#0f1115" font-size="13" font-weight="700">1</text>
+  <text x="350" y="195" text-anchor="middle" fill="#e8ebf0" font-size="13" font-weight="600">Backend live</text>
+  <text x="350" y="213" text-anchor="middle" fill="#ffd166" font-size="11">current</text>
+  <text x="350" y="105" text-anchor="middle" fill="#9aa4b2" font-size="11">one-command docker stack ✓</text>
+  <text x="350" y="120" text-anchor="middle" fill="#9aa4b2" font-size="11">live end-to-end run</text>
+  <text x="350" y="135" text-anchor="middle" fill="#9aa4b2" font-size="11">first VPS deployment</text>
+
+  <!-- Phase 2 -->
+  <circle cx="570" cy="150" r="14" fill="#4a5568"/>
+  <text x="570" y="155" text-anchor="middle" fill="#e8ebf0" font-size="13" font-weight="700">2</text>
+  <text x="570" y="195" text-anchor="middle" fill="#e8ebf0" font-size="13" font-weight="600">Contributor pages</text>
+  <text x="570" y="213" text-anchor="middle" fill="#9aa4b2" font-size="11">next up</text>
+  <text x="570" y="115" text-anchor="middle" fill="#9aa4b2" font-size="11">stub pages → real pages</text>
+  <text x="570" y="130" text-anchor="middle" fill="#9aa4b2" font-size="11">contribute · tasks · translate</text>
+
+  <!-- Phase 3 -->
+  <circle cx="790" cy="150" r="14" fill="#4a5568"/>
+  <text x="790" y="155" text-anchor="middle" fill="#e8ebf0" font-size="13" font-weight="700">3</text>
+  <text x="790" y="195" text-anchor="middle" fill="#e8ebf0" font-size="13" font-weight="600">Public launch</text>
+  <text x="790" y="115" text-anchor="middle" fill="#9aa4b2" font-size="11">first dataset snapshot</text>
+  <text x="790" y="130" text-anchor="middle" fill="#9aa4b2" font-size="11">outside contributions open</text>
+
+  <!-- Phase 4 -->
+  <circle cx="930" cy="150" r="12" fill="#2a3244"/>
+  <text x="930" y="195" text-anchor="middle" fill="#9aa4b2" font-size="12" font-weight="600">4 · Voice &amp; ML</text>
+  <text x="930" y="115" text-anchor="middle" fill="#6b7484" font-size="10">gated, phase 3 first</text>
+
+  <line x1="130" y1="150" x2="350" y2="150" stroke="#3ddc84" stroke-width="3"/>
+</svg>

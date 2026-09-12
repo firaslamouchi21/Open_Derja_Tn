@@ -1,0 +1,59 @@
+<svg viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6472"/>
+    </marker>
+  </defs>
+
+  <rect width="1000" height="620" fill="#0f1115"/>
+  <text x="500" y="42" text-anchor="middle" fill="#f2f4f7" font-size="24" font-weight="600">OpenDerja_TN — architecture, briefly</text>
+  <text x="500" y="68" text-anchor="middle" fill="#9aa4b2" font-size="14">Three planes, split by language for a reason, not by habit</text>
+
+  <!-- Frontend -->
+  <rect x="380" y="100" width="240" height="70" rx="10" fill="#1c2230" stroke="#3a4356" stroke-width="1.5"/>
+  <text x="500" y="130" text-anchor="middle" fill="#e8ebf0" font-size="16" font-weight="600">frontend/</text>
+  <text x="500" y="150" text-anchor="middle" fill="#9aa4b2" font-size="12">Next.js — contributor-facing app</text>
+
+  <!-- Control plane -->
+  <rect x="60" y="230" width="880" height="150" rx="12" fill="#141a26" stroke="#2a3244" stroke-width="1.5"/>
+  <text x="90" y="256" fill="#7fd1ff" font-size="15" font-weight="700">control-plane/  (TypeScript — permanent)</text>
+
+  <rect x="90" y="272" width="250" height="88" rx="8" fill="#1c2230" stroke="#3a4356"/>
+  <text x="215" y="298" text-anchor="middle" fill="#e8ebf0" font-size="14" font-weight="600">backend</text>
+  <text x="215" y="316" text-anchor="middle" fill="#9aa4b2" font-size="11">NestJS API — auth, tasks,</text>
+  <text x="215" y="332" text-anchor="middle" fill="#9aa4b2" font-size="11">consensus, admin, storage</text>
+
+  <rect x="375" y="272" width="250" height="88" rx="8" fill="#1c2230" stroke="#3a4356"/>
+  <text x="500" y="298" text-anchor="middle" fill="#e8ebf0" font-size="14" font-weight="600">worker</text>
+  <text x="500" y="316" text-anchor="middle" fill="#9aa4b2" font-size="11">pg-boss background jobs —</text>
+  <text x="500" y="332" text-anchor="middle" fill="#9aa4b2" font-size="11">the queue lives on Postgres</text>
+
+  <rect x="660" y="272" width="250" height="88" rx="8" fill="#1c2230" stroke="#3a4356"/>
+  <text x="785" y="298" text-anchor="middle" fill="#e8ebf0" font-size="14" font-weight="600">scrapers</text>
+  <text x="785" y="316" text-anchor="middle" fill="#9aa4b2" font-size="11">source ingestion, feeds</text>
+  <text x="785" y="332" text-anchor="middle" fill="#9aa4b2" font-size="11">the corpus pipeline</text>
+
+  <!-- data-plane -->
+  <rect x="60" y="410" width="420" height="110" rx="12" fill="#141a26" stroke="#2a3244" stroke-width="1.5"/>
+  <text x="90" y="436" fill="#ffb37f" font-size="15" font-weight="700">data-plane/  (Rust — measured need only)</text>
+  <text x="90" y="460" fill="#c7cfdb" font-size="12">Near-duplicate detection (MinHash/LSH), live today.</text>
+  <text x="90" y="480" fill="#c7cfdb" font-size="12">Everything else stays a stub until profiling — not</text>
+  <text x="90" y="498" fill="#c7cfdb" font-size="12">guessing — says it's actually a bottleneck.</text>
+
+  <!-- intelligence-plane -->
+  <rect x="520" y="410" width="420" height="110" rx="12" fill="#141a26" stroke="#2a3244" stroke-width="1.5"/>
+  <text x="550" y="436" fill="#b48bff" font-size="15" font-weight="700">intelligence-plane/  (Python, FastAPI — phase-gated)</text>
+  <text x="550" y="460" fill="#c7cfdb" font-size="12">ML inference and training. Health-check stub for now —</text>
+  <text x="550" y="480" fill="#c7cfdb" font-size="12">nothing in the request path ever `await`s inference</text>
+  <text x="550" y="498" fill="#c7cfdb" font-size="12">before Phase 4 of the roadmap.</text>
+
+  <!-- db / shared -->
+  <rect x="60" y="555" width="880" height="45" rx="10" fill="#181d27" stroke="#2a3244"/>
+  <text x="500" y="583" text-anchor="middle" fill="#9aa4b2" font-size="12.5">db/ — Prisma schema + migrations (Postgres)    ·    shared/ — TS enums &amp; zod schemas used across every package above</text>
+
+  <!-- arrows -->
+  <line x1="500" y1="170" x2="500" y2="228" stroke="#5b6472" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="215" y1="360" x2="215" y2="408" stroke="#5b6472" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="785" y1="360" x2="215" y2="408" stroke="#5b6472" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="500" y1="360" x2="700" y2="408" stroke="#5b6472" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+</svg>

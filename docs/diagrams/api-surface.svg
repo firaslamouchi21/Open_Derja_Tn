@@ -1,0 +1,41 @@
+<svg viewBox="0 0 1000 420" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="1000" height="420" fill="#0f1115"/>
+  <text x="500" y="40" text-anchor="middle" fill="#f2f4f7" font-size="22" font-weight="600">Backend API surface, by access level</text>
+  <text x="500" y="62" text-anchor="middle" fill="#9aa4b2" font-size="13">57 routes total — counted straight from docs/postman/OpenDerja_TN.postman_collection.json, one bar per Postman folder</text>
+
+  <!-- axis -->
+  <line x1="120" y1="340" x2="920" y2="340" stroke="#3a4356" stroke-width="1.5"/>
+
+  <!-- bars: max value 16 -> scale to 220px -->
+  <!-- Public: 16 -->
+  <rect x="150" y="120" width="90" height="220" rx="6" fill="#3ddc84"/>
+  <text x="195" y="108" text-anchor="middle" fill="#e8ebf0" font-size="15" font-weight="700">16</text>
+  <text x="195" y="362" text-anchor="middle" fill="#c7cfdb" font-size="12.5">Public</text>
+  <text x="195" y="378" text-anchor="middle" fill="#6b7484" font-size="10.5">no login needed</text>
+
+  <!-- Auth: 15 -->
+  <rect x="290" y="134" width="90" height="206" rx="6" fill="#7fd1ff"/>
+  <text x="335" y="122" text-anchor="middle" fill="#e8ebf0" font-size="15" font-weight="700">15</text>
+  <text x="335" y="362" text-anchor="middle" fill="#c7cfdb" font-size="12.5">Auth</text>
+  <text x="335" y="378" text-anchor="middle" fill="#6b7484" font-size="10.5">register/login/2FA/OAuth</text>
+
+  <!-- Contributor: 6 -->
+  <rect x="430" y="257" width="90" height="83" rx="6" fill="#ffd166"/>
+  <text x="475" y="245" text-anchor="middle" fill="#e8ebf0" font-size="15" font-weight="700">6</text>
+  <text x="475" y="362" text-anchor="middle" fill="#c7cfdb" font-size="12.5">Contributor</text>
+  <text x="475" y="378" text-anchor="middle" fill="#6b7484" font-size="10.5">guest session is enough</text>
+
+  <!-- Reviewer: 16 -->
+  <rect x="570" y="120" width="90" height="220" rx="6" fill="#ffb37f"/>
+  <text x="615" y="108" text-anchor="middle" fill="#e8ebf0" font-size="15" font-weight="700">16</text>
+  <text x="615" y="362" text-anchor="middle" fill="#c7cfdb" font-size="12.5">Reviewer</text>
+  <text x="615" y="378" text-anchor="middle" fill="#6b7484" font-size="10.5">review · corrections · flags</text>
+
+  <!-- Admin: 4 -->
+  <rect x="710" y="285" width="90" height="55" rx="6" fill="#b48bff"/>
+  <text x="755" y="273" text-anchor="middle" fill="#e8ebf0" font-size="15" font-weight="700">4</text>
+  <text x="755" y="362" text-anchor="middle" fill="#c7cfdb" font-size="12.5">Admin</text>
+  <text x="755" y="378" text-anchor="middle" fill="#6b7484" font-size="10.5">moderation, ops (+ nested)</text>
+
+  <text x="500" y="405" text-anchor="middle" fill="#565f6e" font-size="10.5">Admin's own sub-areas (users, data, review-lanes, tasks, sources, snapshots, privacy, system) are grouped, not itemised — see docs/API_REFERENCE.md</text>
+</svg>

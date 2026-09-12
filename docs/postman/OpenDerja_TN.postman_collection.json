@@ -1,0 +1,245 @@
+{
+  "info": {
+    "name": "OpenDerja_TN backend API",
+    "description": "Every endpoint listed in docs/API_REFERENCE.md, grouped the same way (public, contributor, reviewer, admin, auth). Base URL defaults to the local Docker dev stack (http://localhost:3000). If this collection and docs/API_REFERENCE.md ever disagree, the API reference (and the code behind it) is right.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Public",
+      "item": [
+        { "name": "Health check", "request": { "method": "GET", "url": "{{baseUrl}}/health" } },
+        { "name": "Search corpus", "request": { "method": "GET", "url": "{{baseUrl}}/corpus-items?q=&page=1&pageSize=20" } },
+        { "name": "Get corpus item", "request": { "method": "GET", "url": "{{baseUrl}}/corpus-items/:id", "variable": [{ "key": "id", "value": "" }] } },
+        {
+          "name": "Contribute text",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/corpus-items/contribute",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"chneya ahwelek\",\n  \"selfReportedRegion\": \"sahel\",\n  \"consentGiven\": true\n}"
+            }
+          }
+        },
+        { "name": "Search lexicon", "request": { "method": "GET", "url": "{{baseUrl}}/lexicon?q=&limit=20" } },
+        { "name": "Get lexicon entry", "request": { "method": "GET", "url": "{{baseUrl}}/lexicon/:id", "variable": [{ "key": "id", "value": "" }] } },
+        {
+          "name": "Propose word origin",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/lexicon/:id/origins",
+            "variable": [{ "key": "id", "value": "" }],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"origin\": \"amazigh\"\n}" }
+          }
+        },
+        { "name": "Translate lookup", "request": { "method": "GET", "url": "{{baseUrl}}/translate?text=hello" } },
+        { "name": "Translate coverage", "request": { "method": "GET", "url": "{{baseUrl}}/translate/coverage" } },
+        { "name": "Contributors leaderboard", "request": { "method": "GET", "url": "{{baseUrl}}/contributors?limit=50" } },
+        { "name": "Coverage stats", "request": { "method": "GET", "url": "{{baseUrl}}/coverage" } },
+        { "name": "Gaps", "request": { "method": "GET", "url": "{{baseUrl}}/gaps" } },
+        { "name": "List dataset snapshots", "request": { "method": "GET", "url": "{{baseUrl}}/data" } },
+        { "name": "Download dataset snapshot", "request": { "method": "GET", "url": "{{baseUrl}}/data/:id/download", "variable": [{ "key": "id", "value": "" }] } },
+        {
+          "name": "Propose correction",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/corrections",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"targetTable\": \"corpus_items\",\n  \"targetId\": \"00000000-0000-0000-0000-000000000000\",\n  \"field\": \"text\",\n  \"newValue\": \"corrected text\"\n}" }
+          }
+        },
+        {
+          "name": "Report a flag",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/flags",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"targetType\": \"corpus_item\",\n  \"targetId\": \"00000000-0000-0000-0000-000000000000\",\n  \"reason\": \"offensive\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"you@example.com\",\n  \"password\": \"a-strong-password-12+\",\n  \"displayName\": \"Your Name\"\n}" }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"you@example.com\",\n  \"password\": \"a-strong-password-12+\"\n}" }
+          }
+        },
+        {
+          "name": "Guest session",
+          "request": { "method": "POST", "url": "{{baseUrl}}/auth/guest-session" }
+        },
+        { "name": "Refresh token", "request": { "method": "POST", "url": "{{baseUrl}}/auth/refresh" } },
+        { "name": "Logout", "request": { "method": "POST", "url": "{{baseUrl}}/auth/logout" } },
+        { "name": "Request email verification", "request": { "method": "POST", "url": "{{baseUrl}}/auth/verify-email/request" } },
+        { "name": "Confirm email verification", "request": { "method": "POST", "url": "{{baseUrl}}/auth/verify-email/confirm" } },
+        {
+          "name": "Password reset request",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/password-reset/request",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"you@example.com\"\n}" }
+          }
+        },
+        { "name": "Password reset confirm", "request": { "method": "POST", "url": "{{baseUrl}}/auth/password-reset/confirm" } },
+        { "name": "Accept reviewer invite", "request": { "method": "POST", "url": "{{baseUrl}}/auth/accept-invite" } },
+        { "name": "2FA enroll", "request": { "method": "POST", "url": "{{baseUrl}}/auth/2fa/enroll" } },
+        { "name": "2FA confirm", "request": { "method": "POST", "url": "{{baseUrl}}/auth/2fa/confirm" } },
+        { "name": "2FA verify", "request": { "method": "POST", "url": "{{baseUrl}}/auth/2fa/verify" } },
+        { "name": "OAuth start (github)", "request": { "method": "GET", "url": "{{baseUrl}}/auth/oauth/github" } },
+        { "name": "OAuth callback (github)", "request": { "method": "GET", "url": "{{baseUrl}}/auth/oauth/github/callback" } }
+      ]
+    },
+    {
+      "name": "Contributor (needs a session)",
+      "item": [
+        { "name": "Claim next task", "request": { "method": "POST", "url": "{{baseUrl}}/tasks/claim" } },
+        {
+          "name": "Complete task",
+          "request": { "method": "POST", "url": "{{baseUrl}}/tasks/:id/complete", "variable": [{ "key": "id", "value": "" }] }
+        },
+        {
+          "name": "Submit region-tag task",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/tasks/:id/region-tag",
+            "variable": [{ "key": "id", "value": "" }],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"regions\": [\"sahel\"]\n}" }
+          }
+        },
+        {
+          "name": "Submit confirm task",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/tasks/:id/confirm",
+            "variable": [{ "key": "id", "value": "" }],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"agrees\": true\n}" }
+          }
+        },
+        {
+          "name": "Submit translate task",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/tasks/:id/translate",
+            "variable": [{ "key": "id", "value": "" }],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"text\": \"how are you\"\n}" }
+          }
+        },
+        {
+          "name": "Submit transliterate task",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/tasks/:id/transliterate",
+            "variable": [{ "key": "id", "value": "" }],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"text\": \"chneya\",\n  \"lexiconVariantId\": \"00000000-0000-0000-0000-000000000000\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviewer",
+      "item": [
+        {
+          "name": "Review task",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/tasks/:id/review",
+            "variable": [{ "key": "id", "value": "" }],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"approved\": true\n}" }
+          }
+        },
+        {
+          "name": "Standardise task",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/tasks/:id/standardise",
+            "variable": [{ "key": "id", "value": "" }],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"canonicalForm\": \"شنية أحوالك\"\n}" }
+          }
+        },
+        {
+          "name": "Link lemma task",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/tasks/:id/link-lemma",
+            "variable": [{ "key": "id", "value": "" }],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"lexiconEntryId\": \"00000000-0000-0000-0000-000000000000\"\n}" }
+          }
+        },
+        {
+          "name": "Adjudicate task",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/tasks/:id/adjudicate",
+            "variable": [{ "key": "id", "value": "" }],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"kind\": \"region\",\n  \"values\": [\"sahel\"]\n}" }
+          }
+        },
+        { "name": "Send task back for rework", "request": { "method": "POST", "url": "{{baseUrl}}/tasks/:id/rework", "variable": [{ "key": "id", "value": "" }] } },
+        { "name": "Reject task", "request": { "method": "POST", "url": "{{baseUrl}}/tasks/:id/reject", "variable": [{ "key": "id", "value": "" }] } },
+        { "name": "List corrections", "request": { "method": "GET", "url": "{{baseUrl}}/corrections?status=pending" } },
+        { "name": "Accept correction", "request": { "method": "POST", "url": "{{baseUrl}}/corrections/:id/accept", "variable": [{ "key": "id", "value": "" }] } },
+        { "name": "Reject correction", "request": { "method": "POST", "url": "{{baseUrl}}/corrections/:id/reject", "variable": [{ "key": "id", "value": "" }] } },
+        { "name": "List flags", "request": { "method": "GET", "url": "{{baseUrl}}/flags?status=open" } },
+        { "name": "Resolve flag", "request": { "method": "POST", "url": "{{baseUrl}}/flags/:id/resolve", "variable": [{ "key": "id", "value": "" }] } },
+        { "name": "Dismiss flag", "request": { "method": "POST", "url": "{{baseUrl}}/flags/:id/dismiss", "variable": [{ "key": "id", "value": "" }] } },
+        { "name": "Create lexicon entry", "request": { "method": "POST", "url": "{{baseUrl}}/lexicon" } },
+        {
+          "name": "Presigned upload URL",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/storage/uploads",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"fileName\": \"example.png\",\n  \"contentType\": \"image/png\"\n}" }
+          }
+        },
+        { "name": "Confirm upload", "request": { "method": "POST", "url": "{{baseUrl}}/storage/uploads/:id/confirm", "variable": [{ "key": "id", "value": "" }] } },
+        { "name": "Download upload", "request": { "method": "GET", "url": "{{baseUrl}}/storage/uploads/:id/download", "variable": [{ "key": "id", "value": "" }] } }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        { "name": "Overview dashboard", "request": { "method": "GET", "url": "{{baseUrl}}/admin/overview" } },
+        { "name": "List users", "request": { "method": "GET", "url": "{{baseUrl}}/admin/users" } },
+        { "name": "Sources CRUD", "request": { "method": "GET", "url": "{{baseUrl}}/sources" } },
+        { "name": "System job status", "request": { "method": "GET", "url": "{{baseUrl}}/admin/system/jobs" } }
+      ]
+    }
+  ]
+}

@@ -9,7 +9,10 @@
     "test:ops": "bats -r testing/ops",
     "infra:up": "docker compose --env-file .env -f devops/compose/docker-compose.local.yml up -d",
     "infra:down": "docker compose --env-file .env -f devops/compose/docker-compose.local.yml down",
-    "infra:config": "docker compose --env-file .env -f devops/compose/docker-compose.local.yml config"
+    "infra:config": "docker compose --env-file .env -f devops/compose/docker-compose.local.yml config",
+    "dev:up": "docker compose --env-file .env -f devops/compose/docker-compose.dev.yml up --build",
+    "dev:down": "docker compose --env-file .env -f devops/compose/docker-compose.dev.yml down",
+    "dev:logs": "docker compose --env-file .env -f devops/compose/docker-compose.dev.yml logs -f"
   },
   "devDependencies": {
     "bats": "^1.13.0",
